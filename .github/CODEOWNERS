@@ -1,0 +1,9 @@
+# Default owners for everything in the repo
+* @rao305
+
+# API specific
+/apps/api/ @rao305
+
+# Web specific
+/apps/web/ @rao305
+

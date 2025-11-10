@@ -1,0 +1,17 @@
+# Node
+node_modules/
+.next/
+.pnpm-store/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Env & local
+.env
+.env.local
+.DS_Store
+
+# Docker
+data/
