@@ -61,6 +61,38 @@ DAC_SOCIAL_CHAT_PROMPT = """You are DAC. The user is greeting you.
 - Keep it warm, natural, and friendly.
 """
 
+# Mathematical LaTeX generation system prompt
+DAC_MATH_LATEX_PROMPT = """You are a highly capable and precise mathematics assistant. Your primary function is to interpret, solve, and present mathematical concepts, formulas, and equations in a **technically accurate and visually professional manner**.
+
+**CORE INSTRUCTIONS:**
+
+1. **Mandatory LaTeX:** You **must** use LaTeX formatting for **all** mathematical expressions, equations, formulas, complex variables, and technical symbols.
+
+2. **Display vs. Inline:**
+   - Use **display mode** (`$$...$$`) for all standalone equations, final answers, or multi-line derivations (e.g., when showing the steps of a calculation).
+   - Use **inline mode** (`$...$`) for simple variables, single numbers with units, or very short expressions embedded within regular prose.
+
+3. **Strictly Avoid:** Do **not** use standard plain text or code blocks for expressing math (e.g., avoid `x^2`, `sqrt(4)`, or using the standard character `*` for multiplication). Use LaTeX equivalents (e.g., $x^2$, $\\sqrt{4}$, $\\times$ or implicit multiplication).
+
+4. **Formatting and Clarity:** Ensure LaTeX code is correct, well-formed, and uses appropriate commands for fractions (`\\frac`), exponents (`^`), subscripts (`_`), Greek letters (`\\alpha`), sums (`\\sum`), integrals (`\\int`), and matrices (`\\begin{pmatrix}`).
+
+**EXAMPLE IMPLEMENTATION:**
+
+* **User Input:** "What is the formula for the area of a circle and solve $x^2 + 5x + 6 = 0$."
+
+* **Model Output MUST be:**
+
+    The formula for the area of a circle is:
+
+    $$A = \\pi r^2$$
+
+    To solve the quadratic equation $x^2 + 5x + 6 = 0$, we can factor it:
+
+    $$ (x + 2)(x + 3) = 0 $$
+
+    The solutions are $x_1 = -2$ and $x_2 = -3$.
+"""
+
 # Phase 3 QA Validation System Prompt
 DAC_QA_SYSTEM_PROMPT = """You are DAC, the unified assistant under Phase 3 testing.
 
@@ -183,6 +215,39 @@ def get_social_chat_system_message() -> dict:
     }
 
 
+def get_math_latex_system_message() -> dict:
+    """Get the mathematical LaTeX system message."""
+    return {
+        "role": "system",
+        "content": DAC_MATH_LATEX_PROMPT
+    }
+
+
+def detect_intent_from_reason(reason: str) -> str:
+    """
+    Detect intent from router reason string.
+    
+    Returns one of: coding_help, qa_retrieval, editing/writing, reasoning/math, social_chat, or None
+    """
+    if not reason:
+        return None
+    
+    reason_lower = reason.lower()
+    
+    if any(keyword in reason_lower for keyword in ["math", "mathematical", "equation", "solve", "calculate", "formula", "reasoning"]):
+        return "reasoning/math"
+    elif any(keyword in reason_lower for keyword in ["social", "greeting", "chat", "conversational"]):
+        return "social_chat"
+    elif any(keyword in reason_lower for keyword in ["code", "programming", "algorithm", "debug"]):
+        return "coding_help"
+    elif any(keyword in reason_lower for keyword in ["write", "edit", "rewrite", "draft"]):
+        return "editing/writing"
+    elif any(keyword in reason_lower for keyword in ["search", "web", "current", "news", "fact"]):
+        return "qa_retrieval"
+    
+    return None
+
+
 def inject_dac_persona(messages: list[dict], qa_mode: bool = False, intent: str = None) -> list[dict]:
     """
     Inject DAC persona system message into the conversation.
@@ -220,25 +285,33 @@ def inject_dac_persona(messages: list[dict], qa_mode: bool = False, intent: str 
     else:
         dac_system_msg = get_dac_system_message()
     
+    # For math/reasoning intent, append LaTeX instructions
+    system_messages = [dac_system_msg]
+    if intent == "reasoning/math" and not use_qa_prompt:
+        # Add LaTeX formatting instructions for mathematical content
+        math_latex_msg = get_math_latex_system_message()
+        system_messages.append(math_latex_msg)
+    
     # Check if there's already a system message
     has_system = any(msg.get("role") == "system" for msg in messages)
 
     if has_system:
-        # Insert DAC prompt as the first system message
+        # Insert DAC prompts as the first system messages
         result = []
         dac_added = False
 
         for msg in messages:
             if msg.get("role") == "system" and not dac_added:
-                # Add DAC prompt before the first system message
-                result.append(dac_system_msg)
+                # Add DAC prompts before the first system message
+                for sys_msg in system_messages:
+                    result.append(sys_msg)
                 dac_added = True
             result.append(msg)
 
         return result
     else:
-        # No system message exists, add DAC as first message
-        return [dac_system_msg] + messages
+        # No system message exists, add DAC messages first
+        return system_messages + messages
 
 
 def sanitize_response(content: str, provider: str) -> str:

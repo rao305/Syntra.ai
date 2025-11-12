@@ -5,7 +5,14 @@ import { format } from 'date-fns'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { MessageActions } from '@/components/message-actions'
+import { MessageContent } from '@/components/message-content'
 import { cn } from '@/lib/utils'
+
+export interface MessageAttachment {
+  type: 'image' | 'file'
+  name: string
+  preview?: string
+}
 
 export interface Message {
   id: string
@@ -19,6 +26,7 @@ export interface Message {
   error?: string
   ttftMs?: number // Phase 2: Time to first token in milliseconds
   cacheHit?: boolean // Phase 2: Whether this was a cache hit
+  attachments?: MessageAttachment[]
 }
 
 interface MessageBubbleProps {
@@ -157,9 +165,33 @@ export function MessageBubble({
 
           {/* Content */}
           <div className="p-4">
-            <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-              {message.content}
-            </div>
+            {/* Attachments */}
+            {message.attachments && message.attachments.length > 0 && (
+              <div className="mb-3 space-y-2">
+                {message.attachments.map((attachment, idx) => (
+                  <div key={idx} className="rounded-lg overflow-hidden border border-border/50">
+                    {attachment.type === 'image' && attachment.preview ? (
+                      <img
+                        src={attachment.preview}
+                        alt={attachment.name}
+                        className="max-w-full h-auto max-h-64 object-contain"
+                      />
+                    ) : (
+                      <div className="p-4 bg-muted/50 flex items-center gap-3">
+                        <div className="w-10 h-10 rounded bg-background flex items-center justify-center">
+                          <span className="text-xs">📄</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate">{attachment.name}</div>
+                          <div className="text-xs text-muted-foreground">File attachment</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <MessageContent content={message.content} />
 
             {/* Error message */}
             {message.error && (

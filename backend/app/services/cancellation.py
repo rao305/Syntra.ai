@@ -50,3 +50,4 @@ class CancellationRegistry:
 # Global registry instance
 cancellation_registry = CancellationRegistry()
 
+

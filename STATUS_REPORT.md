@@ -24,7 +24,290 @@ Phase 1 is **98% complete** with all core functionality implemented and working.
 
 ### 1. Infrastructure ✅
 
-**Docker Containers:**
+**Docker Containers:**Perfect—here are ready-to-use PR packs (file trees + commit messages) you can paste straight into Cursor/GitHub. I’ve included one PR for the immediate fixes and five PRs for Phase 2. Each PR lists exactly which files are new/modified and a commit message body with test steps.
+
+⸻
+
+PR#0 — chore(db,ui): idempotent enums + session-based org headers (remove org_demo)
+
+File tree
+
+backend/
+  migrations/
+    versions/
+      2025XXXX_idempotent_enums.py            # NEW
+  app/
+    api/
+      middleware_org_scope.py                 # NEW (if not present; sets app.current_org from header)
+    models/
+      __init__.py                             # M (ensure SQLA Enums don't auto-create types)
+      enums.py                                # NEW (centralize enum names)
+frontend/
+  lib/
+    api.ts                                    # NEW (fetch wrapper that injects x-org-id)
+    org.ts                                    # NEW (orgId getter from session)
+  app/
+    settings/
+      providers/page.tsx                      # M (remove hardcoded org_demo; use session orgId + api.ts)
+    threads/page.tsx                          # M (remove hardcoded org_demo; use session orgId + api.ts)
+docs/
+  RUNBOOK_DOCKER.md                           # M (note: enums creation now idempotent)
+
+Commit message
+
+Title: chore(db,ui): idempotent enums + session-based org headers (remove org_demo)
+
+Body:
+	•	Makes enum creation idempotent to eliminate manual psql during setup.
+	•	Removes org_demo hardcoding from the UI; all API calls now send x-org-id from session.
+	•	Adds a small fetch wrapper to consistently include the org header.
+	•	Middleware enforces header presence and sets app.current_org for RLS.
+
+Changes
+	•	2025XXXX_idempotent_enums.py: adds DO-blocks to create user_role, message_role, memory_tier, provider_type only if missing.
+	•	frontend/lib/api.ts: apiFetch(path, {headers}) → injects x-org-id.
+	•	frontend/lib/org.ts: getOrgIdFromSession() helper.
+	•	Pages updated to derive orgId from session and call apiFetch.
+
+How to test
+	1.	Fresh DB: alembic upgrade head should pass without manual SQL.
+	2.	Existing DB: re-running alembic upgrade head should not error on duplicate types.
+	3.	Login → open DevTools → network calls include x-org-id.
+	4.	Hitting API without header returns 4xx with “Missing x-org-id”.
+
+Notes
+	•	No breaking schema changes; safe re-run.
+	•	Remove any Enum(..., create_type=True) in models if present.
+
+⸻
+
+PR#1 — feat(api): provider proxy + token capture
+
+File tree
+
+backend/
+  app/
+    adapters/
+      perplexity.py                            # M (ensure minimal payload + timeout)
+      openai.py                                # M (Responses API call)
+      gemini.py                                # M (generateContent call)
+    api/
+      messages.py                              # NEW (message send handler that invokes router + provider)
+      router.py                                # M (return token_budget and reason)
+    services/
+      tokens.py                                # NEW (cheap token estimator)
+      timing.py                                # NEW (latency capture util)
+    models/
+      schema.py                                # M (Message.meta JSONB fields if not present)
+      db.py                                    # M (add helper to store assistant message)
+
+Commit message
+
+Title: feat(api): provider proxy + token capture
+
+Body:
+	•	On user send, the backend now routes and calls the selected provider (Perplexity/OpenAI/Gemini) via adapters.
+	•	Persists the assistant message, capturing provider, model, latency_ms, and token estimates (token_in/token_out) in Message.meta.
+
+Changes
+	•	api/messages.py: new POST /api/threads/{id}/send that:
+	•	loads last ~6 turns,
+	•	calls /router/choose,
+	•	invokes the provider adapter,
+	•	persists assistant message with meta.
+	•	services/tokens.py: heuristic token estimation (char/4 + bounds).
+	•	services/timing.py: context manager for latency ms.
+
+How to test
+	1.	Send “latest news” in Threads → Perplexity adapter called; assistant message stored.
+	2.	Send “return JSON for schema …” → OpenAI called; assistant stored.
+	3.	Long context (≥10 messages) → Gemini called; assistant stored.
+	4.	Inspect DB: messages.meta contains {provider, model, latency_ms, token_in, token_out}.
+
+Notes
+	•	Adapters use short timeouts and small max_tokens by default for MVP costs.
+
+⸻
+
+PR#2 — feat(guardrails): per-org rate limits + 429 UX + provider usage
+
+File tree
+
+backend/
+  app/
+    services/
+      ratelimit.py                              # NEW (Upstash counters: reqs/day + tokens/day)
+    api/
+      middleware_rate_limit.py                  # NEW (enforce per-org/provider limit pre-call)
+      providers.py                               # M (expose usage in /orgs/{id}/providers/status)
+frontend/
+  app/
+    threads/components/RateLimitBanner.tsx      # NEW
+    settings/providers/page.tsx                 # M (show usage; last success/error)
+  lib/
+    usage.ts                                    # NEW (types/helpers)
+
+Commit message
+
+Title: feat(guardrails): per-org rate limits + 429 UX + provider usage
+
+Body:
+	•	Adds per-org request/day and token/day caps via Upstash.
+	•	When exceeded, returns 429 with Retry-After and {code:"RATE_LIMIT", provider, hint}.
+	•	UI displays a RateLimitBanner and shows provider usage in Settings.
+
+Changes
+	•	ratelimit.py: check_and_increment(org, provider, tokens_est); keys rl:{org}:{provider}:reqs / rl:{org}:{provider}:tokens.
+	•	middleware_rate_limit.py: wraps provider calls.
+	•	providers.status: now returns {usage: {reqsToday, tokensToday}}.
+
+How to test
+	1.	Set tiny limits (e.g., 3 req/day).
+	2.	Send 3 messages; 4th returns 429 with Retry-After.
+	3.	Banner appears in thread; Settings shows usage counts.
+
+Notes
+	•	Limits configurable via env vars (document in .env.example):
+	•	ORG_MAX_REQUESTS_PER_DAY, ORG_MAX_TOKENS_PER_DAY.
+
+⸻
+
+PR#3 — feat(audit): turn-level audit log + UI
+
+File tree
+
+backend/
+  migrations/
+    versions/
+      2025XXXX_create_audits.sql                # NEW
+  app/
+    api/
+      audit.py                                  # NEW (GET /api/threads/{id}/audit)
+    services/
+      audit.py                                  # NEW (hashing + record writer)
+  app/
+    models/
+      schema.py                                 # M (Audit model if ORM; else raw SQL only)
+frontend/
+  app/threads/components/AuditTable.tsx         # NEW
+  app/threads/[id]/page.tsx                     # M (render AuditTable below messages)
+docs/
+  AUDIT.md                                      # NEW (what we log + why)
+
+Commit message
+
+Title: feat(audit): per-turn audit trail (provider, reason, hashes) + UI
+
+Body:
+	•	Introduces audits table and a simple API/UI to inspect per-turn provenance:
+	•	provider, model, reason, package_hash, response_hash, created_at.
+
+Changes
+	•	services/audit.py: write_audit(thread_id, message_id, router_decision, package, response).
+	•	package_hash = sha256(JSON.stringify({messages,lastN,routerDecision,scope}))
+	•	response_hash = sha256(assistantText || rawJSON)
+	•	GET /api/threads/{id}/audit: returns last 25 audits.
+	•	AuditTable.tsx: minimal table rendering.
+
+How to test
+	1.	Send 3 messages.
+	2.	Open the audit tab under the thread → 3 rows, each with non-empty hashes and reason.
+
+Notes
+	•	Hashes allow tamper detection; this is v0 (no signature keys yet).
+
+⸻
+
+PR#4 — feat(ui): forward scope toggle (private-only vs allow-shared)
+
+File tree
+
+frontend/
+  app/
+    threads/components/ForwardScopeToggle.tsx   # NEW
+    threads/page.tsx                            # M (include toggle state in send payload)
+backend/
+  app/
+    api/messages.py                              # M (accept scope; include in audit package_hash input)
+docs/
+  GOVERNANCE.md                                 # NEW (scope semantics, future access-graph enforcement)
+
+Commit message
+
+Title: feat(ui): forward scope toggle (private-only vs allow-shared) and plumbing to audit
+
+Body:
+	•	Adds a Forward Scope toggle to the send/forward UI: Private only (default) / Allow shared.
+	•	Backend accepts scope on send; included in the audit package inputs.
+
+Changes
+	•	UI toggle component; threads page posts {content, scope}.
+	•	Message handler reads scope and passes to audit write.
+
+How to test
+	1.	Toggle between modes; send two messages.
+	2.	/threads/{id}/audit shows different package_hash inputs reflecting scope.
+
+Notes
+	•	Actual enforced memory views arrive in Phase 3; this is the UX + audit groundwork.
+
+⸻
+
+PR#5 — chore(runtime): Qdrant health guard + status surfaces
+
+File tree
+
+backend/
+  app/
+    services/qdrant_health.py                   # NEW (readyz check, cached flag)
+    api/metrics.py                               # M (expose memory status)
+    api/providers.py                             # M (include memory status in status endpoint)
+  app/
+    memory/read_policy.py                        # M (short-circuit if memory disabled)
+docs/
+  MEMORY_README.md                               # NEW (feature flag, fallback behavior)
+
+Commit message
+
+Title: chore(runtime): Qdrant health guard + memory disabled fallback
+
+Body:
+	•	Adds a lightweight health guard around Qdrant:
+	•	If /readyz fails, set MEMORY_DISABLED=true in-process.
+	•	Read policy gracefully skips vector ops and logs a warning.
+	•	Surfaces memory status via /api/metrics and provider status.
+
+Changes
+	•	qdrant_health.py: ping once on startup and cache status; periodic refresh optional.
+	•	Read policy checks the flag before querying.
+
+How to test
+	1.	Stop Qdrant container → send messages.
+	2.	No failures; memory reported “disabled” in metrics/status.
+
+Notes
+	•	Paves the way for Phase 3 memory features without blocking Phase 2.
+
+⸻
+
+Optional: PR checklist comment you can paste on each PR
+
+### Reviewer Checklist
+- [ ] Builds locally and basic flows work
+- [ ] No secrets in code or logs
+- [ ] RLS/org scoping respected (x-org-id present)
+- [ ] Error cases return structured JSON with hints
+- [ ] Docs/Runbook updated where relevant
+
+Suggested branch names
+	•	chore/idempotent-enums-org-header
+	•	feat/provider-proxy-token-capture
+	•	feat/ratelimits-usage-429
+	•	feat/audit-v0
+	•	feat/forward-scope-toggle
+	•	chore/qdrant-health-guard
+
+Want me to also generate concrete code stubs (function signatures & minimal implementations) for any of these files so you can drop them in verbatim?
 ```
 ✓ dac-postgres   (postgres:15-alpine)   port 5432 - HEALTHY
 ✓ dac-qdrant     (qdrant/qdrant:latest) port 6333 - UNHEALTHY (non-critical for Phase 1)

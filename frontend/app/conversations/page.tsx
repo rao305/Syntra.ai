@@ -6,7 +6,7 @@ import { apiFetch, ApiError } from '@/lib/api'
 import { ConversationLayout } from '@/components/conversation-layout'
 import { ConversationList, type Conversation } from '@/components/conversation-list'
 import { MessageBubble, type Message } from '@/components/message-bubble'
-import { MessageComposer } from '@/components/message-composer'
+import { MessageComposer, type FileAttachment } from '@/components/message-composer'
 import { SettingsPanel } from '@/components/settings-panel'
 import { TypingIndicator } from '@/components/typing-indicator'
 import { EmptyConversation } from '@/components/empty-conversation'
@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Settings, MessageSquare } from 'lucide-react'
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 type Provider = 'perplexity' | 'openai' | 'gemini' | 'openrouter' | 'kimi'
 
@@ -62,6 +63,7 @@ export default function ConversationsPage() {
   const [activeConversationId, setActiveConversationId] = React.useState<string | null>(null)
   const [messages, setMessages] = React.useState<Message[]>([])
   const [inputValue, setInputValue] = React.useState('')
+  const [attachments, setAttachments] = React.useState<FileAttachment[]>([])
   const [isLoading, setIsLoading] = React.useState(false)
   const [isSending, setIsSending] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
@@ -81,14 +83,78 @@ export default function ConversationsPage() {
   const [currentReason, setCurrentReason] = React.useState<string | undefined>()
 
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
+  const scrollAreaRef = React.useRef<HTMLDivElement>(null)
+  const isUserScrollingRef = React.useRef(false)
+  const scrollTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
 
-  // Scroll to bottom of messages
-  const scrollToBottom = () => {
+  // Check if user is near the bottom of the scroll area
+  const isNearBottom = (): boolean => {
+    if (!scrollAreaRef.current) return true // Default to true if ref not set
+    
+    const viewport = scrollAreaRef.current.querySelector('[data-slot="scroll-area-viewport"]') as HTMLElement
+    if (!viewport) return true // Default to true if we can't find viewport
+    
+    const threshold = 150 // pixels from bottom
+    const scrollTop = viewport.scrollTop
+    const scrollHeight = viewport.scrollHeight
+    const clientHeight = viewport.clientHeight
+    
+    return scrollHeight - scrollTop - clientHeight < threshold
+  }
+
+  // Scroll to bottom of messages (only if user is near bottom)
+  const scrollToBottom = (force = false) => {
+    // If user has scrolled up, don't auto-scroll unless forced
+    if (!force && !isNearBottom()) {
+      return
+    }
+    
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  // Handle scroll events to detect user scrolling
+  const handleScroll = React.useCallback(() => {
+    isUserScrollingRef.current = true
+    
+    // Clear existing timeout
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current)
+    }
+    
+    // Reset flag after user stops scrolling
+    scrollTimeoutRef.current = setTimeout(() => {
+      isUserScrollingRef.current = false
+    }, 150)
+  }, [])
+
+  // Attach scroll listener
   React.useEffect(() => {
-    scrollToBottom()
+    if (!scrollAreaRef.current) return
+    
+    const viewport = scrollAreaRef.current.querySelector('[data-slot="scroll-area-viewport"]') as HTMLElement
+    if (viewport) {
+      viewport.addEventListener('scroll', handleScroll, { passive: true })
+      return () => {
+        viewport.removeEventListener('scroll', handleScroll)
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current)
+        }
+      }
+    }
+  }, [handleScroll])
+
+  // Auto-scroll only if user is near bottom (hasn't scrolled up)
+  React.useEffect(() => {
+    // Small delay to ensure DOM is updated
+    const timeoutId = setTimeout(() => {
+      // Only auto-scroll if user is near the bottom (hasn't manually scrolled up)
+      // Don't scroll if user is actively scrolling
+      if (isNearBottom() && !isUserScrollingRef.current) {
+        scrollToBottom()
+      }
+    }, 100)
+    
+    return () => clearTimeout(timeoutId)
   }, [messages, isSending])
 
   // Load conversations on mount
@@ -127,21 +193,53 @@ export default function ConversationsPage() {
 
   const handleSendMessage = async () => {
     const trimmed = inputValue.trim()
-    if (!trimmed || isSending) return
+    if ((!trimmed && attachments.length === 0) || isSending) return
 
     setError(null)
     setIsSending(true)
-    setInputValue('')
+    
+    // Convert attachments to base64
+    const attachmentData = await Promise.all(
+      attachments.map(async (attachment) => {
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => {
+            const result = reader.result as string
+            // Remove data URL prefix (e.g., "data:image/png;base64,")
+            const base64Data = result.split(',')[1]
+            resolve(base64Data)
+          }
+          reader.onerror = reject
+          reader.readAsDataURL(attachment.file)
+        })
+
+        return {
+          type: attachment.type,
+          name: attachment.file.name,
+          mimeType: attachment.file.type,
+          data: base64,
+        }
+      })
+    )
 
     const optimisticId = `msg_${Date.now()}`
     const optimisticMessage: Message = {
       id: optimisticId,
       role: 'user',
-      content: trimmed,
+      content: trimmed || (attachments.length > 0 ? `[${attachments.length} file(s) attached]` : ''),
       timestamp: new Date(),
+      attachments: attachments.map((a) => ({
+        type: a.type,
+        name: a.file.name,
+        preview: a.preview,
+      })),
     }
 
     setMessages((prev) => [...prev, optimisticMessage])
+    setInputValue('')
+    setAttachments([])
+    // Force scroll to bottom when user sends a message
+    setTimeout(() => scrollToBottom(true), 50)
 
     // Create streaming message placeholder
     const streamingMsgId = `streaming_${Date.now()}`
@@ -169,7 +267,8 @@ export default function ConversationsPage() {
           'x-org-id': ORG_ID,
         },
         body: JSON.stringify({
-          messages: [{ role: 'user', content: trimmed }],
+          messages: [{ role: 'user', content: trimmed || '' }],
+          attachments: attachmentData.length > 0 ? attachmentData : undefined,
         }),
         signal: abortControllerRef.current.signal,
       })
@@ -398,22 +497,35 @@ export default function ConversationsPage() {
       }
     >
       {/* Main conversation view */}
-      <div className="h-full flex flex-col">
-        {/* Header */}
-        <div className="border-b border-border px-6 py-4 flex items-center justify-between bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="h-full flex flex-col overflow-hidden">
+        {/* Header - Compact when no messages */}
+        <div className={cn(
+          "border-b border-border px-6 flex items-center justify-between bg-zinc-900/60 backdrop-blur-xl supports-[backdrop-filter]:bg-zinc-900/40 flex-shrink-0",
+          messages.length === 0 && !isSending ? "py-2.5" : "py-4"
+        )}>
           <div className="flex items-center gap-3">
-            <MessageSquare className="w-5 h-5 text-muted-foreground" />
+            <MessageSquare className="w-5 h-5 text-emerald-400" />
             <div>
-              <h1 className="text-lg font-semibold text-foreground">
+              <h1 className="text-base font-semibold text-foreground">
                 {activeConversationId
                   ? conversations.find((c) => c.id === activeConversationId)?.title ||
-                    'Conversation'
-                  : 'New Conversation'}
+                    'DAC — Multi-LLM Assistant for Teams'
+                  : 'DAC — Multi-LLM Assistant for Teams'}
               </h1>
-              {selectedModels.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  Using: {selectedModels.join(', ')}
-                </p>
+              {messages.length === 0 && !isSending && (
+                <div className="flex items-center gap-2.5 mt-0.5">
+                  <span className="text-[10px] text-emerald-400/70">4+ Providers</span>
+                  <span className="text-[10px] text-muted-foreground/50">•</span>
+                  <span className="text-[10px] text-blue-400/70">Smart Routing</span>
+                  <span className="text-[10px] text-muted-foreground/50">•</span>
+                  <span className="text-[10px] text-purple-400/70">Secure by Design</span>
+                </div>
+              )}
+              {selectedModels.length > 0 && messages.length > 0 && (
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-[10px] text-muted-foreground">•</span>
+                  <span className="text-[10px] text-emerald-400">Using: {selectedModels.join(', ')}</span>
+                </div>
               )}
             </div>
           </div>
@@ -442,13 +554,24 @@ export default function ConversationsPage() {
           </div>
         )}
 
-        {/* Messages area */}
-        <ScrollArea className="flex-1">
-          <div className="p-6 space-y-6" role="log" aria-live="polite" aria-label="Conversation messages">
-            {messages.length === 0 && !isSending ? (
-              <EmptyConversation onPromptSelect={handlePromptSelect} />
-            ) : (
-              <>
+        {/* Messages area - Gemini-inspired cascading layout */}
+        <div ref={scrollAreaRef} className="flex-1 relative overflow-hidden min-h-0">
+          {messages.length === 0 && !isSending ? (
+            // Centered empty state - no scroll area needed
+            <div className="h-full flex items-center justify-center p-6">
+              <div className="w-full max-w-3xl mx-auto">
+                <EmptyConversation onPromptSelect={handlePromptSelect} />
+              </div>
+            </div>
+          ) : (
+            // Conversation view with scroll
+            <ScrollArea className="h-full">
+              <div 
+                className="p-6 space-y-6 transition-all duration-500 ease-out"
+                role="log" 
+                aria-live="polite" 
+                aria-label="Conversation messages"
+              >
                 {messages.map((message) => (
                   <MessageBubble
                     key={message.id}
@@ -469,23 +592,39 @@ export default function ConversationsPage() {
                 {isSending && (
                   <TypingIndicator provider={currentProvider} model={currentModel} reason={currentReason} />
                 )}
-              </>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        </ScrollArea>
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+          )}
+        </div>
 
-        {/* Message composer */}
-        <MessageComposer
-          value={inputValue}
-          onChange={setInputValue}
-          onSubmit={handleSendMessage}
-          onCancel={isSending ? handleCancel : undefined}
-          isLoading={isSending}
-          selectedModels={selectedModels}
-          showCharacterCount
-          autoFocus
-        />
+        {/* Message composer - Gemini-inspired compact design */}
+        <div className={cn(
+          "border-t border-border/50 bg-background/95 backdrop-blur-sm",
+          "transition-all duration-300",
+          messages.length === 0 && !isSending 
+            ? "px-6 py-4 flex items-center justify-center" 
+            : "px-6 py-4"
+        )}>
+          <div className={cn(
+            "w-full transition-all duration-300",
+            messages.length === 0 && !isSending ? "max-w-2xl" : "max-w-full"
+          )}>
+            <MessageComposer
+              value={inputValue}
+              onChange={setInputValue}
+              onSubmit={handleSendMessage}
+              onCancel={isSending ? handleCancel : undefined}
+              isLoading={isSending}
+              selectedModels={selectedModels}
+              showCharacterCount={messages.length > 0 || isSending}
+              autoFocus
+              attachments={attachments}
+              onAttachmentsChange={setAttachments}
+              className={messages.length === 0 && !isSending ? "max-w-2xl mx-auto" : ""}
+            />
+          </div>
+        </div>
       </div>
     </ConversationLayout>
   )

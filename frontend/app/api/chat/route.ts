@@ -67,13 +67,18 @@ export async function POST(request: NextRequest) {
     
     // Step 2: Call backend streaming endpoint directly
     // Backend will handle routing internally (faster - no extra round-trip)
-    const streamRequestBody = {
+    const streamRequestBody: any = {
       content: messageContent,
       role: 'user',
       provider: 'openrouter',  // Use openrouter as placeholder, backend will route
       model: 'auto',           // Backend will choose model
       scope: 'private',
     };
+
+    // Add attachments if provided
+    if (body.attachments && Array.isArray(body.attachments) && body.attachments.length > 0) {
+      streamRequestBody.attachments = body.attachments;
+    }
 
     const streamResponse = await fetch(`${BACKEND_URL}/threads/${threadId || 'new'}/messages/stream`, {
       method: 'POST',

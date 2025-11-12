@@ -62,20 +62,20 @@ export function EmptyConversation({
   className,
 }: EmptyConversationProps) {
   return (
-    <div className={cn('flex items-center justify-center p-8 h-full', className)}>
-      <div className="max-w-3xl w-full space-y-8">
-        {/* Welcome message */}
+    <div className={cn('flex flex-col items-center justify-center w-full py-4', className)}>
+      <div className="max-w-3xl w-full space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {/* Welcome message - Gemini-inspired centered design */}
         <div className="text-center space-y-3">
           <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center ring-2 ring-purple-500/30">
-              <MessageSquarePlus className="w-8 h-8 text-purple-300" />
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 via-blue-500/20 to-purple-500/20 flex items-center justify-center ring-1 ring-emerald-500/20">
+              <MessageSquarePlus className="w-8 h-8 text-emerald-300" />
             </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">
-              Start a new conversation
+          <div className="space-y-1.5">
+            <h2 className="text-2xl font-semibold text-foreground tracking-tight">
+              Ask DAC anything
             </h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
+            <p className="text-muted-foreground/70 max-w-md mx-auto text-xs leading-relaxed">
               Choose from the examples below or type your own message to get started with AI-powered
               assistance across multiple LLM providers.
             </p>
@@ -92,15 +92,17 @@ export function EmptyConversation({
               </h3>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {EXAMPLE_PROMPTS.map((example, index) => (
                 <Card
                   key={index}
                   className={cn(
-                    'cursor-pointer transition-all duration-200',
-                    'hover:bg-accent/50 hover:border-accent hover:shadow-md',
-                    'group'
+                    'cursor-pointer transition-all duration-300',
+                    'hover:bg-accent/30 hover:border-accent/50 hover:shadow-md hover:scale-[1.01]',
+                    'group border-border/40 bg-card/40 backdrop-blur-sm',
+                    'animate-in fade-in slide-in-from-bottom-4'
                   )}
+                  style={{ animationDelay: `${index * 30}ms` }}
                   onClick={() => onPromptSelect?.(example.prompt)}
                   role="button"
                   tabIndex={0}
@@ -138,20 +140,20 @@ export function EmptyConversation({
           </div>
         )}
 
-        {/* Capabilities */}
-        <div className="pt-4 border-t border-border">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-            <div className="space-y-1">
-              <div className="text-2xl font-bold text-purple-300">4+</div>
-              <div className="text-xs text-muted-foreground">LLM Providers</div>
+        {/* Capabilities - Shrunk stats like Gemini */}
+        <div className="pt-3 border-t border-border/30">
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="space-y-0.5">
+              <div className="text-base font-semibold text-emerald-400">4+</div>
+              <div className="text-[10px] text-muted-foreground/60">Providers</div>
             </div>
-            <div className="space-y-1">
-              <div className="text-2xl font-bold text-green-300">Smart</div>
-              <div className="text-xs text-muted-foreground">Auto-routing</div>
+            <div className="space-y-0.5">
+              <div className="text-base font-semibold text-blue-400">Smart</div>
+              <div className="text-[10px] text-muted-foreground/60">Routing</div>
             </div>
-            <div className="space-y-1">
-              <div className="text-2xl font-bold text-blue-300">Fast</div>
-              <div className="text-xs text-muted-foreground">Responses</div>
+            <div className="space-y-0.5">
+              <div className="text-base font-semibold text-purple-400">Secure</div>
+              <div className="text-[10px] text-muted-foreground/60">by Design</div>
             </div>
           </div>
         </div>

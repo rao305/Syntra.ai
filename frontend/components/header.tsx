@@ -22,31 +22,35 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="/#product" className="text-sm text-muted-foreground hover:text-foreground transition">
+            <Link href="/product" className="text-sm text-muted-foreground hover:text-foreground transition-colors hover:text-emerald-400">
               Product
             </Link>
-            <Link href="/#use-cases" className="text-sm text-muted-foreground hover:text-foreground transition">
+            <Link href="/use-cases" className="text-sm text-muted-foreground hover:text-foreground transition-colors hover:text-emerald-400">
               Use Cases
             </Link>
-            <Link href="/#pricing" className="text-sm text-muted-foreground hover:text-foreground transition">
+            <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors hover:text-emerald-400">
               Pricing
             </Link>
-            <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition">
+            <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors hover:text-emerald-400">
               Docs
             </Link>
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
+            <Link href="/settings">
+              <Button variant="ghost" size="sm">
+                Settings
+              </Button>
+            </Link>
             <Link href="/login">
               <Button variant="ghost" size="sm">
                 Sign In
               </Button>
             </Link>
-            <Link href="/threads">
-              <Button size="sm">Threads</Button>
-            </Link>
-            <Link href="/settings/providers">
-              <Button variant="outline" size="sm">Settings</Button>
+            <Link href="/">
+              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                Start Chat
+              </Button>
             </Link>
           </div>
 
@@ -56,35 +60,35 @@ export function Header() {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
-        {isOpen && (
-          <nav className="md:hidden pb-4 space-y-2">
-            <Link href="/#product" className="block px-4 py-2 rounded-lg hover:bg-muted text-sm">
-              Product
-            </Link>
-            <Link href="/#use-cases" className="block px-4 py-2 rounded-lg hover:bg-muted text-sm">
-              Use Cases
-            </Link>
-            <Link href="/#pricing" className="block px-4 py-2 rounded-lg hover:bg-muted text-sm">
-              Pricing
-            </Link>
-            <Link href="/docs" className="block px-4 py-2 rounded-lg hover:bg-muted text-sm">
-              Docs
-            </Link>
+          {/* Mobile Navigation */}
+          {isOpen && (
+            <nav className="md:hidden pb-4 space-y-2">
+              <Link href="/product" className="block px-4 py-2 rounded-lg hover:bg-muted text-sm">
+                Product
+              </Link>
+              <Link href="/use-cases" className="block px-4 py-2 rounded-lg hover:bg-muted text-sm">
+                Use Cases
+              </Link>
+              <Link href="/pricing" className="block px-4 py-2 rounded-lg hover:bg-muted text-sm">
+                Pricing
+              </Link>
+              <Link href="/docs" className="block px-4 py-2 rounded-lg hover:bg-muted text-sm">
+                Docs
+              </Link>
             <div className="space-y-2 pt-2">
+              <Link href="/settings" className="block">
+                <Button variant="ghost" size="sm" className="w-full">
+                  Settings
+                </Button>
+              </Link>
               <Link href="/login" className="block">
                 <Button variant="ghost" size="sm" className="w-full">
                   Sign In
                 </Button>
               </Link>
-              <Link href="/threads" className="block">
-                <Button size="sm" className="w-full">
-                  Threads
-                </Button>
-              </Link>
-              <Link href="/settings/providers" className="block">
-                <Button variant="outline" size="sm" className="w-full">
-                  Settings
+              <Link href="/" className="block">
+                <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+                  Start Chat
                 </Button>
               </Link>
             </div>

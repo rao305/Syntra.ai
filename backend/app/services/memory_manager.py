@@ -7,7 +7,42 @@ from typing import List, Dict, Optional
 from datetime import datetime
 from dataclasses import dataclass, field
 
-THREAD_WINDOW = 12  # Keep last 12 turns verbatim
+# Dynamic window management
+DEFAULT_THREAD_WINDOW = 12  # Default: Keep last 12 turns verbatim
+MIN_THREAD_WINDOW = 6  # Minimum window size
+MAX_THREAD_WINDOW = 50  # Maximum window size
+
+def get_dynamic_window(model_context_limit: Optional[int] = None, task_complexity: str = "normal") -> int:
+    """
+    Calculate dynamic memory window based on model context limits and task complexity.
+    
+    Args:
+        model_context_limit: Maximum context tokens for the model (e.g., 8192, 32768, 128000)
+        task_complexity: "simple", "normal", "complex"
+    
+    Returns:
+        Optimal window size (number of turns to keep verbatim)
+    """
+    base_window = DEFAULT_THREAD_WINDOW
+    
+    # Adjust based on task complexity
+    complexity_multipliers = {
+        "simple": 0.7,
+        "normal": 1.0,
+        "complex": 1.5
+    }
+    multiplier = complexity_multipliers.get(task_complexity, 1.0)
+    adjusted_window = int(base_window * multiplier)
+    
+    # Adjust based on model context limit if provided
+    if model_context_limit:
+        # Estimate: ~100 tokens per turn on average
+        estimated_tokens_per_turn = 100
+        max_turns_by_context = (model_context_limit * 0.7) // estimated_tokens_per_turn  # Use 70% for conversation
+        adjusted_window = min(adjusted_window, max_turns_by_context)
+    
+    # Clamp to min/max bounds
+    return max(MIN_THREAD_WINDOW, min(MAX_THREAD_WINDOW, adjusted_window))
 
 
 @dataclass
@@ -76,8 +111,16 @@ def initialize_thread_from_db(thread_id: str, db_messages: List[Dict[str, str]])
                 thread.summary = summarize_rolling(thread.summary, older_text)
 
 
-def add_turn(thread_id: str, turn: Turn) -> None:
-    """Add a turn to the thread and manage windowing."""
+def add_turn(thread_id: str, turn: Turn, model_context_limit: Optional[int] = None, task_complexity: str = "normal") -> None:
+    """
+    Add a turn to the thread and manage windowing with dynamic adjustment.
+    
+    Args:
+        thread_id: Thread identifier
+        turn: Turn to add
+        model_context_limit: Optional model context limit for dynamic window sizing
+        task_complexity: "simple", "normal", or "complex" for window adjustment
+    """
     thread = get_thread(thread_id)
     thread.turns.append(turn)
     
@@ -85,11 +128,14 @@ def add_turn(thread_id: str, turn: Turn) -> None:
     if turn.role == "user":
         extract_profile_facts(thread, turn.content)
     
-    # Window management: if we exceed THREAD_WINDOW, summarize older turns
-    if len(thread.turns) > THREAD_WINDOW:
-        # Get turns to summarize (everything except the last THREAD_WINDOW)
-        older_turns = thread.turns[:-THREAD_WINDOW]
-        thread.turns = thread.turns[-THREAD_WINDOW:]
+    # Calculate dynamic window size
+    dynamic_window = get_dynamic_window(model_context_limit, task_complexity)
+    
+    # Window management: if we exceed dynamic window, summarize older turns
+    if len(thread.turns) > dynamic_window:
+        # Get turns to summarize (everything except the last dynamic_window)
+        older_turns = thread.turns[:-dynamic_window]
+        thread.turns = thread.turns[-dynamic_window:]
         
         # Summarize older turns
         if older_turns:

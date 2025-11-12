@@ -25,6 +25,7 @@ from qdrant_client.models import Distance, VectorParams, PointStruct
 
 from app.models.memory import MemoryFragment, MemoryTier
 from app.models.provider_key import ProviderType
+from app.models.access_graph import AgentResourcePermission
 from config import get_settings
 
 settings = get_settings()
@@ -102,13 +103,16 @@ class MemoryService:
         user_id: Optional[str],
         query: str,
         thread_id: str,
-        top_k: int = 5
+        top_k: int = 5,
+        current_provider: Optional[ProviderType] = None
     ) -> MemoryContext:
         """
         Retrieve relevant memory fragments for a query.
 
         This is the READ operation that enables cross-model context sharing.
         It retrieves memory fragments created by ANY model, not just the current one.
+        
+        Now includes access graph permission checks for fine-grained control.
 
         Args:
             db: Database session
@@ -117,6 +121,7 @@ class MemoryService:
             query: Current user query
             thread_id: Thread ID
             top_k: Number of fragments to retrieve per tier
+            current_provider: Current provider/agent making the request (for access graph checks)
 
         Returns:
             MemoryContext with private and shared fragments
@@ -129,11 +134,11 @@ class MemoryService:
 
             # Retrieve from both tiers
             private_fragments = await self._retrieve_from_tier(
-                db, org_id, user_id, query_vector, MemoryTier.PRIVATE, top_k
+                db, org_id, user_id, query_vector, MemoryTier.PRIVATE, top_k, current_provider
             )
 
             shared_fragments = await self._retrieve_from_tier(
-                db, org_id, user_id, query_vector, MemoryTier.SHARED, top_k
+                db, org_id, user_id, query_vector, MemoryTier.SHARED, top_k, current_provider
             )
 
             retrieval_time_ms = (time.perf_counter() - start_time) * 1000
@@ -162,9 +167,14 @@ class MemoryService:
         user_id: Optional[str],
         query_vector: List[float],
         tier: MemoryTier,
-        top_k: int
+        top_k: int,
+        current_provider: Optional[ProviderType] = None
     ) -> List[Dict[str, Any]]:
-        """Retrieve fragments from a specific tier."""
+        """
+        Retrieve fragments from a specific tier with access graph permission checks.
+        
+        Now includes fine-grained access control via AgentResourcePermission.
+        """
         try:
             client = await self._get_client()
 
@@ -180,22 +190,32 @@ class MemoryService:
                     {"key": "user_id", "match": {"value": user_id}}
                 )
 
-            # Search in Qdrant
+            # Search in Qdrant (get more results to filter by permissions)
             search_result = await client.search(
                 collection_name=self.COLLECTION_NAME,
                 query_vector=query_vector,
                 query_filter={
                     "must": must_conditions
                 },
-                limit=top_k,
+                limit=top_k * 2,  # Get more to filter by permissions
                 score_threshold=0.7  # Only return relevant matches
             )
 
-            # Convert to dict format
+            # Convert to dict format and apply access graph permissions
             fragments = []
             for hit in search_result:
+                fragment_id = hit.id
+                
+                # Check access graph permissions if provider is specified
+                if current_provider:
+                    has_access = await self._check_fragment_access(
+                        db, org_id, current_provider.value, fragment_id
+                    )
+                    if not has_access:
+                        continue  # Skip fragments this agent cannot access
+                
                 fragment = {
-                    "id": hit.id,
+                    "id": fragment_id,
                     "text": hit.payload.get("text", ""),
                     "tier": hit.payload.get("tier", ""),
                     "score": hit.score,
@@ -203,12 +223,64 @@ class MemoryService:
                     "created_at": hit.payload.get("created_at", "")
                 }
                 fragments.append(fragment)
+                
+                # Stop when we have enough fragments
+                if len(fragments) >= top_k:
+                    break
 
             return fragments
 
         except Exception as e:
             print(f"Error retrieving from tier {tier}: {e}")
             return []
+    
+    async def _check_fragment_access(
+        self,
+        db: AsyncSession,
+        org_id: str,
+        agent_key: str,
+        fragment_id: str
+    ) -> bool:
+        """
+        Check if an agent has permission to access a specific memory fragment.
+        
+        Returns True if:
+        - No explicit permission record exists (default allow)
+        - Permission exists and can_access=True and not revoked
+        Returns False if:
+        - Permission exists and can_access=False
+        - Permission exists and revoked_at is set
+        """
+        try:
+            from sqlalchemy import and_
+            from datetime import datetime, timezone
+            
+            # Check for explicit permission
+            stmt = select(AgentResourcePermission).where(
+                and_(
+                    AgentResourcePermission.org_id == org_id,
+                    AgentResourcePermission.agent_key == agent_key,
+                    AgentResourcePermission.resource_key == fragment_id
+                )
+            )
+            result = await db.execute(stmt)
+            permission = result.scalar_one_or_none()
+            
+            if permission is None:
+                # No explicit permission = default allow (backward compatible)
+                return True
+            
+            # Check if revoked
+            if permission.revoked_at is not None:
+                return False
+            
+            # Return permission value
+            return permission.can_access
+            
+        except Exception as e:
+            print(f"Error checking fragment access: {e}")
+            # Default to allow on error (fail open for availability)
+            return True
 
     async def save_memory_from_turn(
         self,
@@ -263,12 +335,17 @@ class MemoryService:
                 if insight.importance < 0.5:
                     continue
 
+                # Scrub PII if saving to shared tier
+                text_to_save = insight.text
+                if tier == MemoryTier.SHARED:
+                    text_to_save = await self._scrub_pii(text_to_save)
+
                 # Create memory fragment
                 fragment_id = await self._save_fragment(
                     db=db,
                     org_id=org_id,
                     user_id=user_id,
-                    text=insight.text,
+                    text=text_to_save,
                     tier=tier,
                     provider=provider,
                     model=model,
@@ -489,6 +566,98 @@ class MemoryService:
     def _hash_content(self, text: str) -> str:
         """Generate hash for content deduplication."""
         return hashlib.sha256(text.encode()).hexdigest()
+    
+    async def _scrub_pii(self, text: str) -> str:
+        """
+        Scrub PII (Personally Identifiable Information) from text before saving to shared memory.
+        
+        This is a basic implementation. In production, use a dedicated PII detection service
+        (e.g., Presidio, AWS Comprehend, or an LLM-based detector).
+        """
+        import re
+        
+        # Email addresses
+        text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '[EMAIL_REDACTED]', text)
+        
+        # Phone numbers (US format)
+        text = re.sub(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', '[PHONE_REDACTED]', text)
+        
+        # Credit card numbers (basic pattern)
+        text = re.sub(r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b', '[CARD_REDACTED]', text)
+        
+        # SSN (US format)
+        text = re.sub(r'\b\d{3}-\d{2}-\d{4}\b', '[SSN_REDACTED]', text)
+        
+        # IP addresses
+        text = re.sub(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b', '[IP_REDACTED]', text)
+        
+        # Common patterns that might indicate names (basic heuristic)
+        # This is a simple approach - production should use NER models
+        # Look for "My name is X" or "I'm X" patterns and redact
+        text = re.sub(r'\b(?:my name is|i\'?m|call me)\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?\b', 
+                     r'\1 [NAME_REDACTED]', text, flags=re.IGNORECASE)
+        
+        return text
+    
+    async def expire_old_fragments(
+        self,
+        db: AsyncSession,
+        org_id: Optional[str] = None,
+        days_old: int = 90
+    ) -> int:
+        """
+        Expire (soft delete) memory fragments older than specified days.
+        
+        Args:
+            db: Database session
+            org_id: Optional org ID to limit expiration to specific org
+            days_old: Number of days after which fragments expire (default 90)
+        
+        Returns:
+            Number of fragments expired
+        """
+        try:
+            from datetime import timedelta
+            from sqlalchemy import and_
+            
+            cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_old)
+            
+            # Build query
+            conditions = [
+                MemoryFragment.created_at < cutoff_date
+            ]
+            if org_id:
+                conditions.append(MemoryFragment.org_id == org_id)
+            
+            stmt = select(MemoryFragment).where(and_(*conditions))
+            result = await db.execute(stmt)
+            old_fragments = result.scalars().all()
+            
+            expired_count = 0
+            client = await self._get_client()
+            
+            for fragment in old_fragments:
+                # Delete from Qdrant
+                try:
+                    if fragment.vector_id:
+                        await client.delete(
+                            collection_name=self.COLLECTION_NAME,
+                            points_selector=[fragment.vector_id]
+                        )
+                except Exception as e:
+                    print(f"Error deleting fragment {fragment.id} from Qdrant: {e}")
+                
+                # Delete from database
+                await db.delete(fragment)
+                expired_count += 1
+            
+            await db.commit()
+            return expired_count
+            
+        except Exception as e:
+            print(f"Error expiring old fragments: {e}")
+            await db.rollback()
+            return 0
 
 
 # Singleton instance

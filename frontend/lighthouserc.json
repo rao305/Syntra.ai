@@ -24,7 +24,7 @@
       },
       "url": [
         "http://localhost:3000/",
-        "http://localhost:3000/threads",
+        "http://localhost:3000/conversations",
         "http://localhost:3000/settings/providers"
       ]
     },

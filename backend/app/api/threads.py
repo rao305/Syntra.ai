@@ -345,7 +345,8 @@ async def add_message(
                     user_id=request.user_id,
                     query=request.content,
                     thread_id=thread_id,
-                    top_k=3
+                    top_k=3,
+                    current_provider=request.provider  # Pass provider for access graph checks
                 ),
                 timeout=2.0  # 2 second timeout
             )
@@ -369,9 +370,16 @@ async def add_message(
             "content": custom_system_prompt
         })
 
+    # Detect intent from routing decision reason for LaTeX math formatting
+    from app.services.dac_persona import detect_intent_from_reason
+    detected_intent = None
+    if routing_decision and routing_decision.reason:
+        detected_intent = detect_intent_from_reason(routing_decision.reason)
+    
     # INJECT DAC PERSONA - must come FIRST to establish identity
     # QA mode will be detected automatically if thread.description contains "PHASE3_QA_MODE"
-    prompt_messages = inject_dac_persona(prompt_messages, qa_mode=qa_mode)
+    # Pass detected intent to enable LaTeX formatting for math questions
+    prompt_messages = inject_dac_persona(prompt_messages, qa_mode=qa_mode, intent=detected_intent)
 
     # Inject memory fragments as system context if available
     if memory_context and memory_context.total_fragments > 0:
@@ -697,6 +705,10 @@ async def add_message_streaming(
     validated_model = validate_and_get_model(provider_enum, model)
     print(f"⚡ Routing done in {(perf_time.perf_counter() - start_routing)*1000:.0f}ms -> {provider_enum.value}/{validated_model}")
     
+    # Detect intent from routing reason for LaTeX math formatting
+    from app.services.dac_persona import detect_intent_from_reason
+    detected_intent = detect_intent_from_reason(reason) if reason else None
+    
     # Start DB operations in background (don't await yet)
     start_db = perf_time.perf_counter()
     rls_task = set_rls_context(db, org_id)
@@ -705,9 +717,10 @@ async def add_message_streaming(
     # Add user turn to memory immediately (fast, in-memory, no DB)
     add_turn(thread_id, Turn(role=request.role.value, content=user_content))
     
-    # Build prompt immediately (fast, in-memory)
-    from app.services.dac_persona import DAC_SYSTEM_PROMPT
-    prompt_messages = build_prompt_for_model(thread_id, DAC_SYSTEM_PROMPT)
+    # Build prompt immediately (fast, in-memory) with intent-aware persona injection
+    from app.services.dac_persona import DAC_SYSTEM_PROMPT, inject_dac_persona
+    base_messages = build_prompt_for_model(thread_id, DAC_SYSTEM_PROMPT)
+    prompt_messages = inject_dac_persona(base_messages, qa_mode=False, intent=detected_intent)
     print(f"⚡ Memory + prompt built in {(perf_time.perf_counter() - start_db)*1000:.0f}ms")
     
     # EXTREME OPTIMIZATION: Skip RLS, get API key from cache/env instead of DB

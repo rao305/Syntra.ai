@@ -37,7 +37,8 @@ export function ConversationLayout({
   defaultRightSize = 25,
   showRightPanel = true,
 }: ConversationLayoutProps) {
-  const [leftCollapsed, setLeftCollapsed] = React.useState(false)
+  // Default to collapsed sidebar (closed by default)
+  const [leftCollapsed, setLeftCollapsed] = React.useState(true)
   const [rightCollapsed, setRightCollapsed] = React.useState(false)
 
   // Load saved panel sizes from localStorage (only on client)
@@ -49,7 +50,8 @@ export function ConversationLayout({
     const savedLeftCollapsed = localStorage.getItem('conversation-left-collapsed')
     const savedRightCollapsed = localStorage.getItem('conversation-right-collapsed')
 
-    if (savedLeftCollapsed) {
+    // Only restore collapsed state if user has explicitly set it (not on first visit)
+    if (savedLeftCollapsed !== null) {
       setLeftCollapsed(savedLeftCollapsed === 'true')
     }
     if (savedRightCollapsed) {
@@ -89,9 +91,9 @@ export function ConversationLayout({
           }
         }}
       >
-        {/* Left Sidebar - Conversation List */}
+        {/* Left Sidebar - Conversation List (collapsed by default) */}
         <ResizablePanel
-          defaultSize={defaultLeftSize}
+          defaultSize={leftCollapsed ? 0 : defaultLeftSize}
           minSize={15}
           maxSize={35}
           collapsible

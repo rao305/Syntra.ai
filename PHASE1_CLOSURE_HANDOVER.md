@@ -150,3 +150,4 @@ npx autocannon -c 10 -a 50 -m POST --timeout 120 \
 
 **Proceed to Phase-2**: Lighthouse pass, cache-hit surfacing, adaptive pacer, dashboard polish, UX niceties.
 
+
