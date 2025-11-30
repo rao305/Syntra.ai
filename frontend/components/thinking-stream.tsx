@@ -17,13 +17,13 @@ interface ThinkingStreamProps {
   onViewProcess?: () => void
 }
 
-export function ThinkingStream({ 
-  stages, 
-  mode = "thinking", 
+export function ThinkingStream({
+  stages = [],
+  mode = "thinking",
   finalContent,
-  onViewProcess 
+  onViewProcess
 }: ThinkingStreamProps) {
-  
+
   if (mode === "complete") {
     return (
       <div className="rounded-2xl bg-background px-3 py-2 border text-sm">

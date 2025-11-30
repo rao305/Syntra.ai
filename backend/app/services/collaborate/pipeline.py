@@ -1,6 +1,7 @@
 """Collaborate pipeline orchestrator (LLM council architecture)."""
 import asyncio
 import json
+import logging
 import time
 import uuid
 from datetime import datetime
@@ -20,6 +21,8 @@ from app.services.collaborate.models import (
 )
 from app.models.provider_key import ProviderType
 from app.services.provider_dispatch import call_provider_adapter
+
+logger = logging.getLogger(__name__)
 
 
 # ---------- Helpers ----------
@@ -67,13 +70,15 @@ async def call_llm_json(
     model: str,
     system_prompt: str,
     user_payload: dict,
-    response_key: str,
+    response_key: str = None,
     api_key: str,
-) -> dict:
+) -> tuple[dict, object]:
     """
-    Call an LLM and expect JSON response with a specific key.
+    Call an LLM and expect JSON response.
 
-    Returns the parsed content of response_key, or raises an exception.
+    If response_key is provided, extracts that key from the response.
+    If response_key is None, returns the full parsed JSON.
+    Returns (extracted_content, provider_response).
     """
     messages = [
         {
@@ -100,11 +105,14 @@ async def call_llm_json(
     except json.JSONDecodeError:
         raise ValueError(f"LLM did not return valid JSON: {response.content}")
 
-    # Extract the specific key
-    if response_key not in parsed:
-        raise ValueError(f"Response missing key '{response_key}': {parsed.keys()}")
-
-    return parsed[response_key], response
+    # Extract the specific key if provided
+    if response_key:
+        if response_key not in parsed:
+            raise ValueError(f"Response missing key '{response_key}': {parsed.keys()}")
+        return parsed[response_key], response
+    else:
+        # Return full parsed JSON
+        return parsed, response
 
 
 # ---------- Inner team stages ----------
@@ -132,19 +140,23 @@ async def run_inner_stage(
 
     start = time.time()
     try:
-        # Call LLM
-        partial_state_dict, provider_response = await call_llm_json(
+        # Call LLM (expect JSON with stage_role, summary, collab_state_delta)
+        full_response, provider_response = await call_llm_json(
             provider=model.provider,
             model=model.model_slug,
             system_prompt=system_prompt,
             user_payload=user_payload,
-            response_key="collab_state",
+            response_key=None,  # Get full response
             api_key=api_key,
         )
     except Exception as e:
         raise RuntimeError(f"Stage '{role}' failed: {str(e)}")
 
     latency_ms = int((time.time() - start) * 1000)
+
+    # Extract collab_state_delta from the response
+    partial_state_dict = full_response.get("collab_state_delta", {})
+    stage_summary = full_response.get("summary", "")
 
     # Merge partial state into current state
     merged_dict = {**collab_state.model_dump(), **partial_state_dict}
@@ -263,15 +275,19 @@ async def run_single_council_review(
     }
 
     start = time.time()
-    review_obj, provider_response = await call_llm_json(
+    # Get full response (with stage_role, summary, collab_state_delta)
+    full_response, provider_response = await call_llm_json(
         provider=model.provider,
         model=model.model_slug,
         system_prompt=reviewer_system_prompt,
         user_payload=payload,
-        response_key="review",
+        response_key=None,  # Get full response
         api_key=api_key,
     )
     latency_ms = int((time.time() - start) * 1000)
+
+    # Extract external_review from collab_state_delta
+    review_obj = full_response.get("collab_state_delta", {}).get("external_review", {})
 
     # Reconstruct content from review object
     content = "\n".join(
@@ -377,15 +393,19 @@ async def run_director(
     }
 
     start = time.time()
-    result, provider_response = await call_llm_json(
+    # Get full response (with stage_role, summary, final_answer)
+    full_response, provider_response = await call_llm_json(
         provider=director_model.provider,
         model=director_model.model_slug,
         system_prompt=director_system_prompt,
         user_payload=payload,
-        response_key="final_answer",
+        response_key=None,  # Get full response
         api_key=api_key,
     )
     latency_ms = int((time.time() - start) * 1000)
+
+    # Extract final_answer from the response
+    result = full_response.get("final_answer", {})
 
     content = result.get("content", "")
     confidence = result.get("confidence", "medium")
@@ -486,7 +506,46 @@ async def run_collaborate(
         api_key=director_api_key,
     )
 
-    # 5) Build response metadata
+    # 5) Render visualizations and generate images
+    run_id = str(uuid.uuid4())
+    visuals = None
+
+    if collab_state.visualizations or collab_state.images:
+        from app.services.collaborate.visualization_service import render_visualizations
+        from app.services.collaborate.image_generation_service import generate_images, select_image_provider
+        from app.services.collaborate.models import Visuals
+
+        charts = []
+        images = []
+
+        # Render charts/visualizations
+        if collab_state.visualizations:
+            try:
+                charts = await render_visualizations(collab_state.visualizations, run_id)
+            except Exception as e:
+                logger.error(f"Visualization rendering failed: {str(e)}")
+
+        # Generate images
+        if collab_state.images:
+            try:
+                image_provider, image_api_key = select_image_provider(api_keys)
+                if image_provider and image_api_key:
+                    images = await generate_images(
+                        collab_state.images,
+                        provider=image_provider,
+                        api_key=image_api_key,
+                    )
+            except Exception as e:
+                logger.error(f"Image generation failed: {str(e)}")
+
+        if charts or images:
+            visuals = Visuals(
+                charts=charts,
+                images=images,
+                generated_at=now(),
+            )
+
+    # 6) Build response metadata
     finish_ts = now()
     total_latency_ms = int((time.time() - start_ms) * 1000)
 
@@ -496,7 +555,7 @@ async def run_collaborate(
     models_involved = list(unique_models.values())
 
     meta = CollaborateRunMeta(
-        run_id=str(uuid.uuid4()),
+        run_id=run_id,
         mode=mode,  # type: ignore
         started_at=start_ts,
         finished_at=finish_ts,
@@ -508,5 +567,6 @@ async def run_collaborate(
         final_answer=final_answer,
         internal_pipeline=internal_pipeline,
         external_reviews=external_reviews,
+        visuals=visuals,
         meta=meta,
     )

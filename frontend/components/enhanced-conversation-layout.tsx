@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { EnhancedSidebar } from '@/components/enhanced-sidebar'
 import { EnhancedChatInterface } from '@/components/enhanced-chat-interface'
-// import { useAuth } from '@/components/auth/auth-provider'
 
 interface Message {
   id: string
@@ -27,7 +26,7 @@ interface ChatHistoryItem {
 interface EnhancedConversationLayoutProps {
   messages: Message[]
   history: ChatHistoryItem[]
-  onSendMessage: (content: string) => void
+  onSendMessage: (content: string, images?: any[]) => Promise<void>
   onUpdateMessage?: (messageId: string, updates: Partial<Message>) => void
   onNewChat: () => void
   onHistoryClick: (id: string) => void
@@ -50,7 +49,6 @@ export function EnhancedConversationLayout({
   onContinueWorkflow
 }: EnhancedConversationLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
-  // Removed auth - no user needed
   const user = null
 
   return (
@@ -64,7 +62,6 @@ export function EnhancedConversationLayout({
         user={user}
       />
       <main className="flex-1 flex flex-col h-full relative transition-all duration-300 ease-in-out">
-        {/* No auth buttons needed */}
         <EnhancedChatInterface
           messages={messages}
           onSendMessage={onSendMessage}

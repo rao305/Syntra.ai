@@ -1,227 +1,123 @@
-"use client"
+import { useState, useCallback } from "react";
+import { CollaborateEvent, AbstractPhase, StanceCount } from "@/types/collaborate-events";
 
-import { useCallback, useState } from 'react'
-import {
-  CollaborateEvent,
-  PhaseStartEvent,
-  PhaseEndEvent,
-  PhaseDeltaEvent,
-  AbstractPhase,
-  PHASE_INDICES,
-  TOTAL_PHASES,
-} from '@/types/collaborate-events'
-import { ThinkingStep, CouncilSummary } from '@/components/collaborate/ThinkingStrip'
-
-interface UsePhaseCollaborationProps {
-  onPhaseUpdate?: (phase: AbstractPhase, step: ThinkingStep) => void
-  onCouncilProgress?: (summary: CouncilSummary) => void
-  onFinalAnswerStart?: () => void
-  onFinalAnswerDelta?: (textDelta: string) => void
-  onFinalAnswerComplete?: (response: any) => void
-  onError?: (error: string) => void
+export interface Phase {
+  phase: AbstractPhase;
+  status: "pending" | "in_progress" | "completed";
+  model?: string;
+  provider?: string;
+  latency_ms?: number;
+  tokens_used?: number;
+  council_summary?: StanceCount;
 }
 
-/**
- * Hook for managing phase-based collaboration streaming.
- * Maintains the state of the 5 abstract phases and handles events.
- */
-export function usePhaseCollaboration({
-  onPhaseUpdate,
-  onCouncilProgress,
-  onFinalAnswerStart,
-  onFinalAnswerDelta,
-  onFinalAnswerComplete,
-  onError,
-}: UsePhaseCollaborationProps) {
-  const [phases, setPhases] = useState<Record<AbstractPhase, ThinkingStep>>({
-    understand: {
-      phase: 'understand',
-      label: 'Understanding your query',
-      status: 'pending',
-      preview: '',
-    },
-    research: {
-      phase: 'research',
-      label: 'Researching recent data and trends',
-      status: 'pending',
-      preview: '',
-    },
-    reason_refine: {
-      phase: 'reason_refine',
-      label: 'Refining and organizing the answer',
-      status: 'pending',
-      preview: '',
-    },
-    crosscheck: {
-      phase: 'crosscheck',
-      label: 'Cross-checking with other AI models',
-      status: 'pending',
-      preview: '',
-    },
-    synthesize: {
-      phase: 'synthesize',
-      label: 'Synthesizing final report',
-      status: 'pending',
-      preview: '',
-    },
-  })
+export interface UsePhaseCollaborationState {
+  phases: Phase[];
+  currentPhaseIndex: number;
+  finalAnswerContent: string;
+  finalAnswerDone: boolean;
+  confidence?: "low" | "medium" | "high";
+  isLoading: boolean;
+  error?: string;
+}
 
-  const [councilSummary, setCouncilSummary] = useState<CouncilSummary>({
-    completed: 0,
-    total: 0,
-    stanceCounts: { agree: 0, mixed: 0, disagree: 0 },
-  })
+const defaultPhases: AbstractPhase[] = ["understand", "research", "reason_refine", "crosscheck", "synthesize"];
 
-  const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0)
+export function usePhaseCollaboration() {
+  const [state, setState] = useState<UsePhaseCollaborationState>({
+    phases: defaultPhases.map((phase) => ({
+      phase,
+      status: "pending",
+    })),
+    currentPhaseIndex: -1,
+    finalAnswerContent: "",
+    finalAnswerDone: false,
+    isLoading: true,
+  });
 
-  const handlePhaseStart = useCallback(
-    (event: PhaseStartEvent) => {
-      const phase = event.phase
-      setPhases((prev) => ({
-        ...prev,
-        [phase]: {
-          ...prev[phase],
-          label: event.label,
-          modelDisplay: event.model_display,
-          status: 'active' as const,
-        },
-      }))
-      setCurrentPhaseIndex(event.step_index)
-      onPhaseUpdate?.(phase, {
-        ...phases[phase],
-        label: event.label,
-        modelDisplay: event.model_display,
-        status: 'active',
-      })
-    },
-    [onPhaseUpdate, phases]
-  )
+  const processEvent = useCallback((event: CollaborateEvent) => {
+    setState((prevState) => {
+      const newState = { ...prevState };
 
-  const handlePhaseDelta = useCallback((event: PhaseDeltaEvent) => {
-    const phase = event.phase
-    setPhases((prev) => ({
-      ...prev,
-      [phase]: {
-        ...prev[phase],
-        preview: event.text_delta,
-      },
-    }))
-  }, [])
-
-  const handlePhaseEnd = useCallback(
-    (event: PhaseEndEvent) => {
-      const phase = event.phase
-      setPhases((prev) => ({
-        ...prev,
-        [phase]: {
-          ...prev[phase],
-          status: 'done' as const,
-          latency_ms: event.latency_ms,
-        },
-      }))
-      onPhaseUpdate?.(phase, {
-        ...phases[phase],
-        status: 'done',
-        latency_ms: event.latency_ms,
-      })
-    },
-    [onPhaseUpdate, phases]
-  )
-
-  const handleCouncilProgress = useCallback(
-    (event: any) => {
-      const summary: CouncilSummary = {
-        completed: event.completed,
-        total: event.total,
-        stanceCounts: event.stance_counts,
-      }
-      setCouncilSummary(summary)
-      onCouncilProgress?.(summary)
-    },
-    [onCouncilProgress]
-  )
-
-  const handleFinalAnswerDelta = useCallback(
-    (text: string) => {
-      onFinalAnswerDelta?.(text)
-    },
-    [onFinalAnswerDelta]
-  )
-
-  const handleFinalAnswerDone = useCallback(
-    (response: any) => {
-      onFinalAnswerComplete?.(response)
-    },
-    [onFinalAnswerComplete]
-  )
-
-  const handleError = useCallback(
-    (message: string) => {
-      onError?.(message)
-    },
-    [onError]
-  )
-
-  const processEvent = useCallback(
-    (event: CollaborateEvent) => {
       switch (event.type) {
-        case 'phase_start':
-          handlePhaseStart(event as PhaseStartEvent)
-          break
-        case 'phase_delta':
-          handlePhaseDelta(event as PhaseDeltaEvent)
-          break
-        case 'phase_end':
-          handlePhaseEnd(event as PhaseEndEvent)
-          break
-        case 'council_progress':
-          handleCouncilProgress(event)
-          break
-        case 'final_answer_delta':
-          handleFinalAnswerDelta(event.text_delta)
-          break
-        case 'final_answer_done':
-          handleFinalAnswerDone(event.response)
-          break
-        case 'error':
-          handleError(event.message || 'Unknown error')
-          break
-        // Ignore detailed stage events - they're for internal logging only
-        case 'stage_start':
-        case 'stage_delta':
-        case 'stage_end':
-          break
-      }
-    },
-    [
-      handlePhaseStart,
-      handlePhaseDelta,
-      handlePhaseEnd,
-      handleCouncilProgress,
-      handleFinalAnswerDelta,
-      handleFinalAnswerDone,
-      handleError,
-    ]
-  )
+        case "phase_start": {
+          const phaseIndex = defaultPhases.indexOf(event.phase);
+          newState.currentPhaseIndex = phaseIndex;
+          newState.phases = newState.phases.map((p, idx) => ({
+            ...p,
+            status: idx === phaseIndex ? ("in_progress" as const) : idx < phaseIndex ? ("completed" as const) : ("pending" as const),
+          }));
+          break;
+        }
 
-  const getPhasesList = useCallback((): ThinkingStep[] => {
-    return Object.values(phases)
-  }, [phases])
+        case "phase_end": {
+          const phaseIndex = defaultPhases.indexOf(event.phase);
+          newState.phases[phaseIndex] = {
+            ...newState.phases[phaseIndex],
+            status: "completed",
+            latency_ms: event.latency_ms,
+            tokens_used: event.tokens_used,
+            model: event.model_info?.display_name,
+            provider: event.model_info?.provider,
+            council_summary: event.council_summary,
+          };
+          break;
+        }
+
+        case "final_answer_start": {
+          newState.isLoading = false;
+          newState.finalAnswerContent = "";
+          newState.finalAnswerDone = false;
+          break;
+        }
+
+        case "final_answer_delta": {
+          newState.finalAnswerContent += event.delta;
+          break;
+        }
+
+        case "final_answer_end": {
+          newState.finalAnswerDone = true;
+          newState.confidence = event.confidence;
+          newState.isLoading = false;
+          break;
+        }
+
+        default:
+          break;
+      }
+
+      return newState;
+    });
+  }, []);
+
+  const reset = useCallback(() => {
+    setState({
+      phases: defaultPhases.map((phase) => ({
+        phase,
+        status: "pending",
+      })),
+      currentPhaseIndex: -1,
+      finalAnswerContent: "",
+      finalAnswerDone: false,
+      isLoading: true,
+    });
+  }, []);
+
+  const getPhases = useCallback(() => state.phases, [state.phases]);
+
+  const getCurrentPhase = useCallback(() => {
+    if (state.currentPhaseIndex >= 0) {
+      return state.phases[state.currentPhaseIndex];
+    }
+    return null;
+  }, [state.currentPhaseIndex, state.phases]);
 
   return {
-    // State
-    phases,
-    councilSummary,
-    currentPhaseIndex,
-
-    // Methods
+    ...state,
     processEvent,
-    getPhasesList,
-
-    // Handlers
-    handlePhaseStart,
-    handlePhaseDelta,
-    handlePhaseEnd,
-    handleCouncilProgress,
-  }
+    reset,
+    getPhases,
+    getCurrentPhase,
+  };
 }

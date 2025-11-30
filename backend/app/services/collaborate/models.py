@@ -66,6 +66,47 @@ class InternalReport(BaseModel):
     known_gaps: List[str] = []
 
 
+# ---------- Visualization & Image specs ----------
+
+VisualizationKind = Literal["chart", "table"]
+ChartType = Literal["line", "bar", "stacked_bar", "pie", "area", "scatter"]
+ImagePurpose = Literal["logo", "diagram", "illustration", "thumbnail", "concept_art"]
+AspectRatio = Literal["1:1", "16:9", "4:3", "3:2"]
+
+
+class DataSeries(BaseModel):
+    """A single data series for a chart."""
+    name: str
+    values: List[float]  # Must match length of labels
+
+
+class ChartData(BaseModel):
+    """Structured data for a chart."""
+    labels: List[str]  # X-axis labels (e.g., years, categories)
+    series: List[DataSeries]  # One or more data series
+
+
+class VisualizationSpec(BaseModel):
+    """Specification for a chart or table to be rendered."""
+    id: str
+    kind: VisualizationKind
+    title: Optional[str] = None
+    description: Optional[str] = None
+    chart_type: Optional[ChartType] = None
+    x_axis_label: Optional[str] = None
+    y_axis_label: Optional[str] = None
+    data: Optional[ChartData] = None
+
+
+class ImageSpec(BaseModel):
+    """Specification for an image to be generated."""
+    id: str
+    purpose: ImagePurpose
+    prompt: str  # Detailed text prompt for image generation
+    style: Optional[str] = None
+    aspect_ratio: Optional[AspectRatio] = "1:1"
+
+
 class CollabState(BaseModel):
     user_query: str
     analysis: Optional[AnalysisState] = None
@@ -73,6 +114,8 @@ class CollabState(BaseModel):
     draft: Optional[DraftState] = None
     critique: Optional[CritiqueState] = None
     internal_report: Optional[InternalReport] = None
+    visualizations: List[VisualizationSpec] = []
+    images: List[ImageSpec] = []
 
 
 # ---------- Internal pipeline timeline ----------
@@ -130,6 +173,33 @@ class ExternalReview(BaseModel):
     latency_ms: Optional[int] = None
 
 
+# ---------- Rendered visuals ----------
+
+class RenderedChart(BaseModel):
+    """A rendered chart (PNG/SVG image)."""
+    id: str
+    url: str  # S3 or CDN URL
+    title: Optional[str] = None
+    alt: Optional[str] = None
+    mime_type: str = "image/png"  # image/png, image/svg+xml
+
+
+class GeneratedImage(BaseModel):
+    """A generated image from an image model."""
+    id: str
+    url: str  # S3 or CDN URL
+    purpose: ImagePurpose
+    alt: Optional[str] = None
+    mime_type: str = "image/png"
+
+
+class Visuals(BaseModel):
+    """Collection of rendered charts and generated images."""
+    charts: List[RenderedChart] = []
+    images: List[GeneratedImage] = []
+    generated_at: Optional[datetime] = None
+
+
 # ---------- Final answer & meta ----------
 
 class FinalAnswerExplanation(BaseModel):
@@ -161,4 +231,5 @@ class CollaborateResponse(BaseModel):
     final_answer: FinalAnswer
     internal_pipeline: InternalPipeline
     external_reviews: List[ExternalReview]
+    visuals: Optional[Visuals] = None
     meta: CollaborateRunMeta

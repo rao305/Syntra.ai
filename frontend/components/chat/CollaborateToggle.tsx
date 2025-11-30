@@ -1,62 +1,85 @@
 "use client"
 
-import { Network } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Brain } from "lucide-react"
+import { motion } from "framer-motion"
 
 interface CollaborateToggleProps {
-    isCollaborateMode: boolean
-    toggleCollaborateMode: () => void
-    mode: "auto" | "manual"
-    setMode: (mode: "auto" | "manual") => void
+  isCollaborateMode: boolean
+  toggleCollaborateMode: () => void
+  mode: string
+  setMode: (mode: string) => void
 }
 
 export function CollaborateToggle({
-    isCollaborateMode,
-    toggleCollaborateMode,
-    mode,
-    setMode
+  isCollaborateMode,
+  toggleCollaborateMode,
+  mode,
+  setMode
 }: CollaborateToggleProps) {
-    return (
-        <div className="flex items-center gap-2">
-            <button
-                onClick={toggleCollaborateMode}
-                className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all duration-200",
-                    isCollaborateMode
-                        ? "bg-blue-500/10 border-blue-500/50 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.2)]"
-                        : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800"
-                )}
-            >
-                <Network className="w-4 h-4" />
-                <span className="text-xs font-medium">Collaborate</span>
-            </button>
+  return (
+    <div className="flex items-center gap-2">
+      {/* Collaborate Button */}
+      <motion.button
+        onClick={() => {
+          if (isCollaborateMode) {
+            toggleCollaborateMode()
+          } else {
+            toggleCollaborateMode()
+          }
+        }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
+          isCollaborateMode
+            ? "bg-emerald-600 text-white"
+            : "text-zinc-400 hover:bg-zinc-800"
+        }`}
+      >
+        <Brain className="w-4 h-4" />
+        <span>Collaborate</span>
+      </motion.button>
 
-            {isCollaborateMode && (
-                <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 rounded-lg p-0.5 animate-in fade-in slide-in-from-left-2 duration-200">
-                    <button
-                        onClick={() => setMode("auto")}
-                        className={cn(
-                            "px-2 py-1 rounded-md text-[10px] font-medium transition-colors",
-                            mode === "auto"
-                                ? "bg-zinc-800 text-zinc-200"
-                                : "text-zinc-500 hover:text-zinc-300"
-                        )}
-                    >
-                        Auto
-                    </button>
-                    <button
-                        onClick={() => setMode("manual")}
-                        className={cn(
-                            "px-2 py-1 rounded-md text-[10px] font-medium transition-colors",
-                            mode === "manual"
-                                ? "bg-zinc-800 text-zinc-200"
-                                : "text-zinc-500 hover:text-zinc-300"
-                        )}
-                    >
-                        Manual
-                    </button>
-                </div>
-            )}
-        </div>
-    )
+      {/* Auto | Manual Buttons - Only show when collaboration is enabled */}
+      {isCollaborateMode && (
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -10 }}
+          transition={{ duration: 0.2 }}
+          className="flex items-center gap-1 bg-zinc-800 rounded-lg p-1"
+        >
+          {/* Auto Button */}
+          <motion.button
+            onClick={() => setMode("auto")}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`px-3 py-1.5 rounded transition-colors text-sm font-medium ${
+              mode === "auto"
+                ? "bg-emerald-600 text-white"
+                : "text-zinc-400 hover:text-zinc-200"
+            }`}
+          >
+            Auto
+          </motion.button>
+
+          {/* Divider */}
+          <div className="w-px h-4 bg-zinc-600" />
+
+          {/* Manual Button */}
+          <motion.button
+            onClick={() => setMode("manual")}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`px-3 py-1.5 rounded transition-colors text-sm font-medium ${
+              mode === "manual"
+                ? "bg-blue-600 text-white"
+                : "text-zinc-400 hover:text-zinc-200"
+            }`}
+          >
+            Manual
+          </motion.button>
+        </motion.div>
+      )}
+    </div>
+  )
 }

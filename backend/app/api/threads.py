@@ -1868,7 +1868,7 @@ async def collaborate_thread_streaming(
     Emits real-time events as the pipeline progresses:
     - stage_start, stage_delta, stage_end
     - council_progress
-    - final_answer_delta, final_answer_done
+    - final_answer_delta, final_answer_end
     - error (if something fails)
 
     Frontend receives these events and animates the thinking UI in real-time.
@@ -2374,7 +2374,7 @@ async def collaborate_thread_streaming(
     Emits real-time events as the pipeline progresses:
     - stage_start, stage_delta, stage_end
     - council_progress
-    - final_answer_delta, final_answer_done
+    - final_answer_delta, final_answer_end
     - error (if something fails)
 
     Frontend receives these events and animates the thinking UI in real-time.

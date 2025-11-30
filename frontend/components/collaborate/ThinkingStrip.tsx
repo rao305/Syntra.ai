@@ -1,267 +1,265 @@
-/**
- * ThinkingStrip Component (Abstracted Phase UI)
- *
- * Displays the collaborative reasoning process as a single animated thinking card.
- * Shows 5 user-facing phases that group internal roles:
- * 1. Understanding your query (analyst + creator)
- * 2. Researching recent data (researcher)
- * 3. Refining and organizing (critic + internal_synth)
- * 4. Cross-checking with AI models (council)
- * 5. Synthesizing final report (director)
- *
- * Props:
- * - steps: Current state of each thinking phase
- * - currentIndex: Which phase is currently active (0–4)
- * - councilSummary: Progress info for the cross-check phase
- * - isCollapsed: Whether to collapse after thinking is complete
- * - onToggleCollapsed: Callback when user clicks hide/show button
- */
+"use client";
 
-import React, { useMemo } from "react";
-import { PHASE_LABELS, AbstractPhase } from "@/types/collaborate-events";
+import React, { useEffect, useState } from "react";
+import { usePhaseCollaboration, Phase } from "@/hooks/use-phase-collaboration";
+import { PHASE_LABELS, StanceCount } from "@/types/collaborate-events";
 
-export type ThinkingStatus = "pending" | "active" | "done";
-
-/**
- * Represents a single thinking phase step
- */
-export interface ThinkingStep {
-  phase: AbstractPhase; // "understand" | "research" | "reason_refine" | "crosscheck" | "synthesize"
-  label: string; // e.g., "Understanding your query"
-  modelDisplay?: string; // e.g., "GPT-4.1" or "Perplexity, Gemini, GPT, Kimi, OpenRouter"
-  status: ThinkingStatus;
-  preview: string; // Last snippet of output
-  latency_ms?: number;
+interface ThinkingStripProps {
+  isVisible: boolean;
 }
 
-export interface CouncilSummary {
-  completed: number;
-  total: number;
-  stanceCounts?: {
-    agree: number;
-    mixed: number;
-    disagree: number;
-  };
-}
+// Add custom animations via CSS
+const animationStyle = `
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
-export interface ThinkingStripProps {
-  steps: ThinkingStep[];
-  currentIndex: number;
-  councilSummary?: CouncilSummary;
-  isCollapsed?: boolean;
-  onToggleCollapsed?: () => void;
-}
+  @keyframes pulse-scale {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.8;
+    }
+  }
 
-/**
- * Main ThinkingStrip component
- */
-export function ThinkingStrip({
-  steps,
-  currentIndex,
-  councilSummary,
-  isCollapsed = false,
-  onToggleCollapsed,
-}: ThinkingStripProps) {
-  const totalSteps = steps.length;
+  @keyframes progress-shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
 
-  const currentStepLabel = useMemo(
-    () => steps[currentIndex]?.label ?? "Working...",
-    [steps, currentIndex]
-  );
+  .animate-slide-in {
+    animation: slideInDown 0.5s ease-out;
+  }
 
-  if (!steps.length) return null;
+  .animate-pulse-scale {
+    animation: pulse-scale 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .phase-enter-0 {
+    animation: slideInDown 0.5s ease-out 0s;
+  }
+  .phase-enter-1 {
+    animation: slideInDown 0.5s ease-out 0.15s backwards;
+  }
+  .phase-enter-2 {
+    animation: slideInDown 0.5s ease-out 0.3s backwards;
+  }
+  .phase-enter-3 {
+    animation: slideInDown 0.5s ease-out 0.45s backwards;
+  }
+  .phase-enter-4 {
+    animation: slideInDown 0.5s ease-out 0.6s backwards;
+  }
+`;
+
+export function ThinkingStrip({ isVisible }: ThinkingStripProps) {
+  const { phases, currentPhaseIndex } = usePhaseCollaboration();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // Inject animation styles
+    const style = document.createElement("style");
+    style.textContent = animationStyle;
+    document.head.appendChild(style);
+    return () => style.remove();
+  }, []);
+
+  if (!isVisible || !mounted) return null;
+
+  const progressPercentage = currentPhaseIndex >= 0 ? ((currentPhaseIndex + 1) / 5) * 100 : 0;
 
   return (
-    <div className="mb-4 overflow-hidden rounded-2xl border border-slate-700 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-slate-50 shadow-xl">
-      {/* Header row - always visible */}
-      <div className="flex items-center justify-between gap-3 border-b border-slate-700/50 px-4 py-3 backdrop-blur-sm">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          {/* Brain emoji icon */}
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 shadow-lg">
-            <span className="text-base">🧠</span>
-          </div>
-
-          {/* Status text */}
-          <div className="flex flex-col min-w-0">
-            <span className="text-xs font-semibold uppercase tracking-widest text-slate-300">
-              AI Team Collaborating
-            </span>
-            <span className="text-sm text-slate-400 truncate">
-              Step {currentIndex + 1} of {totalSteps} — {currentStepLabel}
-            </span>
+    <div className="w-full bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 space-y-4 animate-slide-in shadow-sm">
+      {/* Header with animated icon */}
+      <div className="flex items-center gap-3">
+        <div className="relative h-6 w-6">
+          <div className="absolute inset-0 bg-blue-600 dark:bg-blue-400 rounded-full opacity-20 animate-pulse-scale" />
+          <div className="animate-spin h-6 w-6 text-blue-600 dark:text-blue-400 relative z-10">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
           </div>
         </div>
-
-        {/* Collapse button */}
-        {onToggleCollapsed && (
-          <button
-            onClick={onToggleCollapsed}
-            className="flex-shrink-0 rounded-lg border border-slate-600 bg-slate-800/40 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-700/60 hover:border-slate-500 transition-colors"
-          >
-            {isCollapsed ? "Show" : "Hide"}
-          </button>
-        )}
+        <div className="flex-1">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
+            Multi-Model Collaboration in Progress
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Synthesizing insights from 5 AI models...
+          </p>
+        </div>
       </div>
 
-      {/* Expanded content */}
-      {!isCollapsed && (
-        <div className="space-y-2 px-4 py-3 max-h-96 overflow-y-auto">
-          {steps.map((step, idx) => {
-            const isActive = step.status === "active";
-            const isDone = step.status === "done";
-            const isPending = step.status === "pending";
+      {/* Progress Bar */}
+      <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 dark:from-blue-400 dark:via-blue-500 dark:to-blue-600 transition-all duration-300 ease-out"
+          style={{ width: `${progressPercentage}%` }}
+        />
+      </div>
 
-            return (
-              <div
-                key={step.phase}
-                className="flex items-start gap-3 text-xs transition-colors"
-              >
-                {/* Timeline bullet and connector */}
-                <div className="flex flex-col items-center flex-shrink-0 pt-1">
-                  {/* Status indicator dot */}
-                  <div
-                    className={[
-                      "h-3 w-3 rounded-full transition-all",
-                      isActive
-                        ? "animate-pulse bg-gradient-to-r from-cyan-400 to-sky-400 shadow-lg shadow-sky-500/50"
-                        : isDone
-                        ? "bg-gradient-to-r from-emerald-400 to-green-400"
-                        : isPending
-                        ? "bg-slate-600"
-                        : "bg-slate-500",
-                    ].join(" ")}
-                  />
+      {/* Phases with staggered animations */}
+      <div className="space-y-2">
+        {phases.map((phase, idx) => (
+          <div key={phase.phase} className={`phase-enter-${idx}`}>
+            <PhaseStep
+              phase={phase}
+              index={idx}
+              isActive={idx === currentPhaseIndex}
+              isCompleted={phase.status === "completed"}
+            />
+          </div>
+        ))}
+      </div>
 
-                  {/* Vertical connector to next step */}
-                  {idx < steps.length - 1 && (
-                    <div
-                      className={[
-                        "mt-2 h-5 w-px transition-colors",
-                        isDone
-                          ? "bg-slate-600"
-                          : isActive || isPending
-                          ? "bg-slate-700"
-                          : "bg-slate-700",
-                      ].join(" ")}
-                    />
-                  )}
-                </div>
-
-                {/* Step content */}
-                <div className="flex-1 min-w-0 py-1">
-                  {/* Step label + model */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span
-                      className={[
-                        "font-semibold transition-colors",
-                        isActive
-                          ? "text-cyan-300"
-                          : isDone
-                          ? "text-emerald-300"
-                          : "text-slate-300",
-                      ].join(" ")}
-                    >
-                      {step.label}
-                    </span>
-
-                    {step.modelDisplay && (
-                      <span className="text-[11px] text-slate-500">
-                        · {step.modelDisplay}
-                      </span>
-                    )}
-
-                    {/* Status badge */}
-                    {isActive && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/20 px-2 py-0.5 text-[10px] text-cyan-300 border border-cyan-500/30">
-                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                        Thinking…
-                      </span>
-                    )}
-
-                    {isDone && step.latency_ms && (
-                      <span className="text-[10px] text-slate-500">
-                        {(step.latency_ms / 1000).toFixed(1)}s
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Preview text */}
-                  {step.preview && (
-                    <p className="mt-1 line-clamp-2 text-[11px] text-slate-400 leading-snug">
-                      {step.preview}
-                    </p>
-                  )}
-
-                  {/* Council summary (only shown for crosscheck phase) */}
-                  {step.phase === "crosscheck" && councilSummary && (
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-slate-800/60 px-2 py-0.5 text-[10px] text-slate-300 border border-slate-700">
-                        {councilSummary.completed}/{councilSummary.total} reviews
-                      </span>
-
-                      {councilSummary.stanceCounts && (
-                        <>
-                          {councilSummary.stanceCounts.agree > 0 && (
-                            <span className="rounded-full bg-emerald-900/50 px-2 py-0.5 text-[10px] text-emerald-300 border border-emerald-700/50">
-                              ✓ {councilSummary.stanceCounts.agree} agree
-                            </span>
-                          )}
-                          {councilSummary.stanceCounts.mixed > 0 && (
-                            <span className="rounded-full bg-amber-900/50 px-2 py-0.5 text-[10px] text-amber-300 border border-amber-700/50">
-                              ◆ {councilSummary.stanceCounts.mixed} mixed
-                            </span>
-                          )}
-                          {councilSummary.stanceCounts.disagree > 0 && (
-                            <span className="rounded-full bg-red-900/50 px-2 py-0.5 text-[10px] text-red-300 border border-red-700/50">
-                              ✕ {councilSummary.stanceCounts.disagree} disagree
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
+      {/* Summary Stats with better styling */}
+      <div className="pt-3 border-t border-blue-200 dark:border-blue-800">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400">
+              <span>Phase {Math.max(1, currentPhaseIndex + 1)}</span>
+              <span className="text-slate-400 dark:text-slate-500">/</span>
+              <span>5</span>
+              <div className="h-1.5 flex-1 bg-slate-200 dark:bg-slate-700 rounded-full ml-2">
+                <div
+                  className="h-full bg-blue-600 dark:bg-blue-400 rounded-full transition-all duration-300"
+                  style={{ width: `${progressPercentage}%` }}
+                />
               </div>
-            );
-          })}
+            </div>
+          </div>
+          <span className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap">
+            <div className="h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse" />
+            Live
+          </span>
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
-/**
- * Expanded view of thinking transcript (for detailed inspection)
- * Use this in a modal/drawer if you want users to inspect all thinking details
- */
-export function ThinkingTranscript({ steps }: { steps: ThinkingStep[] }) {
+interface PhaseStepProps {
+  phase: Phase;
+  index: number;
+  isActive: boolean;
+  isCompleted: boolean;
+}
+
+function PhaseStep({ phase, index, isActive, isCompleted }: PhaseStepProps) {
+  const getStatusIcon = () => {
+    if (isCompleted) {
+      return (
+        <div className="h-6 w-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ring-2 ring-green-300 dark:ring-green-700 ring-offset-2 dark:ring-offset-slate-900">
+          <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </div>
+      );
+    }
+
+    if (isActive) {
+      return (
+        <div className="relative h-6 w-6 flex items-center justify-center flex-shrink-0">
+          {/* Outer glow ring */}
+          <div className="absolute inset-0 rounded-full bg-blue-600 dark:bg-blue-400 opacity-30 animate-pulse" />
+          {/* Middle ring with animation */}
+          <div className="absolute inset-0.5 rounded-full border-2 border-blue-600 dark:border-blue-400 opacity-50" style={{
+            animation: "spin 2s linear infinite"
+          }} />
+          {/* Inner dot */}
+          <div className="h-2.5 w-2.5 rounded-full bg-blue-600 dark:bg-blue-400 relative z-10 animate-pulse-scale" />
+        </div>
+      );
+    }
+
+    return (
+      <div className={`h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+        isActive
+          ? "bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-50"
+          : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400"
+      }`}>
+        <span className="text-xs font-semibold">{index + 1}</span>
+      </div>
+    );
+  };
+
   return (
-    <div className="space-y-4">
-      {steps.map((step) => (
-        <div
-          key={step.phase}
-          className="rounded-lg border border-slate-700 bg-slate-900/50 p-3"
-        >
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-slate-100">
-              {step.label}
-            </h3>
-            {step.latency_ms && (
-              <span className="text-[11px] text-slate-500">
-                {(step.latency_ms / 1000).toFixed(2)}s
-              </span>
-            )}
-          </div>
-          {step.modelDisplay && (
-            <p className="text-[11px] text-slate-400">{step.modelDisplay}</p>
+    <div className={`flex gap-3 transition-all duration-300 ${
+      isActive ? "opacity-100" : "opacity-75 hover:opacity-90"
+    }`}>
+      {getStatusIcon()}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <span className={`text-sm font-medium transition-colors duration-300 ${
+            isActive
+              ? "text-slate-900 dark:text-slate-50 font-semibold"
+              : "text-slate-700 dark:text-slate-300"
+          }`}>
+            {PHASE_LABELS[phase.phase]}
+          </span>
+          {isCompleted && phase.model && (
+            <span className="text-xs text-slate-500 dark:text-slate-400 animate-fade-in">
+              {phase.model}
+              {phase.latency_ms && ` • ${phase.latency_ms}ms`}
+            </span>
           )}
-          {step.preview && (
-            <p className="mt-2 text-xs text-slate-300 whitespace-pre-wrap">
-              {step.preview}
-            </p>
+          {isActive && phase.council_summary && (
+            <div className="animate-slide-in">
+              <CouncilSummaryBadge summary={phase.council_summary} />
+            </div>
           )}
         </div>
-      ))}
+      </div>
+    </div>
+  );
+}
+
+function CouncilSummaryBadge({ summary }: { summary: StanceCount }) {
+  const total = summary.agree + summary.disagree + summary.mixed;
+  const agreePercentage = total > 0 ? Math.round((summary.agree / total) * 100) : 0;
+
+  return (
+    <div className="flex items-center gap-1 text-xs">
+      <span className="inline-flex items-center gap-0.5 px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+        <span>✓</span>
+        <span>{agreePercentage}%</span>
+      </span>
+      {summary.mixed > 0 && (
+        <span className="inline-flex items-center gap-0.5 px-2 py-1 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300">
+          <span>◆</span>
+          <span>{summary.mixed}</span>
+        </span>
+      )}
+      {summary.disagree > 0 && (
+        <span className="inline-flex items-center gap-0.5 px-2 py-1 rounded bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+          <span>✗</span>
+          <span>{summary.disagree}</span>
+        </span>
+      )}
     </div>
   );
 }

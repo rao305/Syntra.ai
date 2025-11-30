@@ -169,17 +169,6 @@ async def run_collaborate_streaming(
                 )
                 all_stages.append(stage)
 
-                # Emit phase_delta with preview text
-                preview_text = (stage.content[:80] + "...") if len(stage.content) > 80 else stage.content
-                yield sse_event(
-                    "phase_delta",
-                    {
-                        "phase": phase,
-                        "text_delta": preview_text,
-                    },
-                    run_id,
-                )
-
                 # Emit stage_end
                 yield sse_event(
                     "stage_end",
@@ -390,7 +379,91 @@ async def run_collaborate_streaming(
             run_id,
         )
 
-        # ===== 5. Complete Response =====
+        # ===== 5. Visualization & Image Generation =====
+        visuals_obj = None
+
+        if state.visualizations or state.images:
+            viz_phase_start_time = datetime.utcnow()
+
+            # Emit phase_start for visualization
+            yield sse_event(
+                "phase_start",
+                {
+                    "phase": "visualize",
+                    "label": "Generating visualizations and images...",
+                    "model_display": "Charts & Images",
+                    "step_index": 5,  # New phase after synthesize
+                },
+                run_id,
+            )
+
+            try:
+                from app.services.collaborate.visualization_service import render_visualizations
+                from app.services.collaborate.image_generation_service import generate_images, select_image_provider
+                from app.services.collaborate.models import Visuals
+
+                charts = []
+                images = []
+
+                # Render charts
+                if state.visualizations:
+                    try:
+                        charts = await render_visualizations(state.visualizations, run_id)
+                        yield sse_event(
+                            "visualization_progress",
+                            {
+                                "type": "charts",
+                                "count": len(charts),
+                                "total": len(state.visualizations),
+                            },
+                            run_id,
+                        )
+                    except Exception as e:
+                        print(f"Visualization rendering failed: {e}")
+
+                # Generate images
+                if state.images:
+                    try:
+                        image_provider, image_api_key = select_image_provider(api_keys)
+                        if image_provider and image_api_key:
+                            images = await generate_images(
+                                state.images,
+                                provider=image_provider,
+                                api_key=image_api_key,
+                            )
+                            yield sse_event(
+                                "visualization_progress",
+                                {
+                                    "type": "images",
+                                    "count": len(images),
+                                    "total": len(state.images),
+                                },
+                                run_id,
+                            )
+                    except Exception as e:
+                        print(f"Image generation failed: {e}")
+
+                if charts or images:
+                    visuals_obj = Visuals(
+                        charts=charts,
+                        images=images,
+                        generated_at=datetime.utcnow(),
+                    )
+
+            except Exception as e:
+                print(f"Visualization generation failed: {e}")
+
+            # Emit phase_end for visualization
+            yield sse_event(
+                "phase_end",
+                {
+                    "phase": "visualize",
+                    "latency_ms": int((datetime.utcnow() - viz_phase_start_time).total_seconds() * 1000),
+                },
+                run_id,
+            )
+
+        # ===== 6. Complete Response =====
         from app.services.collaborate.models import (
             CollaborateRunMeta,
             CollaborateResponse,
@@ -417,13 +490,14 @@ async def run_collaborate_streaming(
                 compressed_report=compressed_report_obj,
             ),
             external_reviews=all_reviews,
+            visuals=visuals_obj,
             meta=meta,
         )
 
         yield sse_event(
-            "final_answer_done",
+            "final_answer_end",
             {
-                "response": json.loads(response.model_dump_json(default=str)),
+                "full_response": json.loads(response.model_dump_json(default=str)),
             },
             run_id,
         )

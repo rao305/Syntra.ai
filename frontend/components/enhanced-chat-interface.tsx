@@ -66,8 +66,8 @@ export function EnhancedChatInterface({
   const [expandedThoughts, setExpandedThoughts] = useState<Set<string>>(new Set())
   const [codePanelOpen, setCodePanelOpen] = useState(false)
   const [codePanelContent, setCodePanelContent] = useState({ code: '', language: '', title: '' })
-  const { isCollaborateMode, steps, updateStep, mode: storeMode, setMode: setStoreMode } = useWorkflowStore()
-  
+  const { isCollaborateMode, steps = [], updateStep, mode: storeMode, setMode: setStoreMode } = useWorkflowStore()
+
   // Multi-Agent Thinking UI State - use store mode as source of truth
   const thinkingMode = storeMode
   const [showThinkingUI, setShowThinkingUI] = useState(false)
@@ -76,13 +76,13 @@ export function EnhancedChatInterface({
   // Handle mode change - update store mode (which will update all steps)
   const handleModeChange = (newMode: "auto" | "manual") => {
     console.log(`🔄 Changing workflow mode to: ${newMode}`)
-    
+
     // Update the store mode (this will automatically update all pending/running/awaiting_user steps)
     setStoreMode(newMode)
-    
+
     // Get updated steps after mode change
-    const { steps: updatedSteps } = useWorkflowStore.getState()
-    
+    const { steps: updatedSteps = [] } = useWorkflowStore.getState()
+
     // If switching to auto mode and any step is awaiting_user, auto-approve it
     if (newMode === "auto") {
       updatedSteps.forEach(step => {
@@ -106,8 +106,8 @@ export function EnhancedChatInterface({
     }
   }
 
-  // Convert workflow steps to agent steps format  
-  const agentSteps = steps.map((step, index) => {
+  // Convert workflow steps to agent steps format
+  const agentSteps = (steps || []).map((step, index) => {
     // Map workflow status to agent status
     let agentStatus: "waiting" | "thinking" | "awaiting_approval" | "done" | "rerun" | "skipped" | "error" = "waiting"
     switch (step.status) {

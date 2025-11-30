@@ -1,56 +1,77 @@
-"use client"
+"use client";
 
-import { FinalAnswer, CollaborateRunMeta } from "@/lib/collaborate-types"
+import React from "react";
+import { FinalAnswer } from "@/lib/collaborate-types";
+import { getConfidenceBadgeColor, getConfidenceEmoji } from "@/lib/collaborate-types";
 
 interface FinalAnswerCardProps {
-  finalAnswer: FinalAnswer
-  meta: CollaborateRunMeta
+  finalAnswer: FinalAnswer;
+  meta?: {
+    models_used?: any[];
+    num_external_reviews?: number;
+    total_latency_ms?: number;
+  };
 }
 
 export function FinalAnswerCard({ finalAnswer, meta }: FinalAnswerCardProps) {
   return (
-    <div className="rounded-2xl border bg-background p-4 shadow-sm">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-indigo-500 to-sky-400" />
-          <div className="flex flex-col">
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Collaborate
-            </span>
-            <span className="text-xs text-muted-foreground">
-              Synthesized by {finalAnswer.model.display_name}
-            </span>
-          </div>
+    <div className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm">
+      {/* Header with confidence badge */}
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-800/50 dark:to-blue-900/20 px-6 py-4 flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50 mb-1">
+            ✅ Synthesized Answer
+          </h3>
+          <p className="text-xs text-slate-600 dark:text-slate-400">
+            {finalAnswer.synthesized_by?.display_name || "Multi-model synthesis"}
+          </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {finalAnswer.explanation?.external_reviews_considered && (
-            <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700">
-              {finalAnswer.explanation.external_reviews_considered} expert reviews used
-            </span>
-          )}
-          {finalAnswer.explanation?.confidence_level && (
-            <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-700">
-              Confidence: {finalAnswer.explanation.confidence_level}
-            </span>
-          )}
+        <div className={`px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap flex-shrink-0 ${getConfidenceBadgeColor(finalAnswer.confidence)}`}>
+          {getConfidenceEmoji(finalAnswer.confidence)} {finalAnswer.confidence.charAt(0).toUpperCase() + finalAnswer.confidence.slice(1)}
         </div>
       </div>
 
-      <div className="prose prose-sm max-w-none dark:prose-invert">
-        {/* You can render markdown here if you store it that way */}
-        <p className="whitespace-pre-wrap text-sm leading-relaxed">
-          {finalAnswer.content}
-        </p>
+      {/* Content */}
+      <div className="px-6 py-4">
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <p className="text-slate-900 dark:text-slate-50 leading-relaxed whitespace-pre-wrap">
+            {finalAnswer.content}
+          </p>
+        </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between text-[10px] text-muted-foreground">
-        <span>
-          Combined answer from internal pipeline + multi-model reviewers.
-        </span>
-        <span>
-          Finished at {new Date(meta.finished_at).toLocaleTimeString()}
-        </span>
-      </div>
+      {/* Footer with metadata */}
+      {meta && (
+        <div className="border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30 px-6 py-3 flex flex-wrap items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
+          {meta.models_used && meta.models_used.length > 0 && (
+            <div className="flex items-center gap-1">
+              <span className="font-medium">Models:</span>
+              <span>{meta.models_used.length} used</span>
+            </div>
+          )}
+          {meta.num_external_reviews && (
+            <div className="flex items-center gap-1">
+              <span className="font-medium">Reviews:</span>
+              <span>{meta.num_external_reviews} expert evaluations</span>
+            </div>
+          )}
+          {meta.total_latency_ms && (
+            <div className="flex items-center gap-1">
+              <span className="font-medium">Time:</span>
+              <span>{(meta.total_latency_ms / 1000).toFixed(1)}s</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Explanation if available */}
+      {finalAnswer.explanation && (
+        <div className="border-t border-slate-200 dark:border-slate-800 px-6 py-3 bg-blue-50 dark:bg-blue-900/10">
+          <p className="text-xs text-slate-700 dark:text-slate-300 italic">
+            💡 {finalAnswer.explanation}
+          </p>
+        </div>
+      )}
     </div>
-  )
+  );
 }

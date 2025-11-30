@@ -1,8 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 
 interface ConditionalLayoutProps {
   children: React.ReactNode;
@@ -10,19 +8,17 @@ interface ConditionalLayoutProps {
 
 export function ConditionalLayout({ children }: ConditionalLayoutProps) {
   const pathname = usePathname();
-  
+
   // Hide header and footer on conversation pages
   const isConversationPage = pathname.startsWith('/conversations');
-  
+
   if (isConversationPage) {
     return <div className="h-screen w-full overflow-hidden">{children}</div>;
   }
-  
+
   return (
     <>
-      <Header />
       <main className="flex-1">{children}</main>
-      <Footer />
     </>
   );
 }
