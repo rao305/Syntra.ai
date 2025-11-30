@@ -1,6 +1,6 @@
 """Model configuration with capabilities for dynamic routing."""
 from dataclasses import dataclass
-from typing import List, Literal
+from typing import List, Literal, Optional
 from app.models.provider_key import ProviderType
 
 
@@ -116,7 +116,7 @@ MODELS: List[ModelConfig] = [
 ]
 
 
-def get_model_by_id(model_id: str) -> ModelConfig | None:
+def get_model_by_id(model_id: str) -> Optional[ModelConfig]:
     """Get a model config by its ID."""
     for model in MODELS:
         if model.id == model_id:

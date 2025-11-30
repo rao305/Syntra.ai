@@ -1,0 +1,546 @@
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Will watch for changes in these directories: ['/Users/rao305/Documents/DAC/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [8046] using WatchFiles
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [8069]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-11-29 22:40:41,900 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-11-29 22:40:41,900 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-29 22:40:41,911 INFO sqlalchemy.engine.Engine select current_schema()
+2025-11-29 22:40:41,911 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-29 22:40:41,913 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-11-29 22:40:41,913 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-29 22:40:41,914 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:40:41,914 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+INFO:     127.0.0.1:51195 - "OPTIONS /api/auth/firebase HTTP/1.1" 200 OK
+2025-11-29 22:43:23,941 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:43:23,955 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-11-29 22:43:23,955 INFO sqlalchemy.engine.Engine [generated in 0.00012s] ('org_demo',)
+2025-11-29 22:43:23,973 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2025-11-29 22:43:23,973 INFO sqlalchemy.engine.Engine [generated in 0.00011s] ('rohitrao1205@gmail.com',)
+2025-11-29 22:43:23,989 INFO sqlalchemy.engine.Engine UPDATE users SET updated_at=now(), last_login=$1::TIMESTAMP WITH TIME ZONE WHERE users.id = $2::VARCHAR
+2025-11-29 22:43:23,990 INFO sqlalchemy.engine.Engine [generated in 0.00009s] (datetime.datetime(2025, 11, 30, 3, 43, 23, 989247), 'f14bde58-ccb7-47d8-b357-417d5b065133')
+2025-11-29 22:43:23,991 INFO sqlalchemy.engine.Engine COMMIT
+2025-11-29 22:43:23,992 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:43:23,993 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.id = $1::VARCHAR
+2025-11-29 22:43:23,993 INFO sqlalchemy.engine.Engine [generated in 0.00005s] ('f14bde58-ccb7-47d8-b357-417d5b065133',)
+INFO:     127.0.0.1:51195 - "POST /api/auth/firebase HTTP/1.1" 200 OK
+2025-11-29 22:43:23,994 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-11-29 22:43:36,248 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:43:36,248 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-11-29 22:43:36,248 INFO sqlalchemy.engine.Engine [cached since 12.29s ago] ('org_demo',)
+2025-11-29 22:43:36,249 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2025-11-29 22:43:36,249 INFO sqlalchemy.engine.Engine [cached since 12.28s ago] ('rohitrao1205@gmail.com',)
+2025-11-29 22:43:36,250 INFO sqlalchemy.engine.Engine UPDATE users SET updated_at=now(), last_login=$1::TIMESTAMP WITH TIME ZONE WHERE users.id = $2::VARCHAR
+2025-11-29 22:43:36,250 INFO sqlalchemy.engine.Engine [cached since 12.26s ago] (datetime.datetime(2025, 11, 30, 3, 43, 36, 250250), 'f14bde58-ccb7-47d8-b357-417d5b065133')
+2025-11-29 22:43:36,250 INFO sqlalchemy.engine.Engine COMMIT
+2025-11-29 22:43:36,253 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:43:36,253 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.id = $1::VARCHAR
+2025-11-29 22:43:36,253 INFO sqlalchemy.engine.Engine [cached since 12.26s ago] ('f14bde58-ccb7-47d8-b357-417d5b065133',)
+INFO:     127.0.0.1:51244 - "POST /api/auth/firebase HTTP/1.1" 200 OK
+2025-11-29 22:43:36,254 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:51287 - "GET /health HTTP/1.1" 200 OK
+2025-11-29 22:45:45,396 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:45:45,396 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-11-29 22:45:45,396 INFO sqlalchemy.engine.Engine [cached since 141.4s ago] ('org_demo',)
+2025-11-29 22:45:45,397 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2025-11-29 22:45:45,397 INFO sqlalchemy.engine.Engine [cached since 141.4s ago] ('rohitrao1205@gmail.com',)
+2025-11-29 22:45:45,398 INFO sqlalchemy.engine.Engine UPDATE users SET updated_at=now(), last_login=$1::TIMESTAMP WITH TIME ZONE WHERE users.id = $2::VARCHAR
+2025-11-29 22:45:45,398 INFO sqlalchemy.engine.Engine [cached since 141.4s ago] (datetime.datetime(2025, 11, 30, 3, 45, 45, 398304), 'f14bde58-ccb7-47d8-b357-417d5b065133')
+2025-11-29 22:45:45,399 INFO sqlalchemy.engine.Engine COMMIT
+2025-11-29 22:45:45,402 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:45:45,402 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.id = $1::VARCHAR
+2025-11-29 22:45:45,402 INFO sqlalchemy.engine.Engine [cached since 141.4s ago] ('f14bde58-ccb7-47d8-b357-417d5b065133',)
+INFO:     127.0.0.1:51347 - "POST /api/auth/firebase HTTP/1.1" 200 OK
+2025-11-29 22:45:45,403 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-11-29 22:45:45,690 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:45:45,690 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-11-29 22:45:45,690 INFO sqlalchemy.engine.Engine [cached since 141.7s ago] ('org_demo',)
+2025-11-29 22:45:45,692 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2025-11-29 22:45:45,692 INFO sqlalchemy.engine.Engine [cached since 141.7s ago] ('rohitrao1205@gmail.com',)
+2025-11-29 22:45:45,693 INFO sqlalchemy.engine.Engine UPDATE users SET updated_at=now(), last_login=$1::TIMESTAMP WITH TIME ZONE WHERE users.id = $2::VARCHAR
+2025-11-29 22:45:45,693 INFO sqlalchemy.engine.Engine [cached since 141.7s ago] (datetime.datetime(2025, 11, 30, 3, 45, 45, 693092), 'f14bde58-ccb7-47d8-b357-417d5b065133')
+2025-11-29 22:45:45,694 INFO sqlalchemy.engine.Engine COMMIT
+2025-11-29 22:45:45,696 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:45:45,696 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.id = $1::VARCHAR
+2025-11-29 22:45:45,696 INFO sqlalchemy.engine.Engine [cached since 141.7s ago] ('f14bde58-ccb7-47d8-b357-417d5b065133',)
+2025-11-29 22:45:45,698 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-11-29 22:45:45,952 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:45:45,952 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-11-29 22:45:45,953 INFO sqlalchemy.engine.Engine [cached since 142s ago] ('org_demo',)
+2025-11-29 22:45:45,954 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2025-11-29 22:45:45,954 INFO sqlalchemy.engine.Engine [cached since 142s ago] ('rohitrao1205@gmail.com',)
+2025-11-29 22:45:45,955 INFO sqlalchemy.engine.Engine UPDATE users SET updated_at=now(), last_login=$1::TIMESTAMP WITH TIME ZONE WHERE users.id = $2::VARCHAR
+2025-11-29 22:45:45,955 INFO sqlalchemy.engine.Engine [cached since 142s ago] (datetime.datetime(2025, 11, 30, 3, 45, 45, 955047), 'f14bde58-ccb7-47d8-b357-417d5b065133')
+2025-11-29 22:45:45,955 INFO sqlalchemy.engine.Engine COMMIT
+2025-11-29 22:45:45,957 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:45:45,957 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.id = $1::VARCHAR
+2025-11-29 22:45:45,957 INFO sqlalchemy.engine.Engine [cached since 142s ago] ('f14bde58-ccb7-47d8-b357-417d5b065133',)
+INFO:     127.0.0.1:51350 - "POST /api/auth/firebase HTTP/1.1" 200 OK
+2025-11-29 22:45:45,959 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:51350 - "OPTIONS /api/threads/ HTTP/1.1" 200 OK
+2025-11-29 22:45:47,765 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:45:47,765 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-11-29 22:45:47,766 INFO sqlalchemy.engine.Engine [generated in 0.00019s] ()
+2025-11-29 22:45:47,771 INFO sqlalchemy.engine.Engine INSERT INTO threads (id, org_id, creator_id, title, description, last_message_preview, pinned, last_provider, last_model) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::BOOLEAN, $8::VARCHAR, $9::VARCHAR) RETURNING threads.created_at, threads.updated_at
+2025-11-29 22:45:47,772 INFO sqlalchemy.engine.Engine [generated in 0.00064s] ('e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40', 'org_demo', None, 'Hi there', '', None, False, None, None)
+2025-11-29 22:45:47,780 INFO sqlalchemy.engine.Engine COMMIT
+2025-11-29 22:45:47,784 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:45:47,786 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-11-29 22:45:47,786 INFO sqlalchemy.engine.Engine [generated in 0.00039s] ('e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40',)
+INFO:     127.0.0.1:51350 - "POST /api/threads/ HTTP/1.1" 200 OK
+2025-11-29 22:45:47,793 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:51350 - "OPTIONS /api/threads/e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40/messages HTTP/1.1" 200 OK
+🔍 DEBUG: add_message called - collaboration_mode=False, content=Hi there...
+2025-11-29 22:45:47,801 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:45:47,802 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-11-29 22:45:47,802 INFO sqlalchemy.engine.Engine [cached since 0.03635s ago] ()
+2025-11-29 22:45:47,819 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-11-29 22:45:47,819 INFO sqlalchemy.engine.Engine [generated in 0.00048s] ('e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40', 'org_demo')
+2025-11-29 22:45:47,822 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-11-29 22:45:47,822 INFO sqlalchemy.engine.Engine [cached since 143.9s ago] ('org_demo',)
+2025-11-29 22:45:47,825 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-11-29 22:45:47,825 INFO sqlalchemy.engine.Engine [generated in 0.00013s] ('e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40', 20)
+2025-11-29 22:45:47,837 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.is_active = $2::VARCHAR
+2025-11-29 22:45:47,837 INFO sqlalchemy.engine.Engine [generated in 0.00017s] ('org_demo', 'true')
+[CTX] build_contextual_messages called with thread_id='e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40', type=str
+[CTX] _load_short_term_history called with thread_id='e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40', type=str
+[CTX] Attempting to load from in-memory thread storage...
+[THREAD_STORE] get_thread: id='e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40', exists=False, obj_id=None, turns=0
+[THREAD_STORE] get_history: no thread for id='e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40'
+[CTX] get_history returned 0 turns for thread_id='e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40'
+[CTX] No history found for thread_id='e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40' (thread may not exist or has no turns)
+2025-11-29 22:45:47,854 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-11-29 22:45:47,854 INFO sqlalchemy.engine.Engine [cached since 0.02926s ago] ('e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40', 20)
+⚠️  No messages found in DB for thread e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40
+⚠️  No conversation history available for thread e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40, starting fresh
+📚 Loaded 0 validated history messages
+[CTX] Conversation history turns: 0 (before adding current user message)
+[CTX] Memory retrieval disabled (memory_enabled=False)
+
+================================================================================
+🔧 CONTEXT BUILDER: thread_id=e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40
+================================================================================
+Short-term history turns: 0
+Memory snippet present: False
+Query rewritten: False
+Is ambiguous: False
+Total messages: 2
+System messages: 1
+Conversation history turns: 1
+
+Messages array preview:
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Original user message:
+Hi there
+
+Conversation history summary:
+================================================================================
+
+
+================================================================================
+📤 SENDING TO PROVIDER (non-streaming): gemini/gemini-2.5-flash
+================================================================================
+Using centralized context builder ✓
+Total messages: 2
+Conversation history turns: 0
+Memory snippet present: False
+Query rewritten: False
+
+Messages preview (first 120 chars each):
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Original user message:
+Hi there
+================================================================================
+
+2025-11-29 22:45:47,857 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.provider = $2::provider_type AND provider_keys.is_active = $3::VARCHAR
+2025-11-29 22:45:47,857 INFO sqlalchemy.engine.Engine [generated in 0.00027s] ('org_demo', 'gemini', 'true')
+[NORMAL MODE] provider=gemini model=gemini-2.5-flash finish_reason=None prompt_tokens=1458 completion_tokens=9 total_tokens=1467 content_length=32
+2025-11-29 22:45:48,744 INFO sqlalchemy.engine.Engine SELECT max(messages.sequence) AS max_1 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR
+2025-11-29 22:45:48,744 INFO sqlalchemy.engine.Engine [generated in 0.00039s] ('e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40',)
+2025-11-29 22:45:48,753 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, prompt_tokens, completion_tokens, total_tokens, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::INTEGER, $10::INTEGER, $11::INTEGER, $12::INTEGER) RETURNING messages.created_at
+2025-11-29 22:45:48,753 INFO sqlalchemy.engine.Engine [generated in 0.00044s] ('26e25f9c-0d6a-4eb2-a346-7bea5693a86b', 'e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40', None, 'user', 'Hi there', None, None, None, None, None, None, 0)
+2025-11-29 22:45:48,760 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, meta, prompt_tokens, completion_tokens, total_tokens, citations, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::JSON, $10::INTEGER, $11::INTEGER, $12::INTEGER, $13::JSON, $14::INTEGER) RETURNING messages.created_at
+2025-11-29 22:45:48,760 INFO sqlalchemy.engine.Engine [generated in 0.00071s] ('138c2053-7bae-4780-9833-521308788ace', 'e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40', None, 'assistant', 'Hello! How can I help you today?', 'gemini', 'gemini-2.5-flash', None, '{"latency_ms": 879.61, "request_id": null}', 1458, 9, 1467, 'null', 1)
+2025-11-29 22:45:48,765 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-11-29 22:45:48,765 INFO sqlalchemy.engine.Engine [generated in 0.00039s] ('e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40',)
+2025-11-29 22:45:48,769 INFO sqlalchemy.engine.Engine UPDATE threads SET last_message_preview=$1::VARCHAR, last_provider=$2::VARCHAR, last_model=$3::VARCHAR, updated_at=now() WHERE threads.id = $4::VARCHAR
+2025-11-29 22:45:48,769 INFO sqlalchemy.engine.Engine [generated in 0.00037s] ('Hi there', 'gemini', 'gemini-2.5-flash', 'e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40')
+2025-11-29 22:45:48,774 INFO sqlalchemy.engine.Engine INSERT INTO audit_logs (id, thread_id, message_id, user_id, provider, model, reason, fragments_included, fragments_excluded, scope, package_hash, response_hash, prompt_tokens, completion_tokens, total_tokens) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::JSON, $9::JSON, $10::VARCHAR, $11::VARCHAR, $12::VARCHAR, $13::INTEGER, $14::INTEGER, $15::INTEGER) RETURNING audit_logs.created_at
+2025-11-29 22:45:48,774 INFO sqlalchemy.engine.Engine [generated in 0.00043s] ('76447a93-7a0e-42ba-ab0f-8d67e022d14a', 'e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40', '138c2053-7bae-4780-9833-521308788ace', None, 'gemini', 'gemini-2.5-flash', 'Simple conversation - Gemini Flash for quick responses', '[]', '[]', 'private', 'd549e97f2bf92bc28435ae1155eb2333e25954b1cc93b59b6c6399fa27e051a5', 'fda564ba3f7a0f028106d468420f674898ed99ac5bf2765ac9586206e39d73c5', 1458, 9, 1467)
+2025-11-29 22:45:48,780 INFO sqlalchemy.engine.Engine COMMIT
+2025-11-29 22:45:48,784 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 22:45:48,786 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-11-29 22:45:48,786 INFO sqlalchemy.engine.Engine [generated in 0.00028s] ('26e25f9c-0d6a-4eb2-a346-7bea5693a86b',)
+2025-11-29 22:45:48,789 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-11-29 22:45:48,789 INFO sqlalchemy.engine.Engine [cached since 0.003768s ago] ('138c2053-7bae-4780-9833-521308788ace',)
+INFO:     127.0.0.1:51350 - "POST /api/threads/e49fb5cf-83e8-40d7-9c67-a9a75b6a7e40/messages HTTP/1.1" 200 OK
+2025-11-29 22:45:48,792 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:51662 - "OPTIONS /api/auth/firebase HTTP/1.1" 200 OK
+2025-11-29 23:06:41,075 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 23:06:41,075 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-11-29 23:06:41,075 INFO sqlalchemy.engine.Engine [cached since 1397s ago] ('org_demo',)
+2025-11-29 23:06:41,076 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2025-11-29 23:06:41,076 INFO sqlalchemy.engine.Engine [cached since 1397s ago] ('rohitrao1205@gmail.com',)
+2025-11-29 23:06:41,077 INFO sqlalchemy.engine.Engine UPDATE users SET updated_at=now(), last_login=$1::TIMESTAMP WITH TIME ZONE WHERE users.id = $2::VARCHAR
+2025-11-29 23:06:41,077 INFO sqlalchemy.engine.Engine [cached since 1397s ago] (datetime.datetime(2025, 11, 30, 4, 6, 41, 77467), 'f14bde58-ccb7-47d8-b357-417d5b065133')
+2025-11-29 23:06:41,078 INFO sqlalchemy.engine.Engine COMMIT
+2025-11-29 23:06:41,080 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 23:06:41,080 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.id = $1::VARCHAR
+2025-11-29 23:06:41,080 INFO sqlalchemy.engine.Engine [cached since 1397s ago] ('f14bde58-ccb7-47d8-b357-417d5b065133',)
+INFO:     127.0.0.1:51662 - "POST /api/auth/firebase HTTP/1.1" 200 OK
+2025-11-29 23:06:41,081 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-11-29 23:06:41,694 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 23:06:41,695 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-11-29 23:06:41,695 INFO sqlalchemy.engine.Engine [cached since 1398s ago] ('org_demo',)
+2025-11-29 23:06:41,698 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.email = $1::VARCHAR
+2025-11-29 23:06:41,698 INFO sqlalchemy.engine.Engine [cached since 1398s ago] ('rohitrao1205@gmail.com',)
+2025-11-29 23:06:41,700 INFO sqlalchemy.engine.Engine UPDATE users SET updated_at=now(), last_login=$1::TIMESTAMP WITH TIME ZONE WHERE users.id = $2::VARCHAR
+2025-11-29 23:06:41,700 INFO sqlalchemy.engine.Engine [cached since 1398s ago] (datetime.datetime(2025, 11, 30, 4, 6, 41, 700023), 'f14bde58-ccb7-47d8-b357-417d5b065133')
+2025-11-29 23:06:41,702 INFO sqlalchemy.engine.Engine COMMIT
+2025-11-29 23:06:41,705 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-29 23:06:41,706 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.id = $1::VARCHAR
+2025-11-29 23:06:41,706 INFO sqlalchemy.engine.Engine [cached since 1398s ago] ('f14bde58-ccb7-47d8-b357-417d5b065133',)
+INFO:     127.0.0.1:51662 - "POST /api/auth/firebase HTTP/1.1" 200 OK
+2025-11-29 23:06:41,709 INFO sqlalchemy.engine.Engine ROLLBACK
+WARNING:  WatchFiles detected changes in 'app/services/collaborate/models.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [8069]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [26144]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-11-30 00:08:29,547 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-11-30 00:08:29,547 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:08:29,550 INFO sqlalchemy.engine.Engine select current_schema()
+2025-11-30 00:08:29,550 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:08:29,552 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-11-30 00:08:29,552 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:08:29,553 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-30 00:08:29,553 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/collaborate/pipeline.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26144]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [26420]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-11-30 00:09:08,334 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-11-30 00:09:08,334 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:09:08,336 INFO sqlalchemy.engine.Engine select current_schema()
+2025-11-30 00:09:08,336 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:09:08,338 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-11-30 00:09:08,338 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:09:08,339 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-30 00:09:08,339 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/collaborate/__init__.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26420]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [26444]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-11-30 00:09:11,174 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-11-30 00:09:11,174 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:09:11,177 INFO sqlalchemy.engine.Engine select current_schema()
+2025-11-30 00:09:11,177 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:09:11,178 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-11-30 00:09:11,178 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:09:11,179 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-30 00:09:11,179 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/api/threads.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26444]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [27601]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-11-30 00:11:42,752 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-11-30 00:11:42,752 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:11:42,754 INFO sqlalchemy.engine.Engine select current_schema()
+2025-11-30 00:11:42,754 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:11:42,756 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-11-30 00:11:42,756 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:11:42,758 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-30 00:11:42,758 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'test_collaborate.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [27601]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [29060]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-11-30 00:15:51,645 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-11-30 00:15:51,645 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:15:51,647 INFO sqlalchemy.engine.Engine select current_schema()
+2025-11-30 00:15:51,647 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:15:51,649 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-11-30 00:15:51,649 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:15:51,650 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-30 00:15:51,650 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/collaborate/streaming.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [29060]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [30056]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-11-30 00:18:40,910 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-11-30 00:18:40,910 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:18:40,912 INFO sqlalchemy.engine.Engine select current_schema()
+2025-11-30 00:18:40,912 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:18:40,915 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-11-30 00:18:40,915 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-11-30 00:18:40,916 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-11-30 00:18:40,916 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/api/threads.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [30056]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 125, in _main
+    prepare(preparation_data)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 236, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 287, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 268, in run_path
+    return _run_module_code(code, init_globals, run_name,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 97, in _run_module_code
+    _run_code(code, mod_globals, init_globals,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/Users/rao305/Documents/DAC/backend/main.py", line 8, in <module>
+    from app.api import threads, router, providers, billing, audit, metrics, query_rewriter, entities, auth, collaboration, dynamic_collaborate
+  File "/Users/rao305/Documents/DAC/backend/app/api/threads.py", line 1861, in <module>
+    body: CollaborateRequest,
+NameError: name 'CollaborateRequest' is not defined
+WARNING:  WatchFiles detected changes in 'app/services/collaborate/observability.py'. Reloading...
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 125, in _main
+    prepare(preparation_data)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 236, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 287, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 268, in run_path
+    return _run_module_code(code, init_globals, run_name,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 97, in _run_module_code
+    _run_code(code, mod_globals, init_globals,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/Users/rao305/Documents/DAC/backend/main.py", line 8, in <module>
+    from app.api import threads, router, providers, billing, audit, metrics, query_rewriter, entities, auth, collaboration, dynamic_collaborate
+  File "/Users/rao305/Documents/DAC/backend/app/api/threads.py", line 1861, in <module>
+    body: CollaborateRequest,
+NameError: name 'CollaborateRequest' is not defined
+WARNING:  WatchFiles detected changes in 'app/services/collaborate/streaming.py'. Reloading...
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 125, in _main
+    prepare(preparation_data)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 236, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 287, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 268, in run_path
+    return _run_module_code(code, init_globals, run_name,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 97, in _run_module_code
+    _run_code(code, mod_globals, init_globals,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/Users/rao305/Documents/DAC/backend/main.py", line 8, in <module>
+    from app.api import threads, router, providers, billing, audit, metrics, query_rewriter, entities, auth, collaboration, dynamic_collaborate
+  File "/Users/rao305/Documents/DAC/backend/app/api/threads.py", line 1861, in <module>
+    body: CollaborateRequest,
+NameError: name 'CollaborateRequest' is not defined
+WARNING:  WatchFiles detected changes in 'app/services/collaborate/streaming.py'. Reloading...
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 125, in _main
+    prepare(preparation_data)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 236, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 287, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 268, in run_path
+    return _run_module_code(code, init_globals, run_name,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 97, in _run_module_code
+    _run_code(code, mod_globals, init_globals,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/Users/rao305/Documents/DAC/backend/main.py", line 8, in <module>
+    from app.api import threads, router, providers, billing, audit, metrics, query_rewriter, entities, auth, collaboration, dynamic_collaborate
+  File "/Users/rao305/Documents/DAC/backend/app/api/threads.py", line 1861, in <module>
+    body: CollaborateRequest,
+NameError: name 'CollaborateRequest' is not defined
+WARNING:  WatchFiles detected changes in 'app/services/collaborate/streaming.py'. Reloading...
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 125, in _main
+    prepare(preparation_data)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 236, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 287, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 268, in run_path
+    return _run_module_code(code, init_globals, run_name,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 97, in _run_module_code
+    _run_code(code, mod_globals, init_globals,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/Users/rao305/Documents/DAC/backend/main.py", line 8, in <module>
+    from app.api import threads, router, providers, billing, audit, metrics, query_rewriter, entities, auth, collaboration, dynamic_collaborate
+  File "/Users/rao305/Documents/DAC/backend/app/api/threads.py", line 1861, in <module>
+    body: CollaborateRequest,
+NameError: name 'CollaborateRequest' is not defined
+WARNING:  WatchFiles detected changes in 'app/services/collaborate/streaming.py'. Reloading...
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 116, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 125, in _main
+    prepare(preparation_data)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 236, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/spawn.py", line 287, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 268, in run_path
+    return _run_module_code(code, init_globals, run_name,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 97, in _run_module_code
+    _run_code(code, mod_globals, init_globals,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/Users/rao305/Documents/DAC/backend/main.py", line 8, in <module>
+    from app.api import threads, router, providers, billing, audit, metrics, query_rewriter, entities, auth, collaboration, dynamic_collaborate
+  File "/Users/rao305/Documents/DAC/backend/app/api/threads.py", line 1861, in <module>
+    body: CollaborateRequest,
+NameError: name 'CollaborateRequest' is not defined

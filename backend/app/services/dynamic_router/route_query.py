@@ -1,5 +1,5 @@
 """Main routing function that combines intent classification and model scoring."""
-from typing import Optional
+from typing import Optional, List, Dict, Union
 from dataclasses import dataclass
 import random
 
@@ -15,7 +15,7 @@ class RouteDecision:
 
     chosen_model: ModelConfig
     intent: RouterIntent
-    scores: list[dict[str, float | str]]  # List of {modelId, score} dicts
+    scores: List[Dict[str, Union[float, str]]]  # List of {modelId, score} dicts
     reason: str
 
 
@@ -23,8 +23,8 @@ async def route_query(
     user_message: str,
     context_summary: str = "",
     router_api_key: Optional[str] = None,
-    available_providers: Optional[list[ProviderType]] = None,
-    historical_rewards: Optional[dict[str, float]] = None,
+    available_providers: Optional[List[ProviderType]] = None,
+    historical_rewards: Optional[Dict[str, float]] = None,
     epsilon: float = 0.1,
 ) -> RouteDecision:
     """

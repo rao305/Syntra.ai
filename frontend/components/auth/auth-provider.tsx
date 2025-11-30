@@ -55,51 +55,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       try {
         const idToken = await firebaseUser.getIdToken(true);
-        
+
         // Add timeout to fetch request
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-        
-        const response = await fetch(`${API_BASE_URL}/auth/firebase`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id_token: idToken }),
-          signal: controller.signal,
-        });
+        const timeoutId = setTimeout(() => controller.abort(new DOMException('Request timeout', 'TimeoutError')), 10000); // 10 second timeout
 
-        clearTimeout(timeoutId);
+        try {
+          const response = await fetch(`${API_BASE_URL}/auth/firebase`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id_token: idToken }),
+            signal: controller.signal,
+          });
 
-        if (!response.ok) {
-          const errorBody = await response.text();
-          throw new Error(
-            `Backend auth failed (${response.status}): ${errorBody}`
-          );
+          clearTimeout(timeoutId);
+
+          if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(
+              `Backend auth failed (${response.status}): ${errorBody}`
+            );
+          }
+
+          const data = await response.json();
+          const newSession: StoredSession = {
+            accessToken: data.access_token,
+            orgId: data.org_id,
+            userId: data.user?.id,
+            email: data.user?.email,
+          };
+          saveSession(newSession);
+          setSession(newSession);
+        } catch (fetchError) {
+          clearTimeout(timeoutId);
+          throw fetchError;
         }
-
-        const data = await response.json();
-        const newSession: StoredSession = {
-          accessToken: data.access_token,
-          orgId: data.org_id,
-          userId: data.user?.id,
-          email: data.user?.email,
-        };
-        saveSession(newSession);
-        setSession(newSession);
       } catch (error: any) {
         console.error("Failed to sync backend session:", error);
-        
+
         // Retry logic for network errors
-        if (retryCount < maxRetries && 
-            (error.name === 'AbortError' || 
-             error.message === 'Failed to fetch' || 
-             error.message.includes('fetch'))) {
+        if (retryCount < maxRetries &&
+            (error.name === 'AbortError' ||
+             error.message === 'Failed to fetch' ||
+             error.message.includes('fetch') ||
+             error.message.includes('timeout') ||
+             error.name === 'TimeoutError')) {
           console.log(`Retrying backend sync (attempt ${retryCount + 1}/${maxRetries})...`);
           await new Promise(resolve => setTimeout(resolve, retryDelay));
           return syncBackendSession(firebaseUser, retryCount + 1);
         }
-        
+
         throw error;
       }
     },

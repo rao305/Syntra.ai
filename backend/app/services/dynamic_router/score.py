@@ -1,5 +1,5 @@
 """Dynamic scoring logic for model selection."""
-from typing import List, Tuple
+from typing import List, Tuple, Optional, Dict
 from app.services.dynamic_router.models import ModelConfig
 from app.services.dynamic_router.intent import RouterIntent, TaskType
 
@@ -11,7 +11,7 @@ def capability_score(model: ModelConfig, intent: RouterIntent) -> float:
     Returns a score from 0-1.
     """
     # Map task types to required capability tags
-    task_to_capabilities: dict[TaskType, list[str]] = {
+    task_to_capabilities: Dict[TaskType, List[str]] = {
         "generic_chat": ["chat", "creative_writing", "reasoning"],
         "web_research": ["web_search", "multi_doc_rag"],
         "deep_reasoning": ["reasoning"],
@@ -56,7 +56,7 @@ def cost_score(model: ModelConfig) -> float:
 
 
 def historical_reward(
-    model: ModelConfig, intent: RouterIntent, db_reward: float | None = None
+    model: ModelConfig, intent: RouterIntent, db_reward: Optional[float] = None
 ) -> float:
     """
     Score based on historical performance.
@@ -75,7 +75,7 @@ def historical_reward(
 
 
 def score_model(
-    model: ModelConfig, intent: RouterIntent, historical_reward_value: float | None = None
+    model: ModelConfig, intent: RouterIntent, historical_reward_value: Optional[float] = None
 ) -> float:
     """
     Compute overall score for a model given an intent.
@@ -120,7 +120,7 @@ def score_model(
 
 
 def sort_models_by_score(
-    models: List[ModelConfig], intent: RouterIntent, historical_rewards: dict[str, float] | None = None
+    models: List[ModelConfig], intent: RouterIntent, historical_rewards: Optional[Dict[str, float]] = None
 ) -> List[Tuple[ModelConfig, float]]:
     """
     Score and sort models by their suitability for the intent.

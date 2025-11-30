@@ -1,5 +1,5 @@
 """Integration helpers for dynamic router."""
-from typing import Optional
+from typing import Optional, List, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
@@ -11,7 +11,7 @@ from app.services.provider_keys import get_api_key_for_org
 
 async def get_available_providers(
     db: AsyncSession, org_id: str
-) -> list[ProviderType]:
+) -> List[ProviderType]:
     """Get list of providers available for an org."""
     stmt = select(ProviderKey).where(
         ProviderKey.org_id == org_id,
@@ -24,7 +24,7 @@ async def get_available_providers(
 
 async def get_historical_rewards(
     db: AsyncSession, org_id: Optional[str] = None
-) -> dict[str, float]:
+) -> Dict[str, float]:
     """
     Get historical reward scores for models.
 

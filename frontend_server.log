@@ -1,0 +1,624 @@
+
+> my-v0-project@0.1.0 dev
+> next dev
+
+   ▲ Next.js 16.0.0 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://100.70.17.215:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Ready in 288ms
+ GET /conversations 200 in 2.2s (compile: 1936ms, render: 280ms)
+ GET /conversations 200 in 52ms (compile: 7ms, render: 45ms)
+ GET /conversations 200 in 45ms (compile: 5ms, render: 40ms)
+ GET /conversations 200 in 32ms (compile: 1530µs, render: 30ms)
+ GET /conversations 200 in 47ms (compile: 4ms, render: 43ms)
+ GET /conversations 200 in 35ms (compile: 4ms, render: 31ms)
+ GET /conversations 200 in 22ms (compile: 1626µs, render: 20ms)
+[workflow] Current working directory: /Users/rao305/Documents/DAC/frontend
+[workflow] Trying paths: [
+  '/Users/rao305/Documents/DAC/backend/.env',
+  '/Users/rao305/Documents/DAC/frontend/backend/.env',
+  '/Users/rao305/Documents/DAC/backend/.env',
+  '/Users/rao305/Documents/DAC/backend/.env',
+  '/ROOT/backend/.env',
+  '/backend/.env'
+]
+[workflow] Checking: /Users/rao305/Documents/DAC/backend/.env, exists: true
+[dotenv@17.2.3] injecting env (46) from ../backend/.env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+[workflow] ✅ Loaded backend environment variables from /Users/rao305/Documents/DAC/backend/.env
+[workflow] KIMI_API_KEY present: false
+[workflow] OPENAI_API_KEY present: true
+[workflow] GEMINI_API_KEY present: false
+[workflow] PERPLEXITY_API_KEY present: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: false
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: false
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: false
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: false
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: false
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: false
+🎯 Intelligent model assignment (3 unique models): analyst:perplexity, researcher:gpt, creator:gemini, critic:gpt, synthesizer:gemini
+📊 Model distribution: perplexity:1x, gpt:2x, gemini:2x
+ POST /conversations 200 in 35ms (compile: 4ms, render: 31ms)
+🚀 [runStep] Starting step analyst (analyst) with model perplexity
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: false,
+  mockMode: false,
+  selectedModel: 'perplexity',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 41 characters
+[Perplexity] Calling Perplexity API with model sonar-pro... (attempt 1/3)
+⏳ [runStep] Waiting for perplexity response (timeout: 70s)...
+[Perplexity] Full response data: {
+  "id": "082280b6-3e11-44b3-b127-10e6b4f1cec1",
+  "model": "sonar-pro",
+  "created": 1764475625,
+  "usage": {
+    "prompt_tokens": 136,
+    "completion_tokens": 546,
+    "total_tokens": 682,
+    "search_context_size": "low",
+    "cost": {
+      "input_tokens_cost": 0,
+      "output_tokens_cost": 0.008,
+      "request_cost": 0.006,
+      "total_cost": 0.015
+    }
+  },
+  "citations": [
+    "https://www.benzinga.com/news/22/08/28529260/whats-former-tesla-ai-director-andrej-kalpathy-up-to-these-days-and-elon-musk-is-rooting-for-his-for",
+    "https://www.argosinfotech.com/software-2-0-software-development-in-the-age-of-ai/",
+    "https://www.electrochem.org/fellow",
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC7265794/",
+    "https://en.wikipedia.org/wiki/Convolutional_neural_network",
+    "https://febs.onlinelibrary.wiley.com/doi/abs/10.1002/1873-3468.14451",
+    "https://clcouncil.org/economists-statement/",
+    "https://pubs.rsna.org/doi/abs/10.1148/rg.2021200210"
+  ],
+  "search_results": [
+    {
+      "title": "What Former Tesla AI Director Andrej Kalpathy Is Up To These Days",
+      "url": "https://www.benzinga.com/news/22/08/28529260/whats-former-tesla-ai-director-andrej-kalpathy-up-to-these-days-and-elon-musk-is-rooting-for-his-for",
+      "date": "2022-08-17",
+      "last_updated": "2025-10-18",
+      "snippet": "Tesla, Inc.'s (NASDAQ: TSLA) former AI director, Andrej Karpathy, announced his decision to leave the company in mid-July, creating anxiety ...",
+      "source": "web"
+    },
+    {
+      "title": "Software 2.0: Software Development in the Age of AI - Argos Infotech",
+      "url": "https://www.argosinfotech.com/software-2-0-software-development-in-the-age-of-ai/",
+      "snippet": "At the 2018 Spark+AI Summit, Tesla AI director, Andrej Kalapathy discussed the transition from Software 1.0 to Software 2.0 that is more focused on curating ...",
+      "source": "web"
+    },
+    {
+      "title": "Fellow of The Electrochemical Society",
+      "url": "https://www.electrochem.org/fellow",
+      "date": "2025-10-29",
+      "last_updated": "2025-11-11",
+      "snippet": "The Fellow of The Electrochemical Society was established in 1989 for advanced individual technological contributions in the field of electrochemistry.",
+      "source": "web"
+    },
+    {
+      "title": "Quantitative Imaging Informatics for Cancer Research - PMC - NIH",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7265794/",
+      "date": "2020-05-11",
+      "last_updated": "2025-10-03",
+      "snippet": "We summarize Quantitative Imaging Informatics for Cancer Research (QIICR; U24 CA180918), one of the first projects funded by the National ...",
+      "source": "web"
+    },
+    {
+      "title": "Convolutional neural network - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Convolutional_neural_network",
+      "date": "2013-08-31",
+      "last_updated": "2025-11-29",
+      "snippet": "CS231n: Convolutional Neural Networks for Visual Recognition — Andrej Karpathy's Stanford computer science course on CNNs in computer vision · vdumoulin/ ...",
+      "source": "web"
+    },
+    {
+      "title": "A Hitchhiker's guide through the bio‐image analysis software universe",
+      "url": "https://febs.onlinelibrary.wiley.com/doi/abs/10.1002/1873-3468.14451",
+      "date": "2022-07-14",
+      "snippet": "In this review, we provide a Hitchhiker's guide through the bio-image analysis software universe for expert and non-expert users.",
+      "source": "web"
+    },
+    {
+      "title": "Economists' Statement on Carbon Dividends",
+      "url": "https://clcouncil.org/economists-statement/",
+      "date": "2024-05-02",
+      "last_updated": "2025-10-25",
+      "snippet": "The largest statement of economists in the profession's history recommends carbon dividends as cost-effective, equitable and politically-viable solution.",
+      "source": "web"
+    },
+    {
+      "title": "Deep Learning: An Update for Radiologists - RSNA Journals",
+      "url": "https://pubs.rsna.org/doi/abs/10.1148/rg.2021200210",
+      "date": "2021-09-01",
+      "last_updated": "2025-02-15",
+      "snippet": "Deep learning is a class of machine learning methods that has been successful in computer vision. Unlike traditional machine learning methods that require ...",
+      "source": "web"
+    }
+  ],
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "# Analysis of User Request\n\n## Deconstruction of the Request\n\nThe user is asking for information about **Andrej Karpathy** (note: the query contains a spelling variation - \"Kalapathy\" vs. the correct spelling \"Karpathy\"). This is a straightforward biographical query requesting identification and background information about this individual.\n\n## Core Components\n\n1. **Identity**: Who is this person?\n2. **Professional Background**: What are his credentials and expertise?\n3. **Career History**: What roles has he held?\n4. **Current Status**: What is he doing now?\n5. **Contributions**: What is he known for?\n\n## Constraints & Considerations\n\n- Query contains a spelling variation that needs clarification\n- Search results primarily reference Tesla AI director role\n- Multiple search results mention different individuals with similar names (e.g., Jayashree Kalpathy-Cramer, Kalpathy Sundaram)\n- Need to ensure we identify the correct person\n\n## Edge Cases\n\n- Name spelling ambiguity in the query\n- Potential confusion with other researchers sharing similar surnames\n- Time-sensitive information (departure from Tesla occurred in mid-July 2022, now November 2025)\n\n## Strategic Direction\n\nProvide a comprehensive biography focused on:\n1. Correct identification and background\n2. His role at Tesla and AI expertise\n3. His educational contributions\n4. His current activities as of late 2025\n5. Clarify any name spelling issues\n\n---\n\n## Answer\n\n**Andrej Karpathy** (sometimes spelled Karpathy) is a prominent artificial intelligence researcher and computer scientist who served as Tesla's AI director.[1] He is best known for his work in deep learning, neural networks, and computer vision, particularly his expertise in convolutional neural networks (CNNs).[5]\n\n## Professional Background\n\nKarpathy is recognized as an accomplished researcher in the field of machine learning and artificial intelligence. He taught CS231n, a Stanford computer science course on Convolutional Neural Networks for Visual Recognition, which became influential in the computer vision field.[5] At Tesla, he worked on advancing autonomous driving technology and the full self-driving (FSD) software development.[1]\n\n## Career Transition\n\nIn mid-July 2022, Karpathy announced his departure from Tesla, which raised concerns about potential delays in the company's full self-driving software launch.[1] Following his exit from Tesla, he transitioned into content creation and education, launching a YouTube channel where he has shared educational videos on AI and machine learning topics, including videos on neural networks and backpropagation.[1] This move into educational content and online influence represented a significant shift in his career trajectory."
+      },
+      "delta": {
+        "role": "assistant",
+        "content": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+[Perplexity] Response received: # Analysis of User Request
+
+## Deconstruction of t...
+✅ [runStep] Received response from perplexity, content length: 2736
+📤 Returning success result for analyst, status: done, output length: 2736
+ POST /conversations 200 in 9.1s (compile: 5ms, render: 9.1s)
+🚀 [runStep] Starting step researcher (researcher) with model gpt
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: false,
+  mockMode: false,
+  selectedModel: 'gpt',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 2805 characters
+[GPT] Calling OpenAI API with model gpt-4o...
+⏳ [runStep] Waiting for gpt response (timeout: 70s)...
+[GPT] Response received: ### Targeted Search
+
+To gather the most relevant a...
+✅ [runStep] Received response from gpt, content length: 2629
+📤 Returning success result for researcher, status: done, output length: 2629
+ POST /conversations 200 in 7.9s (compile: 3ms, render: 7.9s)
+🚀 [runStep] Starting step creator (creator) with model gemini
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: false,
+  mockMode: false,
+  selectedModel: 'gemini',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 5465 characters
+[Gemini] Calling Google API with model gemini-2.5-flash...
+⏳ [runStep] Waiting for gemini response (timeout: 70s)...
+[Gemini] Response received: As an expert Creator, I will synthesize the Analys...
+✅ [runStep] Received response from gemini, content length: 10259
+📤 Returning success result for creator, status: done, output length: 10259
+ POST /conversations 200 in 15.0s (compile: 3ms, render: 15.0s)
+🚀 [runStep] Starting step critic (critic) with model gpt
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: false,
+  mockMode: false,
+  selectedModel: 'gpt',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 15752 characters
+[GPT] Calling OpenAI API with model gpt-4o...
+⏳ [runStep] Waiting for gpt response (timeout: 70s)...
+[GPT] Response received: ### Logic Check:
+The Creator's solution correctly ...
+✅ [runStep] Received response from gpt, content length: 1711
+📤 Returning success result for critic, status: done, output length: 1711
+ POST /conversations 200 in 4.6s (compile: 3ms, render: 4.6s)
+🚀 [runStep] Starting step synth (synthesizer) with model gemini
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: false,
+  mockMode: false,
+  selectedModel: 'gemini',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 17490 characters
+[Gemini] Calling Google API with model gemini-2.5-flash...
+⏳ [runStep] Waiting for gemini response (timeout: 70s)...
+[Gemini] Response received: ## Executive Summary
+
+Andrej Karpathy (not "Kalapa...
+✅ [runStep] Received response from gemini, content length: 5878
+📤 Returning success result for synth, status: done, output length: 5878
+ POST /conversations 200 in 13.4s (compile: 2ms, render: 13.4s)
+ ✓ Compiled in 157ms
+ ✓ Compiled in 97ms
+ GET /conversations 200 in 54ms (compile: 8ms, render: 46ms)
+ GET /conversations 200 in 37ms (compile: 3ms, render: 33ms)
+ ⚠ Fast Refresh had to perform a full reload when ./components/auth/auth-provider.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ✓ Compiled in 53ms
+ GET /conversations 200 in 410ms (compile: 73ms, render: 337ms)
+ GET /conversations 200 in 59ms (compile: 5ms, render: 54ms)
+[workflow] Backend env already loaded
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: false
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: false
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: false
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: false
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: false
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: false
+🎯 Intelligent model assignment (3 unique models): analyst:gpt, researcher:perplexity, creator:gemini, critic:gpt, synthesizer:gemini
+📊 Model distribution: gpt:2x, perplexity:1x, gemini:2x
+ POST /conversations 200 in 28ms (compile: 4ms, render: 24ms)
+🚀 [runStep] Starting step analyst (analyst) with model gpt
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: false,
+  mockMode: false,
+  selectedModel: 'gpt',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 206 characters
+[GPT] Calling OpenAI API with model gpt-4o...
+⏳ [runStep] Waiting for gpt response (timeout: 70s)...
+[GPT] Response received: # Analysis Report: Challenges Faced by Today's Col...
+✅ [runStep] Received response from gpt, content length: 3421
+📤 Returning success result for analyst, status: done, output length: 3421
+ POST /conversations 200 in 8.5s (compile: 4ms, render: 8.5s)
+🚀 [runStep] Starting step researcher (researcher) with model perplexity
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: false,
+  mockMode: false,
+  selectedModel: 'perplexity',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 3655 characters
+[Perplexity] Calling Perplexity API with model sonar-pro... (attempt 1/3)
+⏳ [runStep] Waiting for perplexity response (timeout: 70s)...
+[Perplexity] Full response data: {
+  "id": "73093334-dbac-4602-a982-86347650bee2",
+  "model": "sonar-pro",
+  "created": 1764529479,
+  "usage": {
+    "prompt_tokens": 863,
+    "completion_tokens": 1119,
+    "total_tokens": 1982,
+    "search_context_size": "low",
+    "cost": {
+      "input_tokens_cost": 0.003,
+      "output_tokens_cost": 0.017,
+      "request_cost": 0.006,
+      "total_cost": 0.025
+    }
+  },
+  "citations": [
+    "https://www.stlouisfed.org/on-the-economy/2025/aug/recent-college-grads-bear-brunt-labor-market-shifts",
+    "https://encoura.org/resources/wake-up-call/the-labor-market-for-recent-college-graduates-part-1-no-more-jobs",
+    "https://www.myperfectresume.com/career-center/careers/basics/crisis-for-new-graduates",
+    "https://conversableeconomist.com/2025/11/24/are-the-entry-level-jobs-drying-up-for-young-adults/",
+    "https://nces.ed.gov/programs/coe/indicator/sbc/bachelor-degree-holder-outcomes",
+    "https://www.visualcapitalist.com/charted-the-rising-unemployment-rate-of-college-graduates/",
+    "https://www.bls.gov/careeroutlook/subject/college.htm",
+    "https://www.naceweb.org/job-market/graduate-outcomes/first-destination/",
+    "https://www.shrm.org/topics-tools/news/talent-acquisition/class-of-2025-college-grads-face-uncertain-job-market"
+  ],
+  "search_results": [
+    {
+      "title": "Recent College Grads Bear Brunt of Labor Market Shifts",
+      "url": "https://www.stlouisfed.org/on-the-economy/2025/aug/recent-college-grads-bear-brunt-labor-market-shifts",
+      "date": "2025-08-25",
+      "last_updated": "2025-11-30",
+      "snippet": "Young college graduates between ages 23 and 27 are experiencing unemployment rates that average 4.59% in 2025—a stark contrast to the 3.25% rate ...",
+      "source": "web"
+    },
+    {
+      "title": "The Labor Market for Recent College Graduates – Part 1 - Encoura",
+      "url": "https://encoura.org/resources/wake-up-call/the-labor-market-for-recent-college-graduates-part-1-no-more-jobs",
+      "date": "2025-07-22",
+      "last_updated": "2025-11-19",
+      "snippet": "Just two years ago, the recent college graduate unemployment rate (among those aged 22-27) stood at 4.1% (March 2023), similar to the 3.9% rate ...",
+      "source": "web"
+    },
+    {
+      "title": "College Degree, No Job: Gen Z Unemployment Rate in 2025",
+      "url": "https://www.myperfectresume.com/career-center/careers/basics/crisis-for-new-graduates",
+      "date": "2025-11-03",
+      "last_updated": "2025-11-17",
+      "snippet": "The college graduate unemployment rate is at a 30-year high. See why entry-level jobs are disappearing & what it means for Gen Z job market ...",
+      "source": "web"
+    },
+    {
+      "title": "Are the Entry-Level Jobs Drying Up for Young Adults?",
+      "url": "https://conversableeconomist.com/2025/11/24/are-the-entry-level-jobs-drying-up-for-young-adults/",
+      "date": "2025-11-24",
+      "last_updated": "2025-11-25",
+      "snippet": "Several recent reports have noted that unemployment rates for recent college graduates have been on the rise, which in turn has led to ...",
+      "source": "web"
+    },
+    {
+      "title": "COE - Employment Outcomes of Bachelor's Degree Holders",
+      "url": "https://nces.ed.gov/programs/coe/indicator/sbc/bachelor-degree-holder-outcomes",
+      "date": "2025-01-01",
+      "last_updated": "2025-09-24",
+      "snippet": "Across all fields in 2018, the median annual earnings of those who were full-time year-round workers were $50,600, and the average unemployment rate was 2.9 ...",
+      "source": "web"
+    },
+    {
+      "title": "Charted: The Rising Unemployment Rate of College Graduates",
+      "url": "https://www.visualcapitalist.com/charted-the-rising-unemployment-rate-of-college-graduates/",
+      "date": "2025-09-04",
+      "snippet": "As of the latest data from June, 2025, new graduates now face an unemployment rate of 4.8% compared to the national overall rate of 4.0%. While ...",
+      "source": "web"
+    },
+    {
+      "title": "College : Career Outlook: U.S. Bureau of Labor Statistics",
+      "url": "https://www.bls.gov/careeroutlook/subject/college.htm",
+      "date": "2014-04-29",
+      "last_updated": "2025-10-27",
+      "snippet": "Field of degree: Humanities employment and wages September 2025 ; Education level and projected openings, 2024–34 September 2025 ; Education pays, 2024 May 2025 ...",
+      "source": "web"
+    },
+    {
+      "title": "First-Destination - NACE",
+      "url": "https://www.naceweb.org/job-market/graduate-outcomes/first-destination/",
+      "date": "2022-01-01",
+      "last_updated": "2025-09-16",
+      "snippet": "NACE's First-Destination Initiative captures information regarding how new college graduates fare in their careers within six months of graduation. The annual ...",
+      "source": "web"
+    },
+    {
+      "title": "Class of 2025 College Grads Face Uncertain Job Market - SHRM",
+      "url": "https://www.shrm.org/topics-tools/news/talent-acquisition/class-of-2025-college-grads-face-uncertain-job-market",
+      "date": "2025-06-13",
+      "last_updated": "2025-06-16",
+      "snippet": "The Class of 2025 faces a challenging job market. Grads must navigate economic uncertainty, fewer internship opportunities, and evolving ...",
+      "source": "web"
+    }
+  ],
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "# Why Today's College Graduates Struggle to Land Jobs Compared to 2018\n\n## The Unemployment Crisis: By the Numbers\n\nToday's recent college graduates face a dramatically different employment landscape than their 2018 counterparts. The data reveals a stark deterioration in job prospects for this demographic.\n\n| Metric | 2018 | 2025 (Jan-July Avg) | Change |\n|--------|------|-------------------|--------|\n| Recent College Graduate Unemployment (ages 23-27) | ~2.9% | 4.59% | +1.70 pp |\n| Overall Unemployment Rate | ~3.9% | 4.18% | +0.28 pp |\n| College Grad vs. High School Grad Gap | 30-year high advantage | 30-year low advantage | Narrowing significantly |\n\nThe unemployment rate for recent college graduates has increased by approximately 1.7 percentage points since 2018—more than five times the increase in the overall unemployment rate. Even more concerning, by March 2025, the unemployment rate for recent college graduates (ages 22-27) reached 5.8%, marking the highest level since October 2013 (excluding the pandemic period)[1][2].\n\n## The Erosion of the College Advantage\n\nHistorically, a college degree provided substantial protection against unemployment. This advantage has dramatically eroded. The gap between bachelor's degree holders and workers with only a high school diploma has narrowed to its smallest in 30 years[3]. In 2019, young college-educated workers had unemployment rates 1.34 percentage points lower than their 2025 counterparts, while the advantage over high school graduates has shrunk from historical norms of 3.4 percentage points to just 1.1 percentage points as of March 2025[1][2].\n\n| Demographic Group | 2019 Average | 2025 Average (Jan-July) | Percentage Point Change |\n|-------------------|-------------|------------------------|------------------------|\n| Recent College Graduates | 3.25% | 4.59% | +1.34 |\n| Older College Graduates | 2.04% | 2.42% | +0.38 |\n| Young Noncollege-Educated Workers | 5.91% | 6.38% | +0.47 |\n\nYoung college graduates have borne the brunt of labor market shifts—their unemployment increased more than three times faster than noncollege-educated workers in the same age range[1].\n\n## Why Entry-Level Jobs Are Disappearing\n\n### The Experience Requirement Barrier\n\nA fundamental structural shift has occurred: employers are increasingly reserving even \"entry-level\" positions for candidates with three or more years of experience[3]. Total job postings in key sectors have remained flat or increased, but senior-level positions held steady, indicating a deliberate shift in hiring preferences rather than a genuine freeze[3]. This creates a catch-22 for recent graduates who cannot gain experience without entry-level opportunities.\n\n### Technology and Disruption\n\nWhite-collar occupations, traditionally strongholds for college graduates, face mounting pressure. Workers in computer occupations—historically enjoying very low unemployment—saw their unemployment rate jump from 1.98% in 2019 to 3.02% in 2025, a 1.04 percentage point increase[1]. Arts, design, entertainment, sports, and media occupations experienced even steeper declines, with unemployment rates spiking by 1.77 percentage points[1].\n\n## Underemployment: The Hidden Crisis\n\nEven when recent graduates secure employment, the jobs often don't match their qualifications. For the Class of 2023, **52% were underemployed one year after graduation**, working in positions that didn't require a degree[3]. This underemployment is particularly severe in fields like engineering, where more than one in four graduates are working outside their field[3].\n\n**Why this matters**: Early-career underemployment can trap graduates in lower-paying roles with fewer advancement opportunities, stalling career progression and skill development for years.\n\n## Rising Job Instability\n\nLayoffs among recent graduates have nearly doubled since before the pandemic, with young graduates in AI-exposed sectors like tech and finance facing especially high layoff rates compared to older degree holders[3]. A job loss early in a career creates long-term consequences—resume gaps and difficulty re-entering a competitive job market compound over time.\n\n## The Labor Force Participation Decline\n\nBeyond unemployment, labor force participation has declined. Participation rates dropped from 62.6% in April 2025 to 62.2% in July 2025, suggesting some graduates are exiting the job search entirely and becoming classified as \"out of the labor force\" rather than unemployed[1].\n\n## The Longer-Term Structural Problem\n\nThis isn't a temporary downturn. A critical mismatch is emerging: the working-age population is projected to remain stable over the next decade, while the number of college-educated adults continues rising. By 2034, there could be 7–11 million more graduates competing for degree-relevant roles[3]. The traditional labor market advantage of a college degree is structurally weakening as supply increases while demand for entry-level, degree-specific positions stagnates.\n\nThe fundamental shift from 2018 involves employers becoming more selective, favoring experienced candidates, technology disrupting white-collar work, and an oversupply of degree holders chasing increasingly scarce entry-level positions—a combination that has fundamentally altered the post-college employment landscape."
+      },
+      "delta": {
+        "role": "assistant",
+        "content": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+[Perplexity] Response received: # Why Today's College Graduates Struggle to Land J...
+✅ [runStep] Received response from perplexity, content length: 5316
+📤 Returning success result for researcher, status: done, output length: 5316
+ POST /conversations 200 in 16.9s (compile: 4ms, render: 16.9s)
+🚀 [runStep] Starting step creator (creator) with model gemini
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: false,
+  mockMode: false,
+  selectedModel: 'gemini',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 9002 characters
+[Gemini] Calling Google API with model gemini-2.5-flash...
+⏳ [runStep] Waiting for gemini response (timeout: 70s)...
+[Gemini] Response received: As the Creator, my role is to synthesize the strat...
+✅ [runStep] Received response from gemini, content length: 17299
+📤 Returning success result for creator, status: done, output length: 17299
+ POST /conversations 200 in 30.7s (compile: 5ms, render: 30.7s)
+🚀 [runStep] Starting step critic (critic) with model gpt
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: false,
+  mockMode: false,
+  selectedModel: 'gpt',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 26329 characters
+[GPT] Calling OpenAI API with model gpt-4o...
+⏳ [runStep] Waiting for gpt response (timeout: 70s)...
+[GPT] Response received: **Logic Check:**
+
+1. **Causality vs. Correlation**...
+✅ [runStep] Received response from gpt, content length: 2458
+📤 Returning success result for critic, status: done, output length: 2458
+ POST /conversations 200 in 8.0s (compile: 3ms, render: 8.0s)
+🚀 [runStep] Starting step synth (synthesizer) with model gemini
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: false,
+  mockMode: false,
+  selectedModel: 'gemini',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 28814 characters
+[Gemini] Calling Google API with model gemini-2.5-flash...
+⏳ [runStep] Waiting for gemini response (timeout: 70s)...
+[Gemini] Response received: ## Executive Summary
+
+Today's college undergraduat...
+✅ [runStep] Received response from gemini, content length: 15070
+📤 Returning success result for synth, status: done, output length: 15070
+ POST /conversations 200 in 19.4s (compile: 3ms, render: 19.4s)
