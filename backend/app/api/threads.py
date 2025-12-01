@@ -1185,53 +1185,23 @@ async def add_message_streaming(
         validated_model = validate_and_get_model(provider_enum, model)
         router_decision = None  # No router decision for forced routing
     else:
-        # Use dynamic router for intelligent model selection
-        try:
-            # Get OpenAI API key for router LLM
-            router_api_key = os.getenv("OPENAI_API_KEY") or settings.openai_api_key
-            if not router_api_key:
-                # Try to get from DB
-                try:
-                    router_api_key = await get_api_key_for_org(db, org_id, ProviderType.OPENAI)
-                except:
-                    pass
-            
-            # Build context summary (simple version - can be enhanced)
-            context_summary = ""
-            if FEATURE_COREWRITE:
-                from app.services.threads_store import get_history
-                history_turns = get_history(thread_id, max_turns=3)
-                if history_turns:
-                    context_summary = f"Previous conversation: {len(history_turns)} turns"
-            
-            # Route with dynamic router
-            router_decision = await route_with_dynamic_router(
-                user_message=rewritten_content,
-                context_summary=context_summary,
-                db=db,
-                org_id=org_id,
-                router_api_key=router_api_key,
-            )
-            
-            # Extract provider and model from router decision
-            provider_enum = router_decision.chosen_model.provider
-            validated_model = router_decision.chosen_model.provider_model
-            reason = router_decision.reason
-            model = validated_model  # For compatibility
-            
-            print(f"🎯 Dynamic router: {router_decision.chosen_model.display_name} (task: {router_decision.intent.task_type}, priority: {router_decision.intent.priority})")
-        except Exception as e:
-            # Fallback to old router if dynamic router fails
-            import traceback
-            print(f"⚠️  Dynamic router error: {e}, falling back to legacy router")
-            print(traceback.format_exc())
-            from app.api.router import analyze_content
-            provider_str, model, reason = analyze_content(rewritten_content, 0)
-            provider_enum = ProviderType(provider_str)
-            validated_model = validate_and_get_model(provider_enum, model)
-            router_decision = None
+        # PERFORMANCE OPTIMIZATION: Use fast keyword-based routing (10-30ms, no LLM blocking)
+        # This unblocks streaming while still routing to the correct specialist model
+        from app.api.router import analyze_content
+        provider_str, model, reason = analyze_content(rewritten_content, 0, has_image_attachments)
+        provider_enum = ProviderType(provider_str)
+        validated_model = validate_and_get_model(provider_enum, model)
+        router_decision = None
 
-    print(f"⚡ Routing done in {(perf_time.perf_counter() - start_routing)*1000:.0f}ms -> {provider_enum.value}/{validated_model}")
+        # Optionally schedule dynamic router in background for future ML-based refinement
+        # (Currently not needed - legacy router works well, but kept for future)
+        # async def run_dynamic_router_in_background():
+        #     try:
+        #         router_decision = await route_with_dynamic_router(...)
+        #     except: pass
+        # asyncio.create_task(run_dynamic_router_in_background())
+
+    print(f"⚡ Provider selected in {(perf_time.perf_counter() - start_routing)*1000:.0f}ms -> {provider_enum.value}/{validated_model}")
 
     # Log LLM rewrite if it happened
     if FEATURE_COREWRITE and rewritten_content != user_content:
@@ -1259,7 +1229,7 @@ async def add_message_streaming(
     
     # Build base system prompt with DAC persona
     base_prompt_messages = [{"role": "system", "content": SYNTRA_SYSTEM_PROMPT}]
-    base_prompt_messages = inject_syntra_persona(base_prompt_messages, qa_mode=False, intent=detected_intent, provider=routing_result.get("provider") if routing_result else None)
+    base_prompt_messages = inject_syntra_persona(base_prompt_messages, qa_mode=False, intent=detected_intent, provider=provider_enum.value)
 
     base_system_prompt = base_prompt_messages[0]["content"] if base_prompt_messages else SYNTRA_SYSTEM_PROMPT
     
