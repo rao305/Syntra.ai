@@ -52,6 +52,7 @@ interface ChatInterfaceProps {
   selectedModel: string
   onModelSelect: (modelId: string) => void
   onContinueWorkflow?: () => void
+  autoRoutedModel?: string | null
 }
 
 export function EnhancedChatInterface({
@@ -61,7 +62,8 @@ export function EnhancedChatInterface({
   isLoading = false,
   selectedModel,
   onModelSelect,
-  onContinueWorkflow
+  onContinueWorkflow,
+  autoRoutedModel
 }: ChatInterfaceProps) {
   const [expandedThoughts, setExpandedThoughts] = useState<Set<string>>(new Set())
   const [codePanelOpen, setCodePanelOpen] = useState(false)
@@ -415,18 +417,29 @@ export function EnhancedChatInterface({
                       </div>
                     )}
 
-                    {/* Message Actions */}
-                    <div className="flex items-center gap-1 pt-1">
-                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-900/50 border border-zinc-800 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300 transition-colors cursor-pointer">
-                        <Brain className="w-3 h-3" />
-                        <span>{message.modelName || 'DAC'}</span>
-                        {message.confidence && (
-                          <span className="text-green-400">{message.confidence}%</span>
+                    {/* Message Metadata - Plain Text */}
+                    {message.role === 'assistant' && (
+                      <div className="pt-2 text-xs text-zinc-400 flex items-center gap-3 flex-wrap">
+                        {/* Model */}
+                        {message.modelName && message.modelName !== 'DAC' && (
+                          <span>Model: <span className="text-zinc-200 font-medium">{message.modelName}</span></span>
                         )}
+
+                        {/* Accuracy */}
+                        {message.confidence && (
+                          <span>Accuracy: <span className="text-zinc-200 font-medium">{message.confidence}%</span></span>
+                        )}
+
+                        {/* Speed */}
                         {message.processingTime && (
-                          <span className="text-blue-400">{message.processingTime}ms</span>
+                          <span>Speed: <span className="text-zinc-200 font-medium">{(message.processingTime / 1000).toFixed(2)}s</span></span>
                         )}
                       </div>
+                    )}
+
+                    {/* Message Actions */}
+                    <div className="flex items-center gap-1 pt-1">
+                      <div></div>
 
                       <div className="flex items-center">
                         <ActionButton
@@ -491,6 +504,7 @@ export function EnhancedChatInterface({
             selectedModel={selectedModel}
             onModelSelect={onModelSelect}
             isLoading={isLoading}
+            autoRoutedModel={autoRoutedModel}
           />
           <div className="flex justify-end mt-2">
             <button className="p-2 text-zinc-500 hover:text-zinc-400 transition-colors rounded-full hover:bg-zinc-900">

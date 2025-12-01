@@ -64,6 +64,10 @@ class Settings(BaseSettings):
     openrouter_api_key: Optional[str] = None
     kimi_api_key: Optional[str] = None
 
+    # SuperMemory (long-term episodic memory)
+    supermemory_api_key: Optional[str] = None
+    supermemory_api_base_url: str = "https://api.supermemory.ai"
+
     # Feature Flags
     feature_corewrite: bool = False  # Query rewriter feature
 

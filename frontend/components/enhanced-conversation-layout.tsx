@@ -34,6 +34,7 @@ interface EnhancedConversationLayoutProps {
   selectedModel: string
   onModelSelect: (modelId: string) => void
   onContinueWorkflow?: () => void
+  autoRoutedModel?: string | null
 }
 
 export function EnhancedConversationLayout({
@@ -46,7 +47,8 @@ export function EnhancedConversationLayout({
   isLoading,
   selectedModel,
   onModelSelect,
-  onContinueWorkflow
+  onContinueWorkflow,
+  autoRoutedModel
 }: EnhancedConversationLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const user = null
@@ -70,6 +72,7 @@ export function EnhancedConversationLayout({
           selectedModel={selectedModel}
           onModelSelect={onModelSelect}
           onContinueWorkflow={onContinueWorkflow}
+          autoRoutedModel={autoRoutedModel}
         />
       </main>
     </div>

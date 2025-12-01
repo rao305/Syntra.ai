@@ -35,8 +35,14 @@ settings = get_settings()
 class MemoryContext:
     """Context retrieved from memory for a query."""
 
-    private_fragments: List[Dict[str, Any]]
-    shared_fragments: List[Dict[str, Any]]
+    # Hybrid memory sources
+    episodic_fragments: List[Dict[str, Any]]  # From SuperMemory (user-centric)
+    knowledge_fragments: List[Dict[str, Any]]  # From Qdrant (domain knowledge)
+
+    # Legacy fields (kept for backward compatibility)
+    private_fragments: List[Dict[str, Any]]  # Qdrant private tier
+    shared_fragments: List[Dict[str, Any]]  # Qdrant shared tier
+
     total_fragments: int
     retrieval_time_ms: float
 
@@ -107,12 +113,11 @@ class MemoryService:
         current_provider: Optional[ProviderType] = None
     ) -> MemoryContext:
         """
-        Retrieve relevant memory fragments for a query.
+        Retrieve relevant memory fragments for a query from BOTH SuperMemory and Qdrant.
 
-        This is the READ operation that enables cross-model context sharing.
-        It retrieves memory fragments created by ANY model, not just the current one.
-        
-        Now includes access graph permission checks for fine-grained control.
+        This is the READ operation for the HYBRID memory system:
+        - SuperMemory: Episodic (user-centric) memories
+        - Qdrant: Knowledge base (domain-specific) memories
 
         Args:
             db: Database session
@@ -120,33 +125,54 @@ class MemoryService:
             user_id: User ID
             query: Current user query
             thread_id: Thread ID
-            top_k: Number of fragments to retrieve per tier
-            current_provider: Current provider/agent making the request (for access graph checks)
+            top_k: Number of fragments to retrieve per source
+            current_provider: Current provider/agent making the request
 
         Returns:
-            MemoryContext with private and shared fragments
+            MemoryContext with episodic and knowledge fragments
         """
         start_time = time.perf_counter()
+        import asyncio
 
         try:
-            # Get query embedding
-            query_vector = await self._get_embedding(query)
+            # Query both sources in parallel for performance
+            supermemory_task = self._query_supermemory(user_id, query, top_k)
+            qdrant_tasks = [
+                self._retrieve_from_tier(
+                    db, org_id, user_id, None, MemoryTier.PRIVATE, top_k, current_provider, query
+                ),
+                self._retrieve_from_tier(
+                    db, org_id, user_id, None, MemoryTier.SHARED, top_k, current_provider, query
+                )
+            ]
 
-            # Retrieve from both tiers
-            private_fragments = await self._retrieve_from_tier(
-                db, org_id, user_id, query_vector, MemoryTier.PRIVATE, top_k, current_provider
+            # Execute all queries in parallel
+            results = await asyncio.gather(
+                supermemory_task,
+                *qdrant_tasks,
+                return_exceptions=True
             )
 
-            shared_fragments = await self._retrieve_from_tier(
-                db, org_id, user_id, query_vector, MemoryTier.SHARED, top_k, current_provider
-            )
+            episodic_fragments = results[0] if not isinstance(results[0], Exception) else []
+            private_fragments = results[1] if not isinstance(results[1], Exception) else []
+            shared_fragments = results[2] if not isinstance(results[2], Exception) else []
+
+            # Log any errors
+            if isinstance(results[0], Exception):
+                print(f"[Memory] SuperMemory error: {results[0]}")
+            if isinstance(results[1], Exception):
+                print(f"[Memory] Qdrant private tier error: {results[1]}")
+            if isinstance(results[2], Exception):
+                print(f"[Memory] Qdrant shared tier error: {results[2]}")
 
             retrieval_time_ms = (time.perf_counter() - start_time) * 1000
 
             return MemoryContext(
-                private_fragments=private_fragments,
-                shared_fragments=shared_fragments,
-                total_fragments=len(private_fragments) + len(shared_fragments),
+                episodic_fragments=episodic_fragments,
+                knowledge_fragments=private_fragments + shared_fragments,
+                private_fragments=private_fragments,  # Legacy field
+                shared_fragments=shared_fragments,    # Legacy field
+                total_fragments=len(episodic_fragments) + len(private_fragments) + len(shared_fragments),
                 retrieval_time_ms=retrieval_time_ms
             )
 
@@ -154,6 +180,8 @@ class MemoryService:
             print(f"Error retrieving memory context: {e}")
             # Return empty context on error
             return MemoryContext(
+                episodic_fragments=[],
+                knowledge_fragments=[],
                 private_fragments=[],
                 shared_fragments=[],
                 total_fragments=0,
@@ -165,17 +193,24 @@ class MemoryService:
         db: AsyncSession,
         org_id: str,
         user_id: Optional[str],
-        query_vector: List[float],
+        query_vector: Optional[List[float]],
         tier: MemoryTier,
         top_k: int,
-        current_provider: Optional[ProviderType] = None
+        current_provider: Optional[ProviderType] = None,
+        query: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
-        Retrieve fragments from a specific tier with access graph permission checks.
-        
+        Retrieve fragments from a specific Qdrant tier with access graph permission checks.
+
         Now includes fine-grained access control via AgentResourcePermission.
         """
         try:
+            # Get embedding if not provided
+            if query_vector is None and query:
+                query_vector = await self._get_embedding(query)
+            elif query_vector is None:
+                return []
+
             client = await self._get_client()
 
             # Build filter
@@ -205,7 +240,7 @@ class MemoryService:
             fragments = []
             for hit in search_result:
                 fragment_id = hit.id
-                
+
                 # Check access graph permissions if provider is specified
                 if current_provider:
                     has_access = await self._check_fragment_access(
@@ -213,17 +248,18 @@ class MemoryService:
                     )
                     if not has_access:
                         continue  # Skip fragments this agent cannot access
-                
+
                 fragment = {
                     "id": fragment_id,
                     "text": hit.payload.get("text", ""),
                     "tier": hit.payload.get("tier", ""),
                     "score": hit.score,
                     "provenance": hit.payload.get("provenance", {}),
-                    "created_at": hit.payload.get("created_at", "")
+                    "created_at": hit.payload.get("created_at", ""),
+                    "source": "qdrant"
                 }
                 fragments.append(fragment)
-                
+
                 # Stop when we have enough fragments
                 if len(fragments) >= top_k:
                     break
@@ -276,11 +312,130 @@ class MemoryService:
             
             # Return permission value
             return permission.can_access
-            
+
         except Exception as e:
             print(f"Error checking fragment access: {e}")
             # Default to allow on error (fail open for availability)
             return True
+
+    async def _query_supermemory(
+        self,
+        user_id: Optional[str],
+        query: str,
+        top_k: int = 8
+    ) -> List[Dict[str, Any]]:
+        """
+        Query SuperMemory for episodic (user-centric) memories.
+
+        Args:
+            user_id: User identifier for SuperMemory scoping
+            query: Search query
+            top_k: Number of memories to retrieve
+
+        Returns:
+            List of episodic memory fragments with source marker
+        """
+        if not user_id:
+            return []
+
+        try:
+            from app.integrations.supermemory_client import supermemory_client
+
+            # Check if SuperMemory is configured
+            if not settings.supermemory_api_key:
+                print("[Memory] SuperMemory not configured, skipping episodic memory retrieval")
+                return []
+
+            # Query SuperMemory
+            memories = await supermemory_client.search_memories(
+                user_id=user_id,
+                query=query,
+                limit=top_k
+            )
+
+            # Format as memory fragments
+            formatted = [
+                {
+                    "id": m.get("id", ""),
+                    "text": m.get("text", ""),
+                    "score": m.get("relevance_score", 0.5),
+                    "tags": m.get("tags", []),
+                    "created_at": m.get("created_at", ""),
+                    "source": "supermemory"
+                }
+                for m in memories
+            ]
+
+            print(f"[Memory] Retrieved {len(formatted)} episodic memories from SuperMemory")
+            return formatted
+
+        except Exception as e:
+            print(f"[Memory] SuperMemory query error: {e}")
+            return []
+
+    def classify_memory_tier(
+        self,
+        user_message: str,
+        assistant_message: str,
+        insight_text: str
+    ) -> MemoryTier:
+        """
+        Classify an insight into episodic vs. knowledge base tier.
+
+        Episodic indicators:
+        - Personal preferences ("I prefer...", "I like...", "I use...")
+        - User decisions and actions
+        - File/project references
+        - User-specific context
+
+        Knowledge indicators:
+        - Factual information ("is defined as", "means")
+        - Patterns discovered
+        - API behavior, best practices
+        - Generalizable findings
+
+        Args:
+            user_message: The original user message
+            assistant_message: The assistant's response
+            insight_text: The extracted insight to classify
+
+        Returns:
+            MemoryTier.PRIVATE for episodic, MemoryTier.SHARED for knowledge
+        """
+        episodic_indicators = [
+            "i prefer", "i like", "i use", "i work with", "i remember",
+            "my project", "my file", "my code", "my preference", "my workflow",
+            "decided to", "going to", "will use", "started using",
+            "found helpful", "my setup", "my environment"
+        ]
+
+        knowledge_indicators = [
+            "is defined as", "means", "refers to", "is a", "pattern",
+            "best practice", "approach", "method", "technique", "implementation",
+            "algorithm", "structure", "design", "architecture", "optimization",
+            "performance", "efficiency", "trade-off", "research shows"
+        ]
+
+        user_lower = user_message.lower()
+        insight_lower = insight_text.lower()
+
+        # Check episodic indicators
+        is_episodic = any(ind in insight_lower for ind in episodic_indicators)
+
+        # Check knowledge indicators
+        is_knowledge = any(ind in insight_lower for ind in knowledge_indicators)
+
+        # Decision logic
+        if is_episodic and not is_knowledge:
+            return MemoryTier.PRIVATE
+        elif is_knowledge:
+            return MemoryTier.SHARED
+        elif "what is" in user_lower or "explain" in user_lower:
+            # Info-seeking questions tend to produce knowledge
+            return MemoryTier.SHARED
+        else:
+            # Default to episodic for personal context
+            return MemoryTier.PRIVATE
 
     async def save_memory_from_turn(
         self,

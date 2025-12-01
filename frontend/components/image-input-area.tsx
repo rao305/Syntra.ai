@@ -30,13 +30,15 @@ interface ImageInputAreaProps {
   selectedModel: string
   onModelSelect: (modelId: string) => void
   isLoading?: boolean
+  autoRoutedModel?: string | null
 }
 
 export function ImageInputArea({
   onSendMessage,
   selectedModel,
   onModelSelect,
-  isLoading = false
+  isLoading = false,
+  autoRoutedModel
 }: ImageInputAreaProps) {
   const [isModelOpen, setIsModelOpen] = useState(false)
   const [inputValue, setInputValue] = useState('')
@@ -368,7 +370,7 @@ export function ImageInputArea({
                 onClick={() => setIsModelOpen(!isModelOpen)}
                 className="flex items-center gap-2 px-3 py-1.5 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs text-zinc-300 transition-colors relative"
               >
-                <span>{selectedModelData.name}</span>
+                <span>{selectedModel === 'auto' && autoRoutedModel ? `Auto - ${autoRoutedModel}` : selectedModelData.name}</span>
                 <ChevronDown className="w-3 h-3" />
                 <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border-2 border-zinc-900"></span>
               </button>

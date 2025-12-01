@@ -36,7 +36,14 @@ interface ChatHistoryItem {
   timestamp: string
 }
 
-export default function ConversationsLanding() {
+interface ConversationsLandingProps {
+  searchParams?: {
+    initialMessage?: string | string[]
+    [key: string]: string | string[] | undefined
+  }
+}
+
+export default function ConversationsLanding({ searchParams }: ConversationsLandingProps) {
   const router = useRouter()
   // Simplified without authentication
   const user = null
@@ -48,8 +55,23 @@ export default function ConversationsLanding() {
   const [messages, setMessages] = React.useState<Message[]>([])
   const [history, setHistory] = React.useState<ChatHistoryItem[]>([])
   const [selectedModel, setSelectedModel] = React.useState('auto')
+  const [autoRoutedModel, setAutoRoutedModel] = React.useState<string | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const [currentThreadId, setCurrentThreadId] = React.useState<string | null>(null)
+
+  // Unwrap the searchParams Promise using React.use()
+  const resolvedSearchParams = React.use(searchParams as Promise<typeof searchParams> || Promise.resolve(searchParams))
+
+  const initialMessageFromSearch = React.useMemo(() => {
+    if (!resolvedSearchParams?.initialMessage) return null
+    const raw = Array.isArray(resolvedSearchParams.initialMessage)
+      ? resolvedSearchParams.initialMessage[0]
+      : resolvedSearchParams.initialMessage
+    if (typeof raw !== 'string') return null
+    const trimmed = raw.trim()
+    return trimmed.length ? trimmed : null
+  }, [resolvedSearchParams?.initialMessage])
+  const hasPrefilledInitialMessage = React.useRef(false)
 
   const { isCollaborateMode, steps, setSteps, updateStep, toggleCollaborateMode } = useWorkflowStore()
 
@@ -708,7 +730,7 @@ export default function ConversationsLanding() {
         role: 'assistant',
         content: messageResponse.assistant_message.content,
         chainOfThought: selectedModelData
-          ? `I analyzed your request using ${selectedModelData.name}. This model excels at ${selectedModelData.description.toLowerCase()}. I applied systematic reasoning to understand your needs, gathered relevant context, synthesized the information, and formulated a comprehensive response. The reasoning process included: pattern recognition, logical inference, and knowledge integration to provide you with the most accurate and helpful answer.`
+          ? `I analyzed your request using ${selectedModelData.name}. This model excels at ${selectedModelData.description?.toLowerCase() || 'advanced language processing'}. I applied systematic reasoning to understand your needs, gathered relevant context, synthesized the information, and formulated a comprehensive response. The reasoning process included: pattern recognition, logical inference, and knowledge integration to provide you with the most accurate and helpful answer.`
           : undefined,
         timestamp: new Date().toLocaleTimeString('en-US', {
           hour: '2-digit',
@@ -719,21 +741,43 @@ export default function ConversationsLanding() {
           const model = messageResponse.assistant_message.model;
           const provider = messageResponse.assistant_message.provider;
 
+          // Check model field first (contains actual model identifier)
           if (model) {
-            // Convert model names to user-friendly format
-            if (model.includes('gemini')) return 'Gemini';
-            if (model.includes('gpt')) return 'GPT';
-            if (model.includes('perplexity') || model.includes('llama')) return 'Perplexity';
-            if (model.includes('kimi') || model.includes('moonshot')) return 'Kimi';
+            const lowerModel = model.toLowerCase();
+            // OpenAI / ChatGPT models
+            if (lowerModel.includes('gpt')) return 'GPT';
+            // Google Gemini models
+            if (lowerModel.includes('gemini')) return 'Gemini';
+            // Perplexity models (includes sonar, llama variants)
+            if (lowerModel.includes('perplexity') || lowerModel.includes('sonar') || lowerModel.includes('llama')) {
+              return 'Perplexity';
+            }
+            // Kimi / Moonshot models (Zhipu AI)
+            if (lowerModel.includes('kimi') || lowerModel.includes('moonshot')) return 'Kimi';
+            // OpenRouter (will have format like "openai/gpt-4", "google/gemini", etc)
+            if (lowerModel.includes('openrouter') || lowerModel.includes('/')) {
+              // Extract provider name from OpenRouter format
+              const parts = lowerModel.split('/');
+              if (parts.length > 1) {
+                const providerPart = parts[0].toLowerCase();
+                if (providerPart.includes('openai') || providerPart.includes('gpt')) return 'GPT';
+                if (providerPart.includes('google') || providerPart.includes('gemini')) return 'Gemini';
+                if (providerPart.includes('perplexity')) return 'Perplexity';
+                if (providerPart.includes('zhipu') || providerPart.includes('kimi')) return 'Kimi';
+              }
+              return 'OpenRouter';
+            }
           }
 
+          // Fallback to provider field if model not available
           if (provider) {
-            // Convert provider names to user-friendly format
-            if (provider === 'gemini') return 'Gemini';
-            if (provider === 'openai') return 'GPT';
-            if (provider === 'perplexity') return 'Perplexity';
-            if (provider === 'kimi') return 'Kimi';
-            // Capitalize first letter as fallback
+            const lowerProvider = provider.toLowerCase();
+            if (lowerProvider === 'gemini' || lowerProvider === 'google') return 'Gemini';
+            if (lowerProvider === 'openai') return 'GPT';
+            if (lowerProvider === 'perplexity') return 'Perplexity';
+            if (lowerProvider === 'kimi' || lowerProvider === 'zhipu') return 'Kimi';
+            if (lowerProvider === 'openrouter') return 'OpenRouter';
+            // Capitalize first letter for unknown providers
             return provider.charAt(0).toUpperCase() + provider.slice(1);
           }
 
@@ -747,6 +791,11 @@ export default function ConversationsLanding() {
       }
 
       setMessages((prev) => [...prev, assistantMessage])
+
+      // Capture the auto-routed model if using auto mode
+      if (selectedModel === 'auto' && assistantMessage.modelName) {
+        setAutoRoutedModel(assistantMessage.modelName)
+      }
 
     } catch (error: any) {
       console.error('💥 Error sending message:', error)
@@ -766,6 +815,21 @@ export default function ConversationsLanding() {
 
   // No loading state needed since we removed auth
 
+  React.useEffect(() => {
+    if (!initialMessageFromSearch || hasPrefilledInitialMessage.current) return
+
+    hasPrefilledInitialMessage.current = true
+    void handleSendMessage(initialMessageFromSearch)
+
+    if (typeof window !== 'undefined' && window.location.search.includes('initialMessage')) {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('initialMessage')
+      const nextSearch = url.searchParams.toString()
+      const nextUrl = `${url.pathname}${nextSearch ? `?${nextSearch}` : ''}${url.hash}`
+      router.replace(nextUrl, { scroll: false })
+    }
+  }, [handleSendMessage, initialMessageFromSearch, router])
+
   return (
     <EnhancedConversationLayout
       messages={messages}
@@ -777,6 +841,7 @@ export default function ConversationsLanding() {
       selectedModel={selectedModel}
       onModelSelect={handleModelSelect}
       onContinueWorkflow={handleContinueWorkflow}
+      autoRoutedModel={autoRoutedModel}
     />
   )
 }

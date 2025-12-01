@@ -21,14 +21,38 @@ async def add_message(
     request_limit = org.requests_per_day or settings.default_requests_per_day
     token_limit = org.tokens_per_day or settings.default_tokens_per_day
 
-    prior_messages = await _get_recent_messages(db, thread_id)
-    prompt_messages = [
-        {"role": msg.role.value, "content": msg.content}
-        for msg in prior_messages
-    ]
-    prompt_messages.append({"role": request.role.value, "content": request.content})
-    prompt_messages = prompt_messages[-MAX_CONTEXT_MESSAGES:]
+    # Use centralized context builder to ensure proper context handling
+    # (includes system prompts, memory retrieval, query rewriting, etc.)
+    from app.services.context_builder import context_builder
+    from app.services.syntra_persona import SYNTRA_SYSTEM_PROMPT
 
+    # Prepare attachments if present in the request
+    attachments = None
+    if hasattr(request, 'attachments') and request.attachments:
+        attachments = [
+            {
+                "type": a.type,
+                "data": a.data,
+                "mimeType": a.mimeType
+            }
+            for a in request.attachments
+        ]
+
+    # Build contextual messages with full context support
+    context_result = await context_builder.build_contextual_messages(
+        db=db,
+        thread_id=thread_id,
+        user_id=request.user_id,
+        org_id=org_id,
+        latest_user_message=request.content,
+        provider=request.provider,
+        use_memory=True,
+        use_query_rewriter=True,
+        base_system_prompt=SYNTRA_SYSTEM_PROMPT,
+        attachments=attachments
+    )
+
+    prompt_messages = context_result.messages
     prompt_tokens_estimate = estimate_messages_tokens(prompt_messages)
 
     await enforce_limits(

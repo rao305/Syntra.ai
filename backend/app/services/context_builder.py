@@ -492,30 +492,55 @@ class ContextBuilder:
     def _format_memory_snippet(self, memory_context: MemoryContext, max_chars: int = 2000) -> str:
         """
         Format memory context into a concise system-level snippet.
-        
+
+        This shows both:
+        - Episodic memories (from SuperMemory): User preferences, decisions, history
+        - Knowledge base (from Qdrant): Domain knowledge, best practices
+
         This should be concise and placed before conversation history.
-        Matches TypeScript blueprint format: "Long-term memory for this user and thread (summarized):"
         """
         memory_content = "Long-term memory for this user and thread (summarized):\n\n"
-        
-        # Add private memories
-        if memory_context.private_fragments:
+
+        # EPISODIC MEMORIES (from SuperMemory)
+        if memory_context.episodic_fragments:
+            memory_content += "## Your Previous Interactions & Preferences:\n"
+            for frag in memory_context.episodic_fragments:
+                text = frag.get('text', '')
+                # Truncate long text
+                if len(text) > 150:
+                    text = text[:147] + "..."
+                memory_content += f"- {text}\n"
+            memory_content += "\n"
+
+        # KNOWLEDGE BASE (from Qdrant - private + shared)
+        if memory_context.knowledge_fragments:
+            memory_content += "## Relevant Knowledge Base:\n"
+            for frag in memory_context.knowledge_fragments:
+                text = frag.get('text', '')
+                # Truncate long text
+                if len(text) > 150:
+                    text = text[:147] + "..."
+                source_info = frag.get('source', 'knowledge')
+                memory_content += f"- {text}\n"
+            memory_content += "\n"
+
+        # Legacy format support (if only private/shared are populated)
+        if not memory_context.episodic_fragments and memory_context.private_fragments:
             memory_content += "## Your Previous Interactions:\n"
             for frag in memory_context.private_fragments:
                 memory_content += f"- {frag['text']}\n"
             memory_content += "\n"
-        
-        # Add shared memories
-        if memory_context.shared_fragments:
+
+        if not memory_context.knowledge_fragments and memory_context.shared_fragments:
             memory_content += "## Shared Knowledge:\n"
             for frag in memory_context.shared_fragments:
                 provider_info = frag.get('provenance', {}).get('provider', 'unknown')
                 memory_content += f"- {frag['text']} (from {provider_info})\n"
-        
-        # Truncate if too long (matches TypeScript blueprint)
+
+        # Truncate if too long
         if len(memory_content) > max_chars:
             memory_content = memory_content[:max_chars] + "\n\n[truncated]"
-        
+
         return memory_content
     
     def _build_messages_array(

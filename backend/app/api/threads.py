@@ -182,7 +182,19 @@ async def _save_turn_to_db(
     await db.commit()
     await db.refresh(user_message)
     await db.refresh(assistant_message)
-    
+
+    # CRITICAL: Add turns to in-memory thread store for fast context retrieval
+    # This ensures conversation history is available for subsequent requests
+    # (prevents context loss when model switches or on follow-up messages)
+    try:
+        from app.services.threads_store import add_turn, Turn
+        add_turn(thread_id, Turn(role="user", content=user_content))
+        add_turn(thread_id, Turn(role="assistant", content=assistant_content))
+        print(f"✅ Added turns to in-memory store for thread {thread_id}")
+    except Exception as e:
+        print(f"⚠️  Failed to add turns to in-memory store: {e}")
+        # This is non-critical - DB will be fallback
+
     return user_message, assistant_message
 
 
