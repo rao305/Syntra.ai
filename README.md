@@ -115,6 +115,58 @@ docker compose ps
 
 ### 3. Backend Setup
 
+#### Option A: AWS Parameter Store (Recommended for Team Development)
+
+**Step 1: Configure AWS Credentials**
+
+Get your AWS credentials from the team (see `developer-credentials.txt`):
+
+```bash
+aws configure
+
+# When prompted, enter:
+# AWS Access Key ID: [from developer-credentials.txt]
+# AWS Secret Access Key: [from developer-credentials.txt]
+# Default region: us-east-1
+# Default output format: json
+```
+
+**Step 2: Fetch Secrets from Parameter Store**
+
+```bash
+cd backend
+
+# Fetch all secrets from AWS Parameter Store into .env.local
+./scripts/fetch-secrets.sh
+
+# This creates backend/.env.local (gitignored, never commit)
+```
+
+**Step 3: Verify and Use**
+
+```bash
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Secrets are now available in .env.local
+# Source them (optional, backend auto-loads from .env.local):
+source .env.local
+
+# Run migrations
+alembic upgrade head
+
+# Start backend
+python main.py
+```
+
+#### Option B: Local Development (Manual Setup)
+
+If you want to set up locally without AWS:
+
 ```bash
 cd backend
 
@@ -128,31 +180,20 @@ pip install -r requirements.txt
 # Copy environment template
 cp .env.example .env
 
-# Edit .env with your configuration
-# Required: DATABASE_URL, QDRANT_URL, REDIS_URL, SECRET_KEY, ENCRYPTION_KEY
-```
-
-**Generate Keys:**
-```bash
+# Generate security keys
 # Generate SECRET_KEY
 openssl rand -hex 32
 
 # Generate ENCRYPTION_KEY
 python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-```
 
-**Run Migrations:**
-```bash
-# Apply database migrations
+# Edit .env with your configuration
+# Required: DATABASE_URL, QDRANT_URL, REDIS_URL, SECRET_KEY, ENCRYPTION_KEY, API_KEYS
+
+# Run migrations
 alembic upgrade head
-```
 
-**Start Backend:**
-```bash
-# Development mode
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# Or use the startup script
+# Start backend
 python main.py
 ```
 
@@ -185,9 +226,34 @@ npm run dev
 
 ## 📋 Detailed Setup
 
+### Secrets Management
+
+**AWS Systems Manager Parameter Store** (Recommended):
+- Secrets are stored securely in AWS Parameter Store
+- Use `./scripts/fetch-secrets.sh` to fetch them locally into `.env.local`
+- `.env.local` is gitignored and never committed
+- Team members: Get AWS credentials from `developer-credentials.txt`
+
+**Setup for Team:**
+```bash
+# 1. One-time setup: Upload secrets to Parameter Store
+./scripts/setup-parameter-store.sh  # Run after editing backend/.env
+
+# 2. Give IAM permissions to team members
+# Share: scripts/setup-iam-policy.json with your AWS admin
+
+# 3. Team members fetch secrets
+aws configure  # Use credentials from developer-credentials.txt
+./scripts/fetch-secrets.sh
+```
+
+**For Single Developer:**
+- Create `backend/.env` directly (don't upload to Parameter Store)
+- Use Option B from Backend Setup section above
+
 ### Environment Variables
 
-#### Backend (`backend/.env`)
+#### Backend (`backend/.env` or `backend/.env.local` after fetching)
 
 ```env
 # Database
@@ -410,11 +476,28 @@ Comprehensive documentation is available in the [`/docs`](./docs/) directory:
 
 ---
 
+## 👥 Getting AWS Credentials
+
+**For Team Members:**
+1. Ask your team lead for AWS access
+2. You'll receive credentials in `developer-credentials.txt`
+3. Run: `aws configure`
+4. Enter your credentials when prompted
+5. Run: `./scripts/fetch-secrets.sh`
+
+**For Team Leads:**
+1. Create AWS IAM users and policies (see `scripts/setup-iam-policy.json`)
+2. Generate access keys for each developer
+3. Share credentials in `developer-credentials.txt`
+4. Upload your `backend/.env` to Parameter Store: `./scripts/setup-parameter-store.sh`
+
+---
+
 ## 🚢 Deployment
 
 ### Production Checklist
 
-- [ ] Set secure `SECRET_KEY` and `ENCRYPTION_KEY`
+- [ ] Use AWS Secrets Manager or Parameter Store for production secrets
 - [ ] Configure production database (PostgreSQL)
 - [ ] Set up Qdrant cluster
 - [ ] Configure Redis/Upstash
@@ -424,6 +507,8 @@ Comprehensive documentation is available in the [`/docs`](./docs/) directory:
 - [ ] Set up monitoring (Grafana, Prometheus)
 - [ ] Configure logging
 - [ ] Set up backup strategy
+- [ ] Enable IAM-based secret access for application
+- [ ] Rotate developer credentials regularly
 
 ### Docker Production
 

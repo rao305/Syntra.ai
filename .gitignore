@@ -21,3 +21,4 @@ src/config.ts
 backend/test_*_keys.py
 backend/verify_api_key.py
 backend/firebase-service-account.json
+developer-credentials.txt
