@@ -620,8 +620,8 @@ async def add_message(
         )
         
         return AddMessageResponse(
-            user_message=_to_message_response(user_msg, hide_provider=True),
-            assistant_message=_to_message_response(assistant_msg, hide_provider=True),
+            user_message=_to_message_response(user_msg, hide_provider=False),
+            assistant_message=_to_message_response(assistant_msg, hide_provider=False),
         )
 
     org = await _get_org(db, org_id)
@@ -1007,8 +1007,8 @@ async def add_message(
         # Return normalized response (followers will reuse this)
         # Hide provider/model info to maintain unified DAC persona
         return {
-            "user_message": _to_message_response(user_msg, hide_provider=True),
-            "assistant_message": _to_message_response(assistant_msg, hide_provider=True),
+            "user_message": _to_message_response(user_msg, hide_provider=False),
+            "assistant_message": _to_message_response(assistant_msg, hide_provider=False),
         }
     
     # Feature flag check
@@ -1684,7 +1684,7 @@ async def get_thread(
         last_provider=None,  # Hide provider info
         last_model=None,  # Hide model info
         created_at=thread.created_at,
-        messages=[_to_message_response(msg, hide_provider=True) for msg in messages]
+        messages=[_to_message_response(msg, hide_provider=False) for msg in messages]
     )
 
 
@@ -2190,7 +2190,7 @@ async def get_thread(
         last_provider=None,  # Hide provider info
         last_model=None,  # Hide model info
         created_at=thread.created_at,
-        messages=[_to_message_response(msg, hide_provider=True) for msg in messages]
+        messages=[_to_message_response(msg, hide_provider=False) for msg in messages]
     )
 
 
