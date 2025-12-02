@@ -57,16 +57,16 @@ export function ComparisonSection() {
                   </div>
                 </th>
                 <th className="text-center py-4 px-4">
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-500/10 rounded-lg">
                     <Image src="/images/new-gemini-icon-cover.webp" alt="Gemini" width={20} height={20} />
-                    <span className="text-sm font-medium text-foreground">GEMINI</span>
+                    <span className="text-sm font-bold text-blue-400">GEMINI</span>
                   </div>
                 </th>
               </tr>
             </thead>
             <tbody>
               {features.map((feature, index) => (
-                <tr key={index} className="border-b border-border">
+                <tr key={index} className="border-b border-border hover:bg-white/5 transition-colors">
                   <td className="py-4 px-4 text-sm text-foreground">{feature.name}</td>
                   <td className="py-4 px-4 text-center">
                     <StatusBadge status={feature.syntra} />
@@ -77,7 +77,7 @@ export function ComparisonSection() {
                   <td className="py-4 px-4 text-center">
                     <StatusBadge status={feature.claude} />
                   </td>
-                  <td className="py-4 px-4 text-center">
+                  <td className="py-4 px-4 text-center bg-blue-500/5">
                     <StatusBadge status={feature.gemini} />
                   </td>
                 </tr>
@@ -106,10 +106,10 @@ function StatusBadge({ status }: { status: string }) {
     )
   }
   if (status === "varies") {
-    return <span className="text-xs text-muted-foreground">Varies by plan</span>
+    return <span className="inline-flex items-center px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-md font-medium">Varies by plan</span>
   }
   if (status === "plaintext") {
-    return <span className="text-xs text-muted-foreground">Plaintext</span>
+    return <span className="inline-flex items-center px-2 py-1 bg-cyan-500/20 text-cyan-300 text-xs rounded-md font-medium">Plaintext</span>
   }
   return null
 }

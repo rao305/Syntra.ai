@@ -9,6 +9,7 @@ import { SYNTRA_MODELS } from '@/components/syntra-model-selector'
 import { apiFetch } from '@/lib/api'
 import { useWorkflowStore } from '@/store/workflow-store'
 import { toast } from 'sonner'
+import { CollabPanel, type CollabPanelState, type CollabStageId } from '@/components/collaborate/CollabPanel'
 
 interface ImageFile {
   file?: File
@@ -59,6 +60,19 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
   const [isLoading, setIsLoading] = React.useState(false)
   const [currentThreadId, setCurrentThreadId] = React.useState<string | null>(null)
 
+  // Collaboration panel state - 6 stages with dynamic model selection
+  const [collabPanel, setCollabPanel] = React.useState<CollabPanelState>({
+    active: false,
+    stages: [
+      { id: "analyst", label: "Analyst", model: "?", status: "pending" },
+      { id: "researcher", label: "Researcher", model: "?", status: "pending" },
+      { id: "creator", label: "Creator", model: "?", status: "pending" },
+      { id: "critic", label: "Critic", model: "?", status: "pending" },
+      { id: "council", label: "LLM Council", model: "?", status: "pending" },
+      { id: "synth", label: "Synthesizer", model: "?", status: "pending" },
+    ]
+  })
+
   // Unwrap the searchParams Promise using React.use()
   const resolvedSearchParams = React.use(searchParams as Promise<typeof searchParams> || Promise.resolve(searchParams))
 
@@ -75,11 +89,59 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
 
   const { isCollaborateMode, steps, setSteps, updateStep, toggleCollaborateMode } = useWorkflowStore()
 
+  // Helper to update collab panel when a step completes
+  const updateCollabPanelForStep = React.useCallback((
+    stepRole: string,
+    status: "running" | "done" | "error",
+    preview?: string,
+    duration_ms?: number,
+    modelId?: string
+  ) => {
+    const stageIdMap: Record<string, CollabStageId> = {
+      "analyst": "analyst",
+      "researcher": "researcher",
+      "creator": "creator",
+      "critic": "critic",
+      "council": "council",
+      "synth": "synth",
+      // legacy mappings
+      "synthesizer": "synth",
+      "internal_synth": "synth",
+    }
+
+    const stageId = stageIdMap[stepRole] as CollabStageId | undefined
+    if (!stageId) return
+
+    setCollabPanel(prev => ({
+      ...prev,
+      stages: prev.stages.map(s =>
+        s.id === stageId
+          ? {
+              ...s,
+              status,
+              preview,
+              duration_ms,
+              model: modelId ?? s.model,
+            }
+          : s
+      )
+    }))
+  }, [])
+
   // Execute workflow logic
   const executeWorkflow = React.useCallback(async (currentSteps: typeof steps, userContent: string) => {
     // Get fresh steps from store to ensure we have the latest state
     let localSteps = [...currentSteps]
     setIsLoading(true)
+
+    // Activate collab panel if in collaborate mode
+    if (isCollaborateMode) {
+      setCollabPanel(prev => ({
+        ...prev,
+        active: true,
+        stages: prev.stages.map(s => ({ ...s, status: "pending" }))
+      }))
+    }
 
     console.log(`🚀 Starting workflow execution with ${localSteps.length} steps`)
     console.log(`📋 Initial step states:`, localSteps.map(s => ({
@@ -153,6 +215,12 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       // Update UI to show running
       console.log(`🔄 Starting step ${step.id} (${step.role}) - mode: ${step.mode}`)
       updateStep(step.id, { status: "running" })
+
+      // Update collab panel if in collaborate mode
+      // Note: step.model represents the selected model ID from the router
+      if (isCollaborateMode) {
+        updateCollabPanelForStep(step.role, "running", undefined, undefined, step.model)
+      }
 
       try {
         // Run the step on server - this will wait for completion
@@ -250,6 +318,14 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
           error
         })
 
+        // Update collab panel if in collaborate mode and step is done
+        if (isCollaborateMode && status === "done" && outputDraft) {
+          // Extract preview (first 150 characters)
+          const preview = outputDraft.substring(0, 150).replace(/\n/g, ' ')
+          const duration = metadata?.processing_time_ms || metadata?.latency_ms || undefined
+          updateCollabPanelForStep(step.role, "done", preview, duration, step.model)
+        }
+
         // Update local steps array for next iteration context
         localSteps = localSteps.map(s => s.id === step.id ? {
           ...s,
@@ -277,7 +353,9 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         })))
 
         // Add step output as a message in the chat for visibility
-        if (outputDraft && status !== "error") {
+        // BUT: Skip this when in Collaborate mode - we only show the final answer
+        const { isCollaborateMode } = useWorkflowStore.getState()
+        if (outputDraft && status !== "error" && !isCollaborateMode) {
           const modelName = step.model === "gpt" ? "GPT" :
             step.model === "gemini" ? "Gemini" :
               step.model === "perplexity" ? "Perplexity" :
@@ -468,6 +546,12 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
 
       setMessages((prev) => [...prev, finalMessage])
 
+      // Deactivate collab panel
+      setCollabPanel(prev => ({
+        ...prev,
+        active: false
+      }))
+
       // Exit collaboration mode and close modal
       console.log('✅ Workflow complete - exiting collaboration mode')
       setTimeout(() => {
@@ -478,7 +562,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
 
     console.log(`🏁 All workflow steps completed`)
     setIsLoading(false)
-  }, [updateStep, setMessages, toggleCollaborateMode])
+  }, [updateStep, setMessages, toggleCollaborateMode, isCollaborateMode, updateCollabPanelForStep])
 
   const handleContinueWorkflow = React.useCallback(() => {
     // Find the last user message to use as context
@@ -842,6 +926,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       onModelSelect={handleModelSelect}
       onContinueWorkflow={handleContinueWorkflow}
       autoRoutedModel={autoRoutedModel}
+      collabPanel={collabPanel}
     />
   )
 }

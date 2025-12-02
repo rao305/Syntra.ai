@@ -67,7 +67,7 @@ const animationStyle = `
 `;
 
 export function ThinkingStrip({ isVisible }: ThinkingStripProps) {
-  const { phases, currentPhaseIndex } = usePhaseCollaboration();
+  const { phases, currentPhaseIndex, currentStage } = usePhaseCollaboration();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -105,7 +105,7 @@ export function ThinkingStrip({ isVisible }: ThinkingStripProps) {
             Multi-Model Collaboration in Progress
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Synthesizing insights from 5 AI models...
+            {currentStage ? currentStage.loadingMessage : "Synthesizing insights from 5 AI models..."}
           </p>
         </div>
       </div>

@@ -102,16 +102,21 @@ function ModelCard({
   iconInvert?: boolean
   selected?: boolean
 }) {
+  const isGemini = name.includes("Gemini")
+  const cardClasses = isGemini
+    ? "border-blue-500/60 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 hover:border-blue-400/80 hover:from-blue-500/15 hover:to-cyan-500/15 transition-all"
+    : selected
+    ? "border-primary bg-card"
+    : "border-border bg-card/50"
+
   return (
-    <div
-      className={`p-4 rounded-xl border ${selected ? "border-primary bg-card" : "border-border bg-card/50"} min-w-[280px]`}
-    >
+    <div className={`p-4 rounded-xl border ${cardClasses} min-w-[280px]`}>
       <div className="flex items-start justify-between mb-2">
         <div>
           <h4 className="font-semibold text-foreground">{name}</h4>
-          <p className="text-sm text-primary">by {provider}</p>
+          <p className={`text-sm ${isGemini ? "text-blue-400" : "text-primary"}`}>by {provider}</p>
         </div>
-        <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center overflow-hidden">
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden ${isGemini ? "bg-blue-500/20" : "bg-secondary"}`}>
           <Image
             src={iconSrc || "/placeholder.svg"}
             alt={name}
@@ -124,7 +129,7 @@ function ModelCard({
       <p className="text-xs text-muted-foreground mb-2">Best for:</p>
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => (
-          <span key={tag} className="px-2 py-1 bg-accent/20 text-accent text-xs rounded-md">
+          <span key={tag} className={`px-2 py-1 text-xs rounded-md ${isGemini ? "bg-blue-500/20 text-blue-300" : "bg-accent/20 text-accent"}`}>
             {tag}
           </span>
         ))}

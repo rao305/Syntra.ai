@@ -41,14 +41,15 @@ PHASE_INDICES = {
 
 
 def sse_event(event_type: str, data: Dict[str, Any], run_id: str) -> str:
-    """Format an event as Server-Sent Event."""
+    """Format an event as Server-Sent Event with proper event: prefix."""
     payload = {
         "type": event_type,
         "run_id": run_id,
         "timestamp": datetime.utcnow().isoformat(),
         **data,
     }
-    return f"data: {json.dumps(payload, default=str)}\n\n"
+    # Proper SSE format: "event: type\ndata: {json}\n\n"
+    return f"event: {event_type}\ndata: {json.dumps(payload, default=str)}\n\n"
 
 
 async def run_collaborate_streaming(
@@ -353,8 +354,15 @@ async def run_collaborate_streaming(
             "phase_delta",
             {
                 "phase": "synthesize",
-                "text_delta": preview_text,
+                "delta": preview_text,
             },
+            run_id,
+        )
+
+        # Emit final_answer_start to signal start of answer streaming
+        yield sse_event(
+            "final_answer_start",
+            {},
             run_id,
         )
 
@@ -364,7 +372,7 @@ async def run_collaborate_streaming(
             yield sse_event(
                 "final_answer_delta",
                 {
-                    "text_delta": char,
+                    "delta": char,
                 },
                 run_id,
             )
@@ -494,9 +502,11 @@ async def run_collaborate_streaming(
             meta=meta,
         )
 
+        # Emit final_answer_end with confidence and full response
         yield sse_event(
             "final_answer_end",
             {
+                "confidence": "high",  # Could be determined by quality metrics
                 "full_response": json.loads(response.model_dump_json(default=str)),
             },
             run_id,

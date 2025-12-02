@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { EnhancedSidebar } from '@/components/enhanced-sidebar'
 import { EnhancedChatInterface } from '@/components/enhanced-chat-interface'
+import { CollabPanel, type CollabPanelState } from '@/components/collaborate/CollabPanel'
 
 interface Message {
   id: string
@@ -35,6 +36,7 @@ interface EnhancedConversationLayoutProps {
   onModelSelect: (modelId: string) => void
   onContinueWorkflow?: () => void
   autoRoutedModel?: string | null
+  collabPanel?: CollabPanelState
 }
 
 export function EnhancedConversationLayout({
@@ -48,7 +50,8 @@ export function EnhancedConversationLayout({
   selectedModel,
   onModelSelect,
   onContinueWorkflow,
-  autoRoutedModel
+  autoRoutedModel,
+  collabPanel
 }: EnhancedConversationLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const user = null
@@ -73,6 +76,7 @@ export function EnhancedConversationLayout({
           onModelSelect={onModelSelect}
           onContinueWorkflow={onContinueWorkflow}
           autoRoutedModel={autoRoutedModel}
+          collabPanel={collabPanel}
         />
       </main>
     </div>

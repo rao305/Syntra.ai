@@ -328,35 +328,56 @@ export function CollaborationIntegration({ threadId, prompt, onComplete }: Colla
       {/* Final Answer - Only show when done */}
       {collaborateResponse && (
         <div className="space-y-6">
-          <FinalAnswerCard finalAnswer={collaborateResponse.final_answer} meta={collaborateResponse.meta} />
-
-          {/* How This Answer Was Selected */}
-          <SelectionExplanation data={collaborateResponse} />
+          {/* Main Final Answer - This is what goes in the chat */}
+          <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/50 p-6 shadow-sm">
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <p className="text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
+                {collaborateResponse.final_answer.content}
+              </p>
+            </div>
+          </div>
 
           {/* Summary Stats */}
           <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground bg-muted/30 rounded-lg p-3 flex-wrap">
             <div className="flex items-center gap-1">
-              <span className="font-medium">📊 Models:</span>
-              <span>{collaborateResponse.meta.models_used.length}</span>
+              <span className="font-medium">✨ Synthesized by:</span>
+              <span>{collaborateResponse.final_answer.model?.display_name || "Multi-model"}</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="font-medium">👥 Reviews:</span>
-              <span>{collaborateResponse.meta.num_external_reviews}</span>
+              <span className="font-medium">📊 Models used:</span>
+              <span>{collaborateResponse.meta.models_involved?.length || 5}</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="font-medium">⏱️ Time:</span>
-              <span>{(collaborateResponse.meta.total_latency_ms / 1000).toFixed(1)}s</span>
+              <span>{collaborateResponse.meta.total_latency_ms ? (collaborateResponse.meta.total_latency_ms / 1000).toFixed(1) : "?"}s</span>
             </div>
           </div>
 
-          {/* Optional: Collapsible detailed analysis */}
+          {/* Confidence indicator */}
+          {collaborateResponse.final_answer.explanation?.confidence_level && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-medium">Confidence:</span>
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                collaborateResponse.final_answer.explanation.confidence_level === "high"
+                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                  : collaborateResponse.final_answer.explanation.confidence_level === "medium"
+                  ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+              }`}>
+                {collaborateResponse.final_answer.explanation.confidence_level.charAt(0).toUpperCase() +
+                  collaborateResponse.final_answer.explanation.confidence_level.slice(1)}
+              </span>
+            </div>
+          )}
+
+          {/* Optional: Collapsible detailed analysis for transparency */}
           <details className="group rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/50 p-6 shadow-sm">
             <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold list-none select-none">
               <span className="flex items-center gap-3">
-                <span className="text-xl">🔍</span>
-                <span className="text-slate-900 dark:text-slate-50">View Detailed Analysis</span>
+                <span className="text-xl">🔬</span>
+                <span className="text-slate-900 dark:text-slate-50">View How This Was Generated</span>
                 <span className="text-xs font-normal text-slate-600 dark:text-slate-400">
-                  (Pipeline stages, expert reviews, metadata)
+                  (Internal pipeline, expert reviews, and reasoning)
                 </span>
               </span>
               <svg
@@ -369,6 +390,9 @@ export function CollaborationIntegration({ threadId, prompt, onComplete }: Colla
               </svg>
             </summary>
             <div className="mt-6 border-t border-slate-200 pt-6 dark:border-slate-700">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                This section shows the internal collaboration process: the analysis, research, draft, critique, and expert reviews that shaped the final answer above.
+              </p>
               <DetailedAnalysisPanel data={collaborateResponse} />
             </div>
           </details>

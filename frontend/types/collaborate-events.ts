@@ -77,6 +77,20 @@ export interface FinalAnswerEndEvent {
   confidence: "low" | "medium" | "high";
 }
 
+export interface StageStartEvent {
+  type: "stage_start";
+  role: string;
+  label: string;
+  model_display: string;
+  step_index: number;
+}
+
+export interface StageEndEvent {
+  type: "stage_end";
+  role: string;
+  latency_ms?: number;
+}
+
 export interface VisualizationEvent {
   type: "visualization";
   title: string;
@@ -95,6 +109,8 @@ export type CollaborateEvent =
   | PhaseStartEvent
   | PhaseDeltaEvent
   | PhaseEndEvent
+  | StageStartEvent
+  | StageEndEvent
   | FinalAnswerStartEvent
   | FinalAnswerDeltaEvent
   | FinalAnswerEndEvent

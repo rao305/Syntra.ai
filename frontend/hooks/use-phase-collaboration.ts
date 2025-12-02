@@ -11,9 +11,20 @@ export interface Phase {
   council_summary?: StanceCount;
 }
 
+export interface Stage {
+  role: string;
+  label: string;
+  model_display: string;
+  status: "pending" | "in_progress" | "completed";
+  latency_ms?: number;
+  loadingMessage: string;
+}
+
 export interface UsePhaseCollaborationState {
   phases: Phase[];
   currentPhaseIndex: number;
+  stages: Stage[];
+  currentStage?: Stage;
   finalAnswerContent: string;
   finalAnswerDone: boolean;
   confidence?: "low" | "medium" | "high";
@@ -23,6 +34,17 @@ export interface UsePhaseCollaborationState {
 
 const defaultPhases: AbstractPhase[] = ["understand", "research", "reason_refine", "crosscheck", "synthesize"];
 
+// Stage loading messages for better UX
+const STAGE_LOADING_MESSAGES: Record<string, string> = {
+  analyst: "🤖 Analyzing your query...",
+  researcher: "🔍 Researching recent data and trends...",
+  creator: "✍️ Drafting the response...",
+  critic: "💭 Refining and organizing...",
+  internal_synth: "🧠 Synthesizing insights...",
+  council: "👥 Getting external perspectives...",
+  director: "🎯 Creating final detailed response...",
+};
+
 export function usePhaseCollaboration() {
   const [state, setState] = useState<UsePhaseCollaborationState>({
     phases: defaultPhases.map((phase) => ({
@@ -30,6 +52,8 @@ export function usePhaseCollaboration() {
       status: "pending",
     })),
     currentPhaseIndex: -1,
+    stages: [],
+    currentStage: undefined,
     finalAnswerContent: "",
     finalAnswerDone: false,
     isLoading: true,
@@ -64,10 +88,46 @@ export function usePhaseCollaboration() {
           break;
         }
 
+        case "stage_start": {
+          const stage: Stage = {
+            role: event.role,
+            label: event.label,
+            model_display: event.model_display,
+            status: "in_progress",
+            loadingMessage: STAGE_LOADING_MESSAGES[event.role] || `${event.label} processing...`,
+          };
+          newState.stages = [...newState.stages, stage];
+          newState.currentStage = stage;
+          break;
+        }
+
+        case "stage_end": {
+          const stageIndex = newState.stages.findIndex((s) => s.role === event.role);
+          if (stageIndex >= 0) {
+            newState.stages[stageIndex] = {
+              ...newState.stages[stageIndex],
+              status: "completed",
+              latency_ms: event.latency_ms,
+            };
+          }
+          // Keep showing the last completed stage for context
+          if (newState.currentStage?.role === event.role) {
+            newState.currentStage = {
+              ...newState.currentStage,
+              status: "completed",
+              latency_ms: event.latency_ms,
+            };
+          }
+          break;
+        }
+
         case "final_answer_start": {
           newState.isLoading = false;
           newState.finalAnswerContent = "";
           newState.finalAnswerDone = false;
+          // Clear stages when final answer starts
+          newState.stages = [];
+          newState.currentStage = undefined;
           break;
         }
 
@@ -98,6 +158,8 @@ export function usePhaseCollaboration() {
         status: "pending",
       })),
       currentPhaseIndex: -1,
+      stages: [],
+      currentStage: undefined,
       finalAnswerContent: "",
       finalAnswerDone: false,
       isLoading: true,

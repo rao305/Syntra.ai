@@ -9,6 +9,7 @@ import { EnhancedMessageContent } from "@/components/enhanced-message-content"
 import { CodePanel } from "@/components/code-panel"
 import { ThinkingStream } from "@/components/thinking-stream"
 import { useWorkflowStore } from "@/store/workflow-store"
+import { CollabPanel, type CollabPanelState } from "@/components/collaborate/CollabPanel"
 
 interface ImageFile {
   file?: File
@@ -53,6 +54,7 @@ interface ChatInterfaceProps {
   onModelSelect: (modelId: string) => void
   onContinueWorkflow?: () => void
   autoRoutedModel?: string | null
+  collabPanel?: CollabPanelState
 }
 
 export function EnhancedChatInterface({
@@ -63,7 +65,8 @@ export function EnhancedChatInterface({
   selectedModel,
   onModelSelect,
   onContinueWorkflow,
-  autoRoutedModel
+  autoRoutedModel,
+  collabPanel
 }: ChatInterfaceProps) {
   const [expandedThoughts, setExpandedThoughts] = useState<Set<string>>(new Set())
   const [codePanelOpen, setCodePanelOpen] = useState(false)
@@ -354,6 +357,7 @@ export function EnhancedChatInterface({
             </div>
           )}
 
+          {collabPanel && <CollabPanel state={collabPanel} />}
 
           {messages.map((message, index) => (
             <div key={message.id} className={cn(
