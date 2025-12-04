@@ -1,0 +1,1124 @@
+
+> my-v0-project@0.1.0 dev
+> next dev
+
+   ▲ Next.js 16.0.0 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://100.70.17.215:3000
+
+ ✓ Starting...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Ready in 445ms
+ GET / 200 in 1362ms (compile: 1026ms, render: 337ms)
+ GET / 200 in 136ms (compile: 2ms, render: 133ms)
+ GET / 200 in 133ms (compile: 1550µs, render: 131ms)
+ GET /conversations?initialMessage=Hi+there&utm_source=homepage-hero 200 in 1330ms (compile: 1098ms, render: 232ms)
+ GET /conversations?utm_source=homepage-hero 200 in 17ms (compile: 3ms, render: 14ms)
+[workflow] Current working directory: /Users/rao305/Documents/Syntra/frontend
+[workflow] Trying paths: [
+  '/Users/rao305/Documents/Syntra/backend/.env',
+  '/Users/rao305/Documents/Syntra/frontend/backend/.env',
+  '/Users/rao305/Documents/Syntra/backend/.env',
+  '/Users/rao305/Documents/Syntra/backend/.env',
+  '/ROOT/backend/.env',
+  '/backend/.env'
+]
+[workflow] Checking: /Users/rao305/Documents/Syntra/backend/.env, exists: true
+[dotenv@17.2.3] injecting env (56) from ../backend/.env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+[workflow] ✅ Loaded backend environment variables from /Users/rao305/Documents/Syntra/backend/.env
+[workflow] KIMI_API_KEY present: true
+[workflow] OPENAI_API_KEY present: true
+[workflow] GEMINI_API_KEY present: false
+[workflow] PERPLEXITY_API_KEY present: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+🎯 Intelligent model assignment (4 unique models): analyst:gpt, researcher:perplexity, creator:gemini, critic:gemini, synthesizer:kimi
+📊 Model distribution: gpt:1x, perplexity:1x, gemini:2x, kimi:1x
+ POST /conversations?utm_source=homepage-hero 200 in 27ms (compile: 4ms, render: 23ms)
+🚀 [runStep] Starting step analyst (analyst) with model gpt
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'gpt',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 107 characters
+[GPT] Calling OpenAI API with model gpt-4o...
+⏳ [runStep] Waiting for gpt response (timeout: 70s)...
+[GPT] Response received: # Analysis Breakdown
+
+## 1. Deconstruct the Reques...
+✅ [runStep] Received response from gpt, content length: 3524
+📤 Returning success result for analyst, status: done, output length: 3524
+ POST /conversations?utm_source=homepage-hero 200 in 21.0s (compile: 2ms, render: 21.0s)
+ ✓ Compiled in 66ms
+ ✓ Compiled in 71ms
+ ✓ Compiled in 38ms
+ ✓ Compiled in 32ms
+ GET /conversations?utm_source=homepage-hero 200 in 307ms (compile: 56ms, render: 251ms)
+[workflow] Backend env already loaded
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+🎯 Intelligent model assignment (4 unique models): analyst:perplexity, researcher:gpt, creator:kimi, critic:gemini, synthesizer:gemini
+📊 Model distribution: perplexity:1x, gpt:1x, kimi:1x, gemini:2x
+ POST /conversations?utm_source=homepage-hero 200 in 19ms (compile: 4ms, render: 15ms)
+🚀 [runStep] Starting step analyst (analyst) with model perplexity
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'perplexity',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 107 characters
+[Perplexity] Calling Perplexity API with model sonar-pro... (attempt 1/3)
+⏳ [runStep] Waiting for perplexity response (timeout: 70s)...
+[Perplexity] Full response data: {
+  "id": "764f80ea-def7-4284-8855-40aab0c3aa56",
+  "model": "sonar-pro",
+  "created": 1764860493,
+  "usage": {
+    "prompt_tokens": 149,
+    "completion_tokens": 704,
+    "total_tokens": 853,
+    "search_context_size": "low",
+    "cost": {
+      "input_tokens_cost": 0,
+      "output_tokens_cost": 0.011,
+      "request_cost": 0.006,
+      "total_cost": 0.017
+    }
+  },
+  "citations": [
+    "https://coincodex.com/crypto/firstneuralink/price-prediction/",
+    "https://coincodex.com/crypto/neuralink-nlink/price-prediction/",
+    "https://www.gate.com/learn/articles/neuralink-stock-price-can-crypto-investors-benefit-from-the-future-of-brain-computer-interfaces/6902",
+    "https://tsginvest.com/neuralink/",
+    "https://www.coinbase.com/price-prediction/firstneuralink",
+    "https://cryptoniteventures.substack.com/p/the-top-blockchain-private-companies",
+    "https://investingnews.com/invest-neuralink-stock/",
+    "https://blockchain.news/ainews/neuralink-vertical-integration-strategy-ai-driven-bci-manufacturing-robotics-and-next-gen-applications-in-austin-hq"
+  ],
+  "search_results": [
+    {
+      "title": "Neuralink (NEURALINK) Price Prediction 2025, 2026-2030",
+      "url": "https://coincodex.com/crypto/firstneuralink/price-prediction/",
+      "date": "2022-01-02",
+      "last_updated": "2025-11-18",
+      "snippet": "According to our latest Neuralink price prediction, NEURALINK is forecasted to drop by -25.08% and reach $ 0.04579 by December 28, 2025. Per our technical ...",
+      "source": "web"
+    },
+    {
+      "title": "Neuralink (NLINK) Price Prediction 2025, 2026-2030 - CoinCodex",
+      "url": "https://coincodex.com/crypto/neuralink-nlink/price-prediction/",
+      "date": "2022-01-02",
+      "last_updated": "2025-10-18",
+      "snippet": "According to our latest Neuralink price prediction, NLINK is forecasted to drop by -25.93% and reach $ 0.0₁₂4466 by December 28, 2025. Per our technical ...",
+      "source": "web"
+    },
+    {
+      "title": "Neuralink Stock Price: Can Crypto Investors Benefit from the Future ...",
+      "url": "https://www.gate.com/learn/articles/neuralink-stock-price-can-crypto-investors-benefit-from-the-future-of-brain-computer-interfaces/6902",
+      "date": "2025-02-28",
+      "last_updated": "2025-07-11",
+      "snippet": "Discover Neuralink's stock status, potential tokenization, and its impact on crypto markets. Explore AI, blockchain, and investment ...",
+      "source": "web"
+    },
+    {
+      "title": "Invest in Neuralink: Private Investment Guide",
+      "url": "https://tsginvest.com/neuralink/",
+      "date": "2025-04-29",
+      "last_updated": "2025-12-04",
+      "snippet": "By February 2025, secondary market activity indicated Neuralink shares trading at a premium, suggesting an implied valuation significantly higher. Neuralink ...",
+      "source": "web"
+    },
+    {
+      "title": "Neuralink Price Prediction | Coinbase",
+      "url": "https://www.coinbase.com/price-prediction/firstneuralink",
+      "snippet": "With your predicted price change of 5%, the Neuralink price prediction for 2026 is estimated to be $0.06. Always remember that factors like increasing ...",
+      "source": "web"
+    },
+    {
+      "title": "The top blockchain & crypto private companies for 2025— the New ...",
+      "url": "https://cryptoniteventures.substack.com/p/the-top-blockchain-private-companies",
+      "date": "2025-04-29",
+      "last_updated": "2025-11-29",
+      "snippet": "Neuralink (a Cryptonite 300 company), is also close to closing $500 million in new equity funds at a rumored valuation of $8.5 billion; a significant increase ...",
+      "source": "web"
+    },
+    {
+      "title": "Can You Invest in Neuralink? | INN",
+      "url": "https://investingnews.com/invest-neuralink-stock/",
+      "date": "2025-08-28",
+      "last_updated": "2025-11-29",
+      "snippet": "Neuralink was reportedly valued at around US$9 billion in May 2025, but as a privately held business, much of its financial information is kept ...",
+      "source": "web"
+    },
+    {
+      "title": "Neuralink Vertical Integration Strategy: AI-Driven BCI Manufacturing ...",
+      "url": "https://blockchain.news/ainews/neuralink-vertical-integration-strategy-ai-driven-bci-manufacturing-robotics-and-next-gen-applications-in-austin-hq",
+      "date": "2025-12-03",
+      "last_updated": "2025-12-03",
+      "snippet": "Analysts predict that by 2028, the global neurotechnology market could exceed $20 billion, as per a Grand View Research report from 2023, with ...",
+      "source": "web"
+    }
+  ],
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "# Strategic Analysis Report: Neuralink's Impact on the BTC Industry and Brain-Computer Interfaces\n\n## Deconstruction of Request\n\n**Core Components:**\n1. Analysis of Neuralink's relationship to the Bitcoin (BTC) industry\n2. Examination of Neuralink's brain-computer interface (BCI) technology impact\n3. Cross-sector implications for cryptocurrency and neurotechnology\n\n**Implicit Needs:**\n- Clarification of Neuralink's current status and market position\n- Understanding of potential technological and financial interconnections\n- Assessment of future market relevance\n\n## Identified Constraints\n\n**Technical Constraints:**\n- Neuralink remains a privately held company; direct stock/equity investment is not publicly available\n- Cryptocurrency tokens bearing the \"Neuralink\" name (NEURALINK and NLINK) exist but appear to be third-party tokens, not official company tokens\n- Limited availability of official company-specific financial data\n\n**Logical Constraints:**\n- Neuralink operates primarily in neurotechnology; its direct operational connection to Bitcoin is minimal\n- Current market correlation between Neuralink tokens and BTC would be speculative rather than fundamentally driven\n- The company has not issued official cryptocurrency or blockchain-based securities\n\n**Data Constraints:**\n- Search results contain cryptocurrency price predictions but lack comprehensive analysis of Neuralink's actual industry impact\n- Most information focuses on investment speculation rather than technological integration\n\n## Edge Cases & Potential Pitfalls\n\n- **Token Confusion**: Users may conflate third-party \"Neuralink\" crypto tokens with the actual company, leading to misguided investment decisions\n- **Speculative Valuation**: Secondary market valuations cited (ranging from $8.5B to $9B) lack transparent verification\n- **Premature Market Entry**: The search results suggest Neuralink tokenization is theoretical rather than implemented\n- **BCI-Blockchain Disconnect**: There's no inherent technological reason why brain-computer interfaces would directly impact Bitcoin's functionality or adoption\n\n## Current Status Assessment\n\n**Company Position:**\nNeuralink remains privately held, with recent valuations around $8.5-$9 billion as of mid-2025[6][7]. The company is actively fundraising and developing brain-computer interface technology rather than participating directly in cryptocurrency markets.\n\n**Cryptocurrency Token Status:**\nThird-party tokens labeled as \"NEURALINK\" and \"NLINK\" exist on cryptocurrency exchanges, displaying bearish technical indicators with expected price declines of approximately 25% by late December 2025[1][2]. These tokens are speculative assets unaffiliated with the actual Neuralink company.\n\n## Strategic Direction for Analysis\n\n**Three-Layer Framework:**\n\n1. **Direct Impact Analysis**: Examine whether Neuralink's technology has operational implications for Bitcoin infrastructure (answer: minimal to none currently)\n\n2. **Indirect Market Correlation**: Assess how blockchain/cryptocurrency markets have speculatively priced Neuralink exposure through third-party tokens\n\n3. **Future Convergence Scenarios**: Explore theoretical applications where BCIs and blockchain technology could intersect, including:\n   - Decentralized finance (DeFi) applications for neurotechnology monitoring\n   - Potential future tokenization of Neuralink equity via security tokens\n   - Integration of blockchain-based health data management with BCI systems\n\n**Conclusion**: Current evidence suggests Neuralink's impact on the BTC industry is speculative and indirect, mediated primarily through third-party cryptocurrency tokens rather than fundamental technological or operational connections. The meaningful convergence between neurotechnology and blockchain remains largely theoretical for 2025."
+      },
+      "delta": {
+        "role": "assistant",
+        "content": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+[Perplexity] Response received: # Strategic Analysis Report: Neuralink's Impact on...
+✅ [runStep] Received response from perplexity, content length: 3819
+📤 Returning success result for analyst, status: done, output length: 3819
+ POST /conversations?utm_source=homepage-hero 200 in 12.1s (compile: 1894µs, render: 12.1s)
+🚀 [runStep] Starting step researcher (researcher) with model gpt
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'gpt',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 3954 characters
+[GPT] Calling OpenAI API with model gpt-4o...
+⏳ [runStep] Waiting for gpt response (timeout: 70s)...
+[GPT] Response received: --- [RESEARCHER] Output ---
+
+## Targeted Search
+
+T...
+✅ [runStep] Received response from gpt, content length: 2866
+📤 Returning success result for researcher, status: done, output length: 2866
+ POST /conversations?utm_source=homepage-hero 200 in 8.4s (compile: 1975µs, render: 8.4s)
+🚀 [runStep] Starting step creator (creator) with model kimi
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'kimi',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 6851 characters
+[Kimi] Calling Moonshot API with model moonshot-v1-8k...
+[Kimi] API key present: true, starts with: sk-cQ0hV...
+⏳ [runStep] Waiting for kimi response (timeout: 70s)...
+Kimi Call Error: Error [ProviderCallError]: {"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}
+    at callKimi (lib/models.ts:267:19)
+    at async runStep (app/actions/workflow.ts:493:34)
+  265 |         if (!response.ok) {
+  266 |             const error = await response.text();
+> 267 |             throw new ProviderCallError("Kimi", error, response.status);
+      |                   ^
+  268 |         }
+  269 |
+  270 |         const data = await response.json(); {
+  provider: 'Kimi',
+  statusCode: 401
+}
+❌ [runStep] Promise race error for kimi: Error [ProviderCallError]: {"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}
+    at callKimi (lib/models.ts:267:19)
+    at async runStep (app/actions/workflow.ts:493:34)
+  265 |         if (!response.ok) {
+  266 |             const error = await response.text();
+> 267 |             throw new ProviderCallError("Kimi", error, response.status);
+      |                   ^
+  268 |         }
+  269 |
+  270 |         const data = await response.json(); {
+  provider: 'Kimi',
+  statusCode: 401
+}
+📝 Captured race error in errorDetails: {
+  message: '{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}',
+  provider: 'kimi',
+  type: 'network'
+}
+❌ Step creator (creator) returning error: {
+  message: '{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}',
+  type: 'network',
+  provider: 'kimi'
+}
+📤 Returning error result: {"outputDraft":"","status":"error","errorMessage":"{\"error\":{\"message\":\"Invalid Authentication\",\"type\":\"invalid_authentication_error\"}}","errorProvider":"kimi","errorType":"network","metadata":{"isMock":false,"providerName":"kimi"}}
+ POST /conversations?utm_source=homepage-hero 200 in 801ms (compile: 3ms, render: 798ms)
+ GET /conversations?utm_source=homepage-hero 200 in 50ms (compile: 5ms, render: 45ms)
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+🎯 Intelligent model assignment (4 unique models): analyst:gpt, researcher:perplexity, creator:gemini, critic:gemini, synthesizer:kimi
+📊 Model distribution: gpt:1x, perplexity:1x, gemini:2x, kimi:1x
+ POST /conversations?utm_source=homepage-hero 200 in 19ms (compile: 4ms, render: 15ms)
+🚀 [runStep] Starting step analyst (analyst) with model gpt
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'gpt',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 107 characters
+[GPT] Calling OpenAI API with model gpt-4o...
+⏳ [runStep] Waiting for gpt response (timeout: 70s)...
+[GPT] Response received: # Analysis Request Breakdown
+
+## 1. Deconstruct th...
+✅ [runStep] Received response from gpt, content length: 3643
+📤 Returning success result for analyst, status: awaiting_user, output length: 3643
+ POST /conversations?utm_source=homepage-hero 200 in 12.1s (compile: 5ms, render: 12.1s)
+ GET /conversations?utm_source=homepage-hero 200 in 34ms (compile: 2ms, render: 31ms)
+ GET /conversations?utm_source=homepage-hero 200 in 46ms (compile: 5ms, render: 41ms)
+ GET /conversations?utm_source=homepage-hero 200 in 59ms (compile: 41ms, render: 18ms)
+[workflow] Backend env already loaded
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+🎯 Intelligent model assignment (4 unique models): analyst:gpt, researcher:gemini, creator:perplexity, critic:gemini, synthesizer:kimi
+📊 Model distribution: gpt:1x, gemini:2x, perplexity:1x, kimi:1x
+ POST /conversations?utm_source=homepage-hero 200 in 26ms (compile: 3ms, render: 23ms)
+🚀 [runStep] Starting step analyst (analyst) with model gpt
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'gpt',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 89 characters
+[GPT] Calling OpenAI API with model gpt-4o...
+⏳ [runStep] Waiting for gpt response (timeout: 70s)...
+[GPT] Response received: # User Request Analysis Report
+
+## 1. Deconstruct ...
+✅ [runStep] Received response from gpt, content length: 3229
+📤 Returning success result for analyst, status: done, output length: 3229
+ POST /conversations?utm_source=homepage-hero 200 in 8.2s (compile: 1642µs, render: 8.2s)
+🚀 [runStep] Starting step researcher (researcher) with model gemini
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'gemini',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 3346 characters
+[Gemini] Calling Google API with model gemini-2.5-flash...
+⏳ [runStep] Waiting for gemini response (timeout: 70s)...
+[Gemini] Response received: As an expert Researcher, I've conducted a targeted...
+✅ [runStep] Received response from gemini, content length: 4296
+📤 Returning success result for researcher, status: done, output length: 4296
+ POST /conversations?utm_source=homepage-hero 200 in 9.9s (compile: 3ms, render: 9.9s)
+🚀 [runStep] Starting step creator (creator) with model perplexity
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'perplexity',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 7673 characters
+[Perplexity] Calling Perplexity API with model sonar-pro... (attempt 1/3)
+⏳ [runStep] Waiting for perplexity response (timeout: 70s)...
+[Perplexity] Full response data: {
+  "id": "103b9f52-9641-4f32-b0a0-bb9b9e2026d9",
+  "model": "sonar-pro",
+  "created": 1764862027,
+  "usage": {
+    "prompt_tokens": 1790,
+    "completion_tokens": 645,
+    "total_tokens": 2435,
+    "search_context_size": "low",
+    "cost": {
+      "input_tokens_cost": 0.005,
+      "output_tokens_cost": 0.01,
+      "request_cost": 0.006,
+      "total_cost": 0.021
+    }
+  },
+  "citations": [
+    "https://www.crfb.org/press-releases/gross-national-debt-reaches-38-trillion",
+    "https://bipartisanpolicy.org/report/deficit-tracker/",
+    "https://fortune.com/2025/12/01/elon-musk-national-debt-solved-ai-robotics-doge/",
+    "https://fortune.com/2025/11/17/america-national-debt-inflation-fed-independence-inflation-fears-jp/",
+    "https://www.jec.senate.gov/public/index.cfm/republicans/debt-dashboard",
+    "https://www.congress.gov/crs-product/IN12045",
+    "https://www.pgpf.org/article/the-federal-government-has-borrowed-trillions-but-who-owns-all-that-debt/"
+  ],
+  "search_results": [
+    {
+      "title": "Gross National Debt Reaches $38 Trillion",
+      "url": "https://www.crfb.org/press-releases/gross-national-debt-reaches-38-trillion",
+      "date": "2025-10-22",
+      "last_updated": "2025-10-24",
+      "snippet": "The quick pace of debt buildup is largely attributable to delayed borrowing while the debt ceiling was close to being breached and extraordinary ...",
+      "source": "web"
+    },
+    {
+      "title": "Deficit Tracker - Bipartisan Policy Center",
+      "url": "https://bipartisanpolicy.org/report/deficit-tracker/",
+      "date": "2025-11-11",
+      "last_updated": "2025-11-17",
+      "snippet": "Even as the U.S. economy expands, the federal government continues to run large and growing budget deficits that will soon exceed $1 trillion per year.",
+      "source": "web"
+    },
+    {
+      "title": "US national debt: Telsa CEO Elon Musk says AI and robotics will solve crisis but lead to deflation",
+      "url": "https://fortune.com/2025/12/01/elon-musk-national-debt-solved-ai-robotics-doge/",
+      "date": "2025-12-01",
+      "last_updated": "2025-12-02",
+      "snippet": "",
+      "source": "web"
+    },
+    {
+      "title": "America's path out of $38 trillion national debt crisis likely involves pushing up inflation and 'eroding Fed independence,' says JPMorgan Private Bank",
+      "url": "https://fortune.com/2025/11/17/america-national-debt-inflation-fed-independence-inflation-fears-jp/",
+      "date": "2025-11-17",
+      "last_updated": "2025-11-17",
+      "snippet": "",
+      "source": "web"
+    },
+    {
+      "title": "Debt Dashboard - U.S. Congress Joint Economic Committee",
+      "url": "https://www.jec.senate.gov/public/index.cfm/republicans/debt-dashboard",
+      "date": "2025-01-01",
+      "last_updated": "2025-12-04",
+      "snippet": "US public debt in the form of Treasury securities is primarily made up of bills (4-52 weeks), notes (2-10 years), and bonds (20-30 years).",
+      "source": "web"
+    },
+    {
+      "title": "Federal Debt and the Debt Limit in 2025 | Congress.gov",
+      "url": "https://www.congress.gov/crs-product/IN12045",
+      "date": "2025-09-11",
+      "last_updated": "2025-08-29",
+      "snippet": "At that time, debt held by the public was $3.3 trillion (about 32% of GDP), which included Federal Reserve holdings of Treasury debt (about $0.5 ...",
+      "source": "web"
+    },
+    {
+      "title": "The Federal Government Has Borrowed Trillions. Who Owns All that ...",
+      "url": "https://www.pgpf.org/article/the-federal-government-has-borrowed-trillions-but-who-owns-all-that-debt/",
+      "date": "2025-10-22",
+      "last_updated": "2025-12-04",
+      "snippet": "Most federal debt is owed to domestic holders, but foreign ownership is much higher now than it was about 50 years ago.",
+      "source": "web"
+    }
+  ],
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "# US National Debt Report\n\n## Current Debt Status\n\nThe United States gross national debt has reached **$38 trillion**, marking a significant milestone in the nation's fiscal history.[1] This represents an extraordinary acceleration in debt accumulation—the debt climbed from $37 trillion to $38 trillion in just over two months, a pace largely driven by delayed borrowing that occurred while the debt ceiling was close to being breached.[1]\n\nBeyond the gross debt figure, economists often focus on **debt held by the public**, which has now grown to equal the entire size of the US economy—a threshold that historically has only been exceeded during periods of world war.[1] This metric is considered more meaningful for assessing fiscal health than gross national debt, as it excludes intragovernmental holdings where the government owes money to itself.\n\n## The Deficit Crisis\n\nThe federal government is running substantial and accelerating budget deficits. For fiscal year 2025 (which ended September 30), the deficit reached **$1.8 trillion**, and projections indicate deficits are headed toward **$2 trillion annually** over the coming decade.[1][2] By August 2025, the cumulative fiscal year deficit had already reached $2.0 trillion, representing a 1% increase compared to the same period in the previous year after adjusting for timing effects.[2]\n\nThe deficit growth has been driven by outlays increasing at a faster pace than revenues. While revenues increased 7% from fiscal year 2024 to 2025, outlays increased by only 5% through August, yet the deficit still grew due to the already substantial gap between spending and revenue collection.[2]\n\n## Interest Payments and Fiscal Pressures\n\nOne of the most alarming developments is the cost of servicing the national debt. The United States is on course to spend **$1 trillion annually just on interest payments**, a figure that now exceeds spending on national defense.[1] This massive interest burden crowds out spending on other priorities and represents a growing constraint on the federal budget.\n\nThe rapid debt accumulation during 2025 has been partially attributed to extraordinary measures taken to manage the debt ceiling crisis. When the debt ceiling approached breach levels from January through July 2025, the Treasury employed special measures to extend borrowing capacity, which resulted in delayed borrowing that subsequently contributed to the rapid debt accumulation observed in recent months.[1]\n\n## Treasury Debt Composition\n\nUS public debt is primarily composed of three main types of Treasury securities:[5]\n\n- **Treasury bills** (4-52 weeks maturity)\n- **Treasury notes** (2-10 years maturity)\n- **Treasury bonds** (20-30 years maturity)\n\nThis diversified maturity structure allows the Treasury to manage its borrowing needs across different time horizons and to refinance maturing debt continuously.\n\n## Long-Term Fiscal Outlook\n\nThe trajectory of US debt is unsustainable under current fiscal policies. The combination of rising interest costs, growing deficits, and structural spending pressures on entitlements creates a fiscal situation that economists describe as \"just as bleak\" as the debt figures alone suggest.[1] Without significant policy changes affecting either revenues or spending, the debt will continue to accumulate at an accelerating pace, with cascading effects on the broader economy."
+      },
+      "delta": {
+        "role": "assistant",
+        "content": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+[Perplexity] Response received: # US National Debt Report
+
+## Current Debt Status
+...
+✅ [runStep] Received response from perplexity, content length: 3388
+📤 Returning success result for creator, status: done, output length: 3388
+ POST /conversations?utm_source=homepage-hero 200 in 11.5s (compile: 3ms, render: 11.5s)
+🚀 [runStep] Starting step critic (critic) with model gemini
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'gemini',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 11089 characters
+[Gemini] Calling Google API with model gemini-2.5-flash...
+⏳ [runStep] Waiting for gemini response (timeout: 70s)...
+[Gemini] Response received: The Creator's report shows a good attempt at struc...
+✅ [runStep] Received response from gemini, content length: 6295
+📤 Returning success result for critic, status: done, output length: 6295
+ POST /conversations?utm_source=homepage-hero 200 in 21.6s (compile: 4ms, render: 21.6s)
+🚀 [runStep] Starting step synth (synthesizer) with model kimi
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'kimi',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 17411 characters
+[Kimi] Calling Moonshot API with model moonshot-v1-8k...
+[Kimi] API key present: true, starts with: sk-cQ0hV...
+⏳ [runStep] Waiting for kimi response (timeout: 70s)...
+Kimi Call Error: Error [ProviderCallError]: {"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}
+    at callKimi (lib/models.ts:267:19)
+    at async runStep (app/actions/workflow.ts:493:34)
+  265 |         if (!response.ok) {
+  266 |             const error = await response.text();
+> 267 |             throw new ProviderCallError("Kimi", error, response.status);
+      |                   ^
+  268 |         }
+  269 |
+  270 |         const data = await response.json(); {
+  provider: 'Kimi',
+  statusCode: 401
+}
+❌ [runStep] Promise race error for kimi: Error [ProviderCallError]: {"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}
+    at callKimi (lib/models.ts:267:19)
+    at async runStep (app/actions/workflow.ts:493:34)
+  265 |         if (!response.ok) {
+  266 |             const error = await response.text();
+> 267 |             throw new ProviderCallError("Kimi", error, response.status);
+      |                   ^
+  268 |         }
+  269 |
+  270 |         const data = await response.json(); {
+  provider: 'Kimi',
+  statusCode: 401
+}
+📝 Captured race error in errorDetails: {
+  message: '{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}',
+  provider: 'kimi',
+  type: 'network'
+}
+❌ Step synth (synthesizer) returning error: {
+  message: '{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}',
+  type: 'network',
+  provider: 'kimi'
+}
+📤 Returning error result: {"outputDraft":"","status":"error","errorMessage":"{\"error\":{\"message\":\"Invalid Authentication\",\"type\":\"invalid_authentication_error\"}}","errorProvider":"kimi","errorType":"network","metadata":{"isMock":false,"providerName":"kimi"}}
+ POST /conversations?utm_source=homepage-hero 200 in 600ms (compile: 3ms, render: 598ms)
+ GET /conversations?utm_source=homepage-hero 200 in 265ms (compile: 2ms, render: 263ms)
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+🎯 Intelligent model assignment (4 unique models): analyst:perplexity, researcher:gemini, creator:gpt, critic:kimi, synthesizer:gemini
+📊 Model distribution: perplexity:1x, gemini:2x, gpt:1x, kimi:1x
+ POST /conversations?utm_source=homepage-hero 200 in 16ms (compile: 3ms, render: 14ms)
+🚀 [runStep] Starting step analyst (analyst) with model perplexity
+[workflow] Backend env already loaded
+[workflow] Checking if perplexity is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'perplexity',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 37 characters
+[Perplexity] Calling Perplexity API with model sonar-pro... (attempt 1/3)
+⏳ [runStep] Waiting for perplexity response (timeout: 70s)...
+[Perplexity] Full response data: {
+  "id": "09af795b-4b39-4674-a95f-5ab74927eabe",
+  "model": "sonar-pro",
+  "created": 1764862333,
+  "usage": {
+    "prompt_tokens": 135,
+    "completion_tokens": 722,
+    "total_tokens": 857,
+    "search_context_size": "low",
+    "cost": {
+      "input_tokens_cost": 0,
+      "output_tokens_cost": 0.011,
+      "request_cost": 0.006,
+      "total_cost": 0.017
+    }
+  },
+  "citations": [
+    "https://mecenemarket.com/blogs/journal/bryan-johnson",
+    "https://mynucleus.com/blog/bryan-johnson-net-worth",
+    "https://fortune.com/2023/02/01/how-did-bryan-johnson-make-his-money/",
+    "https://tim.blog/2015/06/12/bryan-johnson/",
+    "https://www.imdb.com/name/nm9710956/bio/",
+    "https://news.uchicago.edu/story/how-one-entrepreneur-tackling-humanitys-most-pressing-problems",
+    "https://time.com/6315607/bryan-johnsons-quest-for-immortality/"
+  ],
+  "search_results": [
+    {
+      "title": "Meet Bryan Johnson - Mécène Market",
+      "url": "https://mecenemarket.com/blogs/journal/bryan-johnson",
+      "date": "2025-04-12",
+      "last_updated": "2025-04-12",
+      "snippet": "Bryan Johnson (b. August 22, 1977) is an American entrepreneur, venture capitalist, and bio-optimization pioneer. He is best known as the founder of Braintree.",
+      "source": "web"
+    },
+    {
+      "title": "Bryan Johnson's net worth: Growth timeline, wealth sources, and ...",
+      "url": "https://mynucleus.com/blog/bryan-johnson-net-worth",
+      "date": "2024-10-28",
+      "last_updated": "2025-12-02",
+      "snippet": "Bryan Johnson began his entrepreneurial journey at age 22 and started five businesses between 1999 and 2003. He had some small wins, but ...",
+      "source": "web"
+    },
+    {
+      "title": "How did Bryan Johnson make his money? Youth-chasing millionaire ...",
+      "url": "https://fortune.com/2023/02/01/how-did-bryan-johnson-make-his-money/",
+      "date": "2023-02-01",
+      "last_updated": "2025-10-29",
+      "snippet": "Before getting a taste for entrepreneurialism, he became a Mormon missionary and spent two years in Ecuador at 19.",
+      "source": "web"
+    },
+    {
+      "title": "The Rags to Riches Philosopher: Bryan Johnson's Path to $800 ...",
+      "url": "https://tim.blog/2015/06/12/bryan-johnson/",
+      "date": "2015-06-12",
+      "last_updated": "2025-11-28",
+      "snippet": "Bryan Johnson is an entrepreneur and investor. He is the founder of OS Fund and Braintree, the latter of which was bought by eBay in 2013 for $800 million in ...",
+      "source": "web"
+    },
+    {
+      "title": "Bryan Johnson - Biography - IMDb",
+      "url": "https://www.imdb.com/name/nm9710956/bio/",
+      "date": "2025-10-15",
+      "last_updated": "2025-10-15",
+      "snippet": "Bryan Johnson is the founder of Kernel, Braintree Venmo and OS Fund. Bryan founded Kernel in 2016 to build a next generation, non-invasive brain interface.",
+      "source": "web"
+    },
+    {
+      "title": "How one entrepreneur is tackling humanity's most pressing problems",
+      "url": "https://news.uchicago.edu/story/how-one-entrepreneur-tackling-humanitys-most-pressing-problems",
+      "date": "2019-09-06",
+      "last_updated": "2025-12-04",
+      "snippet": "Braintree founder Bryan Johnson, MBA'07, invests big in two bold new ventures, OS Fund and Kernel.",
+      "source": "web"
+    },
+    {
+      "title": "The Man Who Thinks He Can Live Forever - Time Magazine",
+      "url": "https://time.com/6315607/bryan-johnsons-quest-for-immortality/",
+      "date": "2023-09-20",
+      "last_updated": "2025-12-04",
+      "snippet": "Johnson, 46, is a centimillionaire tech entrepreneur who has spent most of the last three years in pursuit of a singular goal: don't die.",
+      "source": "web"
+    }
+  ],
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "# Analysis of User Request\n\n## Deconstruction of the Request\n\nThe user is asking \"who is bryan johnson\" (note: there appears to be a minor typo in \"whyo\"). This is a straightforward **biographical query** requesting identification and information about a specific individual named Bryan Johnson.\n\n**Core components:**\n- Identity clarification\n- Background and professional history\n- Notable achievements and current ventures\n- Personal significance/public profile\n\n## Identified Constraints\n\n1. **Disambiguation potential**: Multiple people named Bryan Johnson exist, but context from search results clearly indicates the tech entrepreneur/venture capitalist\n2. **Format requirement**: Per guidelines, this requires a short, comprehensive biography without starting with the person's name as a header\n3. **Scope management**: Balance between providing sufficient detail and maintaining conciseness appropriate for a biographical summary\n4. **Citation accuracy**: Multiple search results contain overlapping information that should be synthesized naturally\n\n## Edge Cases & Potential Pitfalls\n\n- Conflicting information: One search result states Braintree was bought by \"eBay in 2013\" [4] while others correctly state PayPal [1][3][5] — must prioritize accurate sources\n- Multiple ventures and complex timeline could overwhelm a short biography\n- Risk of over-citing or under-citing given the wealth of supporting information\n\n## Strategic Direction\n\n**Recommended approach:**\n1. Open with direct identification and current relevance\n2. Trace chronological arc: early life → entrepreneurial journey → major exit → current ventures\n3. Highlight defining characteristics: bio-optimization focus, impact-driven mindset\n4. Organize by major achievements (Braintree, OS Fund, Kernel) rather than pure chronology\n5. Cite strategically to support key claims without over-citation\n\n---\n\n# Response\n\nBryan Johnson is an American entrepreneur, venture capitalist, and bio-optimization pioneer born on August 22, 1977[1]. He is best known for founding Braintree, a fintech payment platform that he sold to PayPal in 2013 for $800 million[1][3].\n\nJohnson's path to success was unconventional. After serving as a Mormon missionary in Ecuador from ages 19-21, where he experienced poverty firsthand, he returned to the United States determined to build wealth so he could pursue world-bettering initiatives. He launched five businesses between 1999 and 2003 with limited success, eventually turning to sales work before founding Braintree in 2007[2]. The payment platform became a major player in e-commerce infrastructure, powering companies like Uber and Airbnb, and achieved 4,000% growth within three years[3].\n\nFollowing the PayPal acquisition, Johnson channeled his resources into ambitious ventures aligned with his vision of advancing humanity. In 2014, he founded OS Fund, a venture capital firm investing $100 million of his personal capital into frontier science and biotechnology startups working on transformative technologies including synthetic biology, artificial intelligence, and space exploration[1][5]. He also founded Kernel in 2016, a neurotechnology company developing non-invasive brain interface technology designed to measure brain signals and unlock insights into cognition[1][5].\n\nMore recently, Johnson has become a public figure through Project Blueprint, a personal experiment in age reversal and health optimization involving comprehensive biometric monitoring and lifestyle interventions. His estimated net worth is around $400 million[3]. In addition to his entrepreneurial ventures, Johnson has authored bestselling children's books and is an outdoor enthusiast who has climbed some of the world's tallest mountains[5]."
+      },
+      "delta": {
+        "role": "assistant",
+        "content": ""
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+[Perplexity] Response received: # Analysis of User Request
+
+## Deconstruction of t...
+✅ [runStep] Received response from perplexity, content length: 3739
+📤 Returning success result for analyst, status: done, output length: 3739
+ POST /conversations?utm_source=homepage-hero 200 in 12.3s (compile: 1297µs, render: 12.3s)
+🚀 [runStep] Starting step researcher (researcher) with model gemini
+[workflow] Backend env already loaded
+[workflow] Checking if gemini is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'gemini',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 3804 characters
+[Gemini] Calling Google API with model gemini-2.5-flash...
+⏳ [runStep] Waiting for gemini response (timeout: 70s)...
+[Gemini] Response received: **1. Targeted Search (Simulated Queries):**
+
+*   "...
+✅ [runStep] Received response from gemini, content length: 2476
+📤 Returning success result for researcher, status: done, output length: 2476
+ POST /conversations?utm_source=homepage-hero 200 in 11.5s (compile: 3ms, render: 11.5s)
+🚀 [runStep] Starting step creator (creator) with model gpt
+[workflow] Backend env already loaded
+[workflow] Checking if gpt is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'gpt',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 6311 characters
+[GPT] Calling OpenAI API with model gpt-4o...
+⏳ [runStep] Waiting for gpt response (timeout: 70s)...
+[GPT] Response received: **Solution Design**
+
+To address the user's inquiry...
+✅ [runStep] Received response from gpt, content length: 3561
+📤 Returning success result for creator, status: done, output length: 3561
+ POST /conversations?utm_source=homepage-hero 200 in 18.0s (compile: 2ms, render: 18.0s)
+🚀 [runStep] Starting step critic (critic) with model kimi
+[workflow] Backend env already loaded
+[workflow] Checking if kimi is available: true
+📊 [runStep] Model availability: {
+  gpt: true,
+  gemini: true,
+  perplexity: true,
+  kimi: true,
+  mockMode: false,
+  selectedModel: 'kimi',
+  selectedModelAvailable: true
+}
+📝 [runStep] Context length: 9900 characters
+[Kimi] Calling Moonshot API with model moonshot-v1-8k...
+[Kimi] API key present: true, starts with: sk-cQ0hV...
+⏳ [runStep] Waiting for kimi response (timeout: 70s)...
+Kimi Call Error: Error [ProviderCallError]: {"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}
+    at callKimi (lib/models.ts:267:19)
+    at async runStep (app/actions/workflow.ts:493:34)
+  265 |         if (!response.ok) {
+  266 |             const error = await response.text();
+> 267 |             throw new ProviderCallError("Kimi", error, response.status);
+      |                   ^
+  268 |         }
+  269 |
+  270 |         const data = await response.json(); {
+  provider: 'Kimi',
+  statusCode: 401
+}
+❌ [runStep] Promise race error for kimi: Error [ProviderCallError]: {"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}
+    at callKimi (lib/models.ts:267:19)
+    at async runStep (app/actions/workflow.ts:493:34)
+  265 |         if (!response.ok) {
+  266 |             const error = await response.text();
+> 267 |             throw new ProviderCallError("Kimi", error, response.status);
+      |                   ^
+  268 |         }
+  269 |
+  270 |         const data = await response.json(); {
+  provider: 'Kimi',
+  statusCode: 401
+}
+📝 Captured race error in errorDetails: {
+  message: '{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}',
+  provider: 'kimi',
+  type: 'network'
+}
+❌ Step critic (critic) returning error: {
+  message: '{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}',
+  type: 'network',
+  provider: 'kimi'
+}
+📤 Returning error result: {"outputDraft":"","status":"error","errorMessage":"{\"error\":{\"message\":\"Invalid Authentication\",\"type\":\"invalid_authentication_error\"}}","errorProvider":"kimi","errorType":"network","metadata":{"isMock":false,"providerName":"kimi"}}
+ POST /conversations?utm_source=homepage-hero 200 in 1144ms (compile: 2ms, render: 1141ms)
+[?25h

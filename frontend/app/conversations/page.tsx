@@ -616,6 +616,20 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
     router.push(`/conversations/${id}`)
   }
 
+  const handleDeleteChat = (id: string) => {
+    setHistory((prev) => prev.filter((item) => item.id !== id))
+    toast.success('Chat deleted')
+  }
+
+  const handleRenameChat = (id: string, newName: string) => {
+    setHistory((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, firstLine: newName } : item
+      )
+    )
+    toast.success('Chat renamed')
+  }
+
   const handleModelSelect = (modelId: string) => {
     setSelectedModel(modelId)
     const modelName = SYNTRA_MODELS.find((m) => m.id === modelId)?.name
@@ -924,6 +938,8 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       onSendMessage={handleSendMessage}
       onNewChat={handleNewChat}
       onHistoryClick={handleHistoryClick}
+      onDeleteChat={handleDeleteChat}
+      onRenameChat={handleRenameChat}
       isLoading={isLoading}
       selectedModel={selectedModel}
       onModelSelect={handleModelSelect}

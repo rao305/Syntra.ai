@@ -1,0 +1,1213 @@
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Will watch for changes in these directories: ['/Users/rao305/Documents/Syntra/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [19153] using WatchFiles
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [19165]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 10:20:32,699 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 10:20:32,699 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 10:20:32,701 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 10:20:32,701 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 10:20:32,703 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 10:20:32,703 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 10:20:32,704 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 10:20:32,705 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+INFO:     127.0.0.1:54917 - "GET /api/test HTTP/1.1" 404 Not Found
+WARNING:  WatchFiles detected changes in 'app/services/collaboration_orchestrator.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [19165]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [40539]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 11:00:58,609 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 11:00:58,610 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:00:58,617 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 11:00:58,617 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:00:58,621 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 11:00:58,621 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:00:58,622 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 11:00:58,622 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/provider_dispatch.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40539]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [40658]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 11:01:05,046 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 11:01:05,046 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:01:05,049 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 11:01:05,049 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:01:05,051 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 11:01:05,051 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:01:05,052 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 11:01:05,052 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/provider_dispatch.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40658]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [40724]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 11:01:09,148 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 11:01:09,148 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:01:09,150 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 11:01:09,150 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:01:09,152 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 11:01:09,152 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:01:09,153 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 11:01:09,153 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/collaboration_orchestrator.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40724]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [40788]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 11:01:12,791 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 11:01:12,791 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:01:12,793 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 11:01:12,793 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:01:12,794 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 11:01:12,794 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:01:12,795 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 11:01:12,795 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/collaboration_orchestrator.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40788]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [40956]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 11:01:22,893 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 11:01:22,894 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:01:22,896 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 11:01:22,896 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:01:22,898 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 11:01:22,898 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:01:22,899 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 11:01:22,899 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/collaboration_orchestrator.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [40956]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [42452]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 11:03:16,144 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 11:03:16,144 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:03:16,146 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 11:03:16,146 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:03:16,148 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 11:03:16,148 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:03:16,149 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 11:03:16,149 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/collaboration_orchestrator.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [42452]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [42545]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 11:03:23,044 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 11:03:23,044 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:03:23,046 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 11:03:23,046 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:03:23,048 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 11:03:23,048 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:03:23,049 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 11:03:23,049 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/collaboration_orchestrator.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [42545]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [43472]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 11:04:46,793 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 11:04:46,793 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:04:46,795 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 11:04:46,796 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:04:46,798 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 11:04:46,798 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:04:46,799 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 11:04:46,799 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/collaboration_orchestrator.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [43472]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [43696]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 11:05:02,662 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 11:05:02,662 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:05:02,664 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 11:05:02,664 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:05:02,665 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 11:05:02,665 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:05:02,667 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 11:05:02,667 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/api/threads.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [43696]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [45771]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 11:08:03,474 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 11:08:03,474 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:08:03,477 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 11:08:03,477 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:08:03,480 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 11:08:03,480 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 11:08:03,482 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 11:08:03,482 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+INFO:     127.0.0.1:60143 - "GET /api/health HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:60824 - "OPTIONS /api/threads/ HTTP/1.1" 200 OK
+2025-12-04 16:09:38,006 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:09:38,007 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-04 16:09:38,007 INFO sqlalchemy.engine.Engine [generated in 0.00024s] ()
+2025-12-04 16:09:38,053 INFO sqlalchemy.engine.Engine INSERT INTO threads (id, org_id, creator_id, title, description, last_message_preview, pinned, last_provider, last_model) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::BOOLEAN, $8::VARCHAR, $9::VARCHAR) RETURNING threads.created_at, threads.updated_at
+2025-12-04 16:09:38,053 INFO sqlalchemy.engine.Engine [generated in 0.00019s] ('22a488e0-3e90-47a9-903d-9184d8a5dcb0', 'org_demo', None, 'Hi', '', None, False, None, None)
+2025-12-04 16:09:38,068 INFO sqlalchemy.engine.Engine COMMIT
+2025-12-04 16:09:38,070 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:09:38,071 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-12-04 16:09:38,071 INFO sqlalchemy.engine.Engine [generated in 0.00005s] ('22a488e0-3e90-47a9-903d-9184d8a5dcb0',)
+INFO:     127.0.0.1:60824 - "POST /api/threads/ HTTP/1.1" 200 OK
+2025-12-04 16:09:38,075 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:60824 - "OPTIONS /api/threads/22a488e0-3e90-47a9-903d-9184d8a5dcb0/messages HTTP/1.1" 200 OK
+🔍 DEBUG: add_message called - collaboration_mode=False, content=Hi...
+2025-12-04 16:09:38,078 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:09:38,078 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-04 16:09:38,078 INFO sqlalchemy.engine.Engine [cached since 0.0714s ago] ()
+2025-12-04 16:09:38,090 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-04 16:09:38,090 INFO sqlalchemy.engine.Engine [generated in 0.00011s] ('22a488e0-3e90-47a9-903d-9184d8a5dcb0', 'org_demo')
+2025-12-04 16:09:38,091 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-12-04 16:09:38,091 INFO sqlalchemy.engine.Engine [generated in 0.00006s] ('org_demo',)
+2025-12-04 16:09:38,093 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-04 16:09:38,093 INFO sqlalchemy.engine.Engine [generated in 0.00006s] ('22a488e0-3e90-47a9-903d-9184d8a5dcb0', 20)
+2025-12-04 16:09:38,105 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.is_active = $2::VARCHAR
+2025-12-04 16:09:38,105 INFO sqlalchemy.engine.Engine [generated in 0.00009s] ('org_demo', 'true')
+[CTX] build_contextual_messages called with thread_id='22a488e0-3e90-47a9-903d-9184d8a5dcb0', type=str
+[CTX] _load_short_term_history called with thread_id='22a488e0-3e90-47a9-903d-9184d8a5dcb0', type=str
+[CTX] Attempting to load from in-memory thread storage...
+[THREAD_STORE] get_thread: id='22a488e0-3e90-47a9-903d-9184d8a5dcb0', exists=False, obj_id=None, turns=0
+[THREAD_STORE] get_history: no thread for id='22a488e0-3e90-47a9-903d-9184d8a5dcb0'
+[CTX] get_history returned 0 turns for thread_id='22a488e0-3e90-47a9-903d-9184d8a5dcb0'
+[CTX] No history found for thread_id='22a488e0-3e90-47a9-903d-9184d8a5dcb0' (thread may not exist or has no turns)
+2025-12-04 16:09:38,111 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-04 16:09:38,111 INFO sqlalchemy.engine.Engine [cached since 0.01804s ago] ('22a488e0-3e90-47a9-903d-9184d8a5dcb0', 20)
+⚠️  No messages found in DB for thread 22a488e0-3e90-47a9-903d-9184d8a5dcb0
+⚠️  No conversation history available for thread 22a488e0-3e90-47a9-903d-9184d8a5dcb0, starting fresh
+📚 Loaded 0 validated history messages
+[CTX] Conversation history turns: 0 (before adding current user message)
+[CTX] Memory retrieval disabled (memory_enabled=False)
+
+================================================================================
+🔧 CONTEXT BUILDER: thread_id=22a488e0-3e90-47a9-903d-9184d8a5dcb0
+================================================================================
+Short-term history turns: 0
+Memory snippet present: False
+Query rewritten: False
+Is ambiguous: False
+Total messages: 2
+System messages: 1
+Conversation history turns: 1
+
+Messages array preview:
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Original user message:
+Hi
+
+Conversation history summary:
+================================================================================
+
+
+================================================================================
+📤 SENDING TO PROVIDER (non-streaming): gemini/gemini-2.5-flash
+================================================================================
+Using centralized context builder ✓
+Total messages: 2
+Conversation history turns: 0
+Memory snippet present: False
+Query rewritten: False
+
+Messages preview (first 120 chars each):
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Original user message:
+Hi
+================================================================================
+
+2025-12-04 16:09:38,112 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.provider = $2::provider_type AND provider_keys.is_active = $3::VARCHAR
+2025-12-04 16:09:38,112 INFO sqlalchemy.engine.Engine [generated in 0.00005s] ('org_demo', 'gemini', 'true')
+[NORMAL MODE] provider=gemini model=gemini-2.5-flash finish_reason=None prompt_tokens=1457 completion_tokens=9 total_tokens=1466 content_length=32
+2025-12-04 16:09:38,873 INFO sqlalchemy.engine.Engine SELECT max(messages.sequence) AS max_1 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR
+2025-12-04 16:09:38,873 INFO sqlalchemy.engine.Engine [generated in 0.00043s] ('22a488e0-3e90-47a9-903d-9184d8a5dcb0',)
+2025-12-04 16:09:38,881 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, prompt_tokens, completion_tokens, total_tokens, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::INTEGER, $10::INTEGER, $11::INTEGER, $12::INTEGER) RETURNING messages.created_at
+2025-12-04 16:09:38,882 INFO sqlalchemy.engine.Engine [generated in 0.00133s] ('792c0ffd-cb59-4271-aa7e-467afbc9e935', '22a488e0-3e90-47a9-903d-9184d8a5dcb0', None, 'user', 'Hi', None, None, None, None, None, None, 0)
+2025-12-04 16:09:38,889 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, meta, prompt_tokens, completion_tokens, total_tokens, citations, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::JSON, $10::INTEGER, $11::INTEGER, $12::INTEGER, $13::JSON, $14::INTEGER) RETURNING messages.created_at
+2025-12-04 16:09:38,890 INFO sqlalchemy.engine.Engine [generated in 0.00102s] ('dff92c9a-4ba4-4228-96fd-2f5862196ae7', '22a488e0-3e90-47a9-903d-9184d8a5dcb0', None, 'assistant', 'Hello! How can I help you today?', 'gemini', 'gemini-2.5-flash', None, '{"latency_ms": 754.82, "request_id": null}', 1457, 9, 1466, 'null', 1)
+2025-12-04 16:09:38,895 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-12-04 16:09:38,895 INFO sqlalchemy.engine.Engine [generated in 0.00035s] ('22a488e0-3e90-47a9-903d-9184d8a5dcb0',)
+2025-12-04 16:09:38,900 INFO sqlalchemy.engine.Engine UPDATE threads SET last_message_preview=$1::VARCHAR, last_provider=$2::VARCHAR, last_model=$3::VARCHAR, updated_at=now() WHERE threads.id = $4::VARCHAR
+2025-12-04 16:09:38,900 INFO sqlalchemy.engine.Engine [generated in 0.00024s] ('Hi', 'gemini', 'gemini-2.5-flash', '22a488e0-3e90-47a9-903d-9184d8a5dcb0')
+2025-12-04 16:09:38,906 INFO sqlalchemy.engine.Engine INSERT INTO audit_logs (id, thread_id, message_id, user_id, provider, model, reason, fragments_included, fragments_excluded, scope, package_hash, response_hash, prompt_tokens, completion_tokens, total_tokens) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::JSON, $9::JSON, $10::VARCHAR, $11::VARCHAR, $12::VARCHAR, $13::INTEGER, $14::INTEGER, $15::INTEGER) RETURNING audit_logs.created_at
+2025-12-04 16:09:38,906 INFO sqlalchemy.engine.Engine [generated in 0.00062s] ('341ca1ef-2a25-46a0-bf14-a57ebf79ab66', '22a488e0-3e90-47a9-903d-9184d8a5dcb0', 'dff92c9a-4ba4-4228-96fd-2f5862196ae7', None, 'gemini', 'gemini-2.5-flash', 'Simple conversation - Gemini Flash for quick responses', '[]', '[]', 'private', 'd771b07bcab861cd563392337bad16c7fdf88c9d5488ebc876b08f596e18216c', 'fda564ba3f7a0f028106d468420f674898ed99ac5bf2765ac9586206e39d73c5', 1457, 9, 1466)
+2025-12-04 16:09:38,911 INFO sqlalchemy.engine.Engine COMMIT
+2025-12-04 16:09:38,915 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:09:38,917 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:09:38,917 INFO sqlalchemy.engine.Engine [generated in 0.00023s] ('792c0ffd-cb59-4271-aa7e-467afbc9e935',)
+2025-12-04 16:09:38,920 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:09:38,920 INFO sqlalchemy.engine.Engine [cached since 0.003267s ago] ('dff92c9a-4ba4-4228-96fd-2f5862196ae7',)
+[THREAD_STORE] get_or_create_thread: NEW id='22a488e0-3e90-47a9-903d-9184d8a5dcb0', obj_id=4919241600
+[THREAD_STORE] add_turn BEFORE: id='22a488e0-3e90-47a9-903d-9184d8a5dcb0', obj_id=4919241600, len(turns)=0
+[THREAD_STORE] add_turn AFTER: id='22a488e0-3e90-47a9-903d-9184d8a5dcb0', obj_id=4919241600, len(turns)=1
+[THREAD_STORE] get_or_create_thread: existing id='22a488e0-3e90-47a9-903d-9184d8a5dcb0', obj_id=4919241600, turns=1
+[THREAD_STORE] add_turn BEFORE: id='22a488e0-3e90-47a9-903d-9184d8a5dcb0', obj_id=4919241600, len(turns)=1
+[THREAD_STORE] add_turn AFTER: id='22a488e0-3e90-47a9-903d-9184d8a5dcb0', obj_id=4919241600, len(turns)=2
+✅ Added turns to in-memory store for thread 22a488e0-3e90-47a9-903d-9184d8a5dcb0
+INFO:     127.0.0.1:60824 - "POST /api/threads/22a488e0-3e90-47a9-903d-9184d8a5dcb0/messages HTTP/1.1" 200 OK
+2025-12-04 16:09:38,923 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-04 16:17:21,937 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:17:21,937 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-04 16:17:21,938 INFO sqlalchemy.engine.Engine [cached since 463.9s ago] ()
+2025-12-04 16:17:21,940 INFO sqlalchemy.engine.Engine INSERT INTO threads (id, org_id, creator_id, title, description, last_message_preview, pinned, last_provider, last_model) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::BOOLEAN, $8::VARCHAR, $9::VARCHAR) RETURNING threads.created_at, threads.updated_at
+2025-12-04 16:17:21,940 INFO sqlalchemy.engine.Engine [cached since 463.9s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 'org_demo', None, 'Hi there', '', None, False, None, None)
+2025-12-04 16:17:21,942 INFO sqlalchemy.engine.Engine COMMIT
+2025-12-04 16:17:21,945 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:17:21,945 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-12-04 16:17:21,945 INFO sqlalchemy.engine.Engine [cached since 463.9s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e',)
+INFO:     127.0.0.1:61202 - "POST /api/threads/ HTTP/1.1" 200 OK
+2025-12-04 16:17:21,947 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:61202 - "OPTIONS /api/threads/e52c38e2-3448-438f-9dd4-64d5e4ed7e0e/messages HTTP/1.1" 200 OK
+🔍 DEBUG: add_message called - collaboration_mode=False, content=Hi there...
+2025-12-04 16:17:21,951 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:17:21,951 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-04 16:17:21,951 INFO sqlalchemy.engine.Engine [cached since 463.9s ago] ()
+2025-12-04 16:17:21,961 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-04 16:17:21,961 INFO sqlalchemy.engine.Engine [cached since 463.9s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 'org_demo')
+2025-12-04 16:17:21,962 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-12-04 16:17:21,962 INFO sqlalchemy.engine.Engine [cached since 463.9s ago] ('org_demo',)
+2025-12-04 16:17:21,963 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-04 16:17:21,963 INFO sqlalchemy.engine.Engine [cached since 463.9s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 20)
+2025-12-04 16:17:21,964 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.is_active = $2::VARCHAR
+2025-12-04 16:17:21,964 INFO sqlalchemy.engine.Engine [cached since 463.9s ago] ('org_demo', 'true')
+[CTX] build_contextual_messages called with thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', type=str
+[CTX] _load_short_term_history called with thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', type=str
+[CTX] Attempting to load from in-memory thread storage...
+[THREAD_STORE] get_thread: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', exists=False, obj_id=None, turns=0
+[THREAD_STORE] get_history: no thread for id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e'
+[CTX] get_history returned 0 turns for thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e'
+[CTX] No history found for thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e' (thread may not exist or has no turns)
+2025-12-04 16:17:21,964 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-04 16:17:21,964 INFO sqlalchemy.engine.Engine [cached since 463.9s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 20)
+⚠️  No messages found in DB for thread e52c38e2-3448-438f-9dd4-64d5e4ed7e0e
+⚠️  No conversation history available for thread e52c38e2-3448-438f-9dd4-64d5e4ed7e0e, starting fresh
+📚 Loaded 0 validated history messages
+[CTX] Conversation history turns: 0 (before adding current user message)
+[CTX] Memory retrieval disabled (memory_enabled=False)
+
+================================================================================
+🔧 CONTEXT BUILDER: thread_id=e52c38e2-3448-438f-9dd4-64d5e4ed7e0e
+================================================================================
+Short-term history turns: 0
+Memory snippet present: False
+Query rewritten: False
+Is ambiguous: False
+Total messages: 2
+System messages: 1
+Conversation history turns: 1
+
+Messages array preview:
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Original user message:
+Hi there
+
+Conversation history summary:
+================================================================================
+
+
+================================================================================
+📤 SENDING TO PROVIDER (non-streaming): gemini/gemini-2.5-flash
+================================================================================
+Using centralized context builder ✓
+Total messages: 2
+Conversation history turns: 0
+Memory snippet present: False
+Query rewritten: False
+
+Messages preview (first 120 chars each):
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Original user message:
+Hi there
+================================================================================
+
+2025-12-04 16:17:21,965 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.provider = $2::provider_type AND provider_keys.is_active = $3::VARCHAR
+2025-12-04 16:17:21,965 INFO sqlalchemy.engine.Engine [cached since 463.9s ago] ('org_demo', 'gemini', 'true')
+[NORMAL MODE] provider=gemini model=gemini-2.5-flash finish_reason=None prompt_tokens=1458 completion_tokens=2 total_tokens=1460 content_length=6
+2025-12-04 16:17:22,868 INFO sqlalchemy.engine.Engine SELECT max(messages.sequence) AS max_1 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR
+2025-12-04 16:17:22,869 INFO sqlalchemy.engine.Engine [cached since 464s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e',)
+2025-12-04 16:17:22,872 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, prompt_tokens, completion_tokens, total_tokens, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::INTEGER, $10::INTEGER, $11::INTEGER, $12::INTEGER) RETURNING messages.created_at
+2025-12-04 16:17:22,872 INFO sqlalchemy.engine.Engine [cached since 464s ago] ('92c3b4e3-1622-4e43-b19c-27bcc462df41', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', None, 'user', 'Hi there', None, None, None, None, None, None, 0)
+2025-12-04 16:17:22,875 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, meta, prompt_tokens, completion_tokens, total_tokens, citations, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::JSON, $10::INTEGER, $11::INTEGER, $12::INTEGER, $13::JSON, $14::INTEGER) RETURNING messages.created_at
+2025-12-04 16:17:22,876 INFO sqlalchemy.engine.Engine [cached since 464s ago] ('41f12592-c8c1-4978-989f-08f727d62a61', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', None, 'assistant', 'Hello!', 'gemini', 'gemini-2.5-flash', None, '{"latency_ms": 901.94, "request_id": null}', 1458, 2, 1460, 'null', 1)
+2025-12-04 16:17:22,878 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-12-04 16:17:22,878 INFO sqlalchemy.engine.Engine [cached since 464s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e',)
+2025-12-04 16:17:22,881 INFO sqlalchemy.engine.Engine UPDATE threads SET last_message_preview=$1::VARCHAR, last_provider=$2::VARCHAR, last_model=$3::VARCHAR, updated_at=now() WHERE threads.id = $4::VARCHAR
+2025-12-04 16:17:22,881 INFO sqlalchemy.engine.Engine [cached since 464s ago] ('Hi there', 'gemini', 'gemini-2.5-flash', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e')
+2025-12-04 16:17:22,883 INFO sqlalchemy.engine.Engine INSERT INTO audit_logs (id, thread_id, message_id, user_id, provider, model, reason, fragments_included, fragments_excluded, scope, package_hash, response_hash, prompt_tokens, completion_tokens, total_tokens) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::JSON, $9::JSON, $10::VARCHAR, $11::VARCHAR, $12::VARCHAR, $13::INTEGER, $14::INTEGER, $15::INTEGER) RETURNING audit_logs.created_at
+2025-12-04 16:17:22,883 INFO sqlalchemy.engine.Engine [cached since 464s ago] ('1ef884d1-9867-458d-9e0c-5c481a2d6492', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', '41f12592-c8c1-4978-989f-08f727d62a61', None, 'gemini', 'gemini-2.5-flash', 'Simple conversation - Gemini Flash for quick responses', '[]', '[]', 'private', 'd549e97f2bf92bc28435ae1155eb2333e25954b1cc93b59b6c6399fa27e051a5', '334d016f755cd6dc58c53a86e183882f8ec14f52fb05345887c8a5edd42c87b7', 1458, 2, 1460)
+2025-12-04 16:17:22,885 INFO sqlalchemy.engine.Engine COMMIT
+2025-12-04 16:17:22,889 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:17:22,890 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:17:22,890 INFO sqlalchemy.engine.Engine [cached since 464s ago] ('92c3b4e3-1622-4e43-b19c-27bcc462df41',)
+2025-12-04 16:17:22,893 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:17:22,893 INFO sqlalchemy.engine.Engine [cached since 464s ago] ('41f12592-c8c1-4978-989f-08f727d62a61',)
+[THREAD_STORE] get_or_create_thread: NEW id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536
+[THREAD_STORE] add_turn BEFORE: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=0
+[THREAD_STORE] add_turn AFTER: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=1
+[THREAD_STORE] get_or_create_thread: existing id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, turns=1
+[THREAD_STORE] add_turn BEFORE: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=1
+[THREAD_STORE] add_turn AFTER: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=2
+✅ Added turns to in-memory store for thread e52c38e2-3448-438f-9dd4-64d5e4ed7e0e
+INFO:     127.0.0.1:61202 - "POST /api/threads/e52c38e2-3448-438f-9dd4-64d5e4ed7e0e/messages HTTP/1.1" 200 OK
+2025-12-04 16:17:22,896 INFO sqlalchemy.engine.Engine ROLLBACK
+🔍 DEBUG: add_message called - collaboration_mode=False, content=who is virat kholi?...
+2025-12-04 16:20:20,748 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:20:20,750 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-04 16:20:20,750 INFO sqlalchemy.engine.Engine [cached since 642.7s ago] ()
+2025-12-04 16:20:20,763 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-04 16:20:20,763 INFO sqlalchemy.engine.Engine [cached since 642.7s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 'org_demo')
+2025-12-04 16:20:20,765 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-12-04 16:20:20,765 INFO sqlalchemy.engine.Engine [cached since 642.7s ago] ('org_demo',)
+2025-12-04 16:20:20,766 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-04 16:20:20,766 INFO sqlalchemy.engine.Engine [cached since 642.7s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 20)
+2025-12-04 16:20:20,767 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.is_active = $2::VARCHAR
+2025-12-04 16:20:20,767 INFO sqlalchemy.engine.Engine [cached since 642.7s ago] ('org_demo', 'true')
+[CTX] build_contextual_messages called with thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', type=str
+[CTX] _load_short_term_history called with thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', type=str
+[CTX] Attempting to load from in-memory thread storage...
+[THREAD_STORE] get_thread: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', exists=True, obj_id=4960627536, turns=2
+[THREAD_STORE] get_history: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=2
+[CTX] get_history returned 2 turns for thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e'
+[CTX] short_term_history_len=2
+✅ Loaded 2 messages from in-memory thread storage (thread_id: e52c38e2-3448-438f-9dd4-64d5e4ed7e0e)
+   History breakdown: 1 user, 1 assistant messages
+📚 Loaded 2 validated history messages
+[CTX] Conversation history turns: 2 (before adding current user message)
+[CTX] Memory retrieval disabled (memory_enabled=False)
+
+================================================================================
+🔧 CONTEXT BUILDER: thread_id=e52c38e2-3448-438f-9dd4-64d5e4ed7e0e
+================================================================================
+Short-term history turns: 2
+Memory snippet present: False
+Query rewritten: False
+Is ambiguous: False
+Total messages: 4
+System messages: 1
+Conversation history turns: 3
+
+Messages array preview:
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Hi there
+  [2] assistant: Hello!
+  [3] user: Original user message:
+who is virat kholi?
+
+Conversation history summary:
+  [0] user: Hi there
+  [1] assistant: Hello!
+================================================================================
+
+
+================================================================================
+📤 SENDING TO PROVIDER (non-streaming): perplexity/sonar
+================================================================================
+Using centralized context builder ✓
+Total messages: 4
+Conversation history turns: 2
+Memory snippet present: False
+Query rewritten: False
+
+Messages preview (first 120 chars each):
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Hi there
+  [2] assistant: Hello!
+  [3] user: Original user message:
+who is virat kholi?
+================================================================================
+
+2025-12-04 16:20:20,769 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.provider = $2::provider_type AND provider_keys.is_active = $3::VARCHAR
+2025-12-04 16:20:20,769 INFO sqlalchemy.engine.Engine [cached since 642.7s ago] ('org_demo', 'perplexity', 'true')
+[NORMAL MODE] provider=perplexity model=sonar finish_reason=None prompt_tokens=1330 completion_tokens=387 total_tokens=1717 content_length=1548
+2025-12-04 16:20:28,368 INFO sqlalchemy.engine.Engine SELECT max(messages.sequence) AS max_1 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR
+2025-12-04 16:20:28,368 INFO sqlalchemy.engine.Engine [cached since 649.5s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e',)
+2025-12-04 16:20:28,372 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, prompt_tokens, completion_tokens, total_tokens, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::INTEGER, $10::INTEGER, $11::INTEGER, $12::INTEGER) RETURNING messages.created_at
+2025-12-04 16:20:28,372 INFO sqlalchemy.engine.Engine [cached since 649.5s ago] ('2163756e-7c4e-4306-9c80-a7f1a0d47df9', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', None, 'user', 'who is virat kholi?', None, None, None, None, None, None, 2)
+2025-12-04 16:20:28,374 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, meta, prompt_tokens, completion_tokens, total_tokens, citations, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::JSON, $10::INTEGER, $11::INTEGER, $12::INTEGER, $13::JSON, $14::INTEGER) RETURNING messages.created_at
+2025-12-04 16:20:28,374 INFO sqlalchemy.engine.Engine [cached since 649.5s ago] ('63144fd0-2251-475e-a8d6-be43f347504e', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', None, 'assistant', '**Virat Kohli** is an Indian international cricketer, widely regarded as one of the greatest batsmen in cricket history. Born on November 5, 1988, in ... (1222 characters truncated) ...  and he was among the first to train at the West Delhi Cricket Academy. He studied in Delhi and started his domestic cricket career with Delhi teams.', 'perplexity', 'sonar', None, '{"latency_ms": 7595.96, "request_id": null}', 1330, 387, 1717, '["https://www.vedantu.com/biography/virat-kohli", "https://www.britannica.com/biography/Virat-Kohli", "http://cricketforindia.com/PlayerProfiles/ViratKohli", "https://bdcrictime.com/player/profile/119/virat-kohli"]', 3)
+2025-12-04 16:20:28,375 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-12-04 16:20:28,375 INFO sqlalchemy.engine.Engine [cached since 649.5s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e',)
+2025-12-04 16:20:28,377 INFO sqlalchemy.engine.Engine UPDATE threads SET last_message_preview=$1::VARCHAR, last_provider=$2::VARCHAR, last_model=$3::VARCHAR, updated_at=now() WHERE threads.id = $4::VARCHAR
+2025-12-04 16:20:28,377 INFO sqlalchemy.engine.Engine [cached since 649.5s ago] ('who is virat kholi?', 'perplexity', 'sonar', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e')
+2025-12-04 16:20:28,378 INFO sqlalchemy.engine.Engine INSERT INTO audit_logs (id, thread_id, message_id, user_id, provider, model, reason, fragments_included, fragments_excluded, scope, package_hash, response_hash, prompt_tokens, completion_tokens, total_tokens) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::JSON, $9::JSON, $10::VARCHAR, $11::VARCHAR, $12::VARCHAR, $13::INTEGER, $14::INTEGER, $15::INTEGER) RETURNING audit_logs.created_at
+2025-12-04 16:20:28,378 INFO sqlalchemy.engine.Engine [cached since 649.5s ago] ('6968adaf-ee0b-44bd-81ea-95c9c249ef25', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', '63144fd0-2251-475e-a8d6-be43f347504e', None, 'perplexity', 'sonar', 'Factual query - Perplexity Sonar provides real-time web search', '[]', '[]', 'private', '086e5b1de5d131dd204cacf7f959742eeba5defdf620cebd2668fe3736e74b5c', 'b4bef2e45bfe580148a81ecc218727bdca210b3d72234b25a025227f631958bd', 1330, 387, 1717)
+2025-12-04 16:20:28,379 INFO sqlalchemy.engine.Engine COMMIT
+2025-12-04 16:20:28,381 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:20:28,381 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:20:28,381 INFO sqlalchemy.engine.Engine [cached since 649.5s ago] ('2163756e-7c4e-4306-9c80-a7f1a0d47df9',)
+2025-12-04 16:20:28,383 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:20:28,383 INFO sqlalchemy.engine.Engine [cached since 649.5s ago] ('63144fd0-2251-475e-a8d6-be43f347504e',)
+[THREAD_STORE] get_or_create_thread: existing id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, turns=2
+[THREAD_STORE] add_turn BEFORE: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=2
+[THREAD_STORE] add_turn AFTER: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=3
+[THREAD_STORE] get_or_create_thread: existing id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, turns=3
+[THREAD_STORE] add_turn BEFORE: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=3
+[THREAD_STORE] add_turn AFTER: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=4
+✅ Added turns to in-memory store for thread e52c38e2-3448-438f-9dd4-64d5e4ed7e0e
+⚠️  TTFT target missed: 7.60s (target: ≤1.5s)
+⚠️  Latency P95 target missed: 7.61s (target: ≤6s)
+INFO:     127.0.0.1:61328 - "POST /api/threads/e52c38e2-3448-438f-9dd4-64d5e4ed7e0e/messages HTTP/1.1" 200 OK
+2025-12-04 16:20:28,386 INFO sqlalchemy.engine.Engine ROLLBACK
+🔍 DEBUG: add_message called - collaboration_mode=False, content=whats his recent score details like...
+2025-12-04 16:20:44,177 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:20:44,178 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-04 16:20:44,178 INFO sqlalchemy.engine.Engine [cached since 666.2s ago] ()
+2025-12-04 16:20:44,178 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-04 16:20:44,178 INFO sqlalchemy.engine.Engine [cached since 666.1s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 'org_demo')
+2025-12-04 16:20:44,179 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-12-04 16:20:44,179 INFO sqlalchemy.engine.Engine [cached since 666.1s ago] ('org_demo',)
+2025-12-04 16:20:44,180 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-04 16:20:44,180 INFO sqlalchemy.engine.Engine [cached since 666.1s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 20)
+2025-12-04 16:20:44,181 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.is_active = $2::VARCHAR
+2025-12-04 16:20:44,181 INFO sqlalchemy.engine.Engine [cached since 666.1s ago] ('org_demo', 'true')
+[CTX] build_contextual_messages called with thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', type=str
+[CTX] _load_short_term_history called with thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', type=str
+[CTX] Attempting to load from in-memory thread storage...
+[THREAD_STORE] get_thread: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', exists=True, obj_id=4960627536, turns=4
+[THREAD_STORE] get_history: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=4
+[CTX] get_history returned 4 turns for thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e'
+[CTX] short_term_history_len=4
+✅ Loaded 4 messages from in-memory thread storage (thread_id: e52c38e2-3448-438f-9dd4-64d5e4ed7e0e)
+   History breakdown: 2 user, 2 assistant messages
+📚 Loaded 4 validated history messages
+[CTX] Conversation history turns: 4 (before adding current user message)
+[CTX] Memory retrieval disabled (memory_enabled=False)
+
+================================================================================
+🔧 CONTEXT BUILDER: thread_id=e52c38e2-3448-438f-9dd4-64d5e4ed7e0e
+================================================================================
+Short-term history turns: 4
+Memory snippet present: False
+Query rewritten: False
+Is ambiguous: False
+Total messages: 6
+System messages: 1
+Conversation history turns: 5
+
+Messages array preview:
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Hi there
+  [2] assistant: Hello!
+  [3] user: who is virat kholi?
+  [4] assistant: **Virat Kohli** is an Indian international cricketer, widely regarded as one of the greatest batsmen in cricket history....
+  [5] user: Original user message:
+whats his recent score details like
+
+Conversation history summary:
+  [0] user: Hi there
+  [1] assistant: Hello!
+  [2] user: who is virat kholi?
+  [3] assistant: **Virat Kohli** is an Indian international cricketer, widely regarded as one of ...
+================================================================================
+
+
+================================================================================
+📤 SENDING TO PROVIDER (non-streaming): perplexity/sonar
+================================================================================
+Using centralized context builder ✓
+Total messages: 6
+Conversation history turns: 4
+Memory snippet present: False
+Query rewritten: False
+
+Messages preview (first 120 chars each):
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Hi there
+  [2] assistant: Hello!
+  [3] user: who is virat kholi?
+  [4] assistant: **Virat Kohli** is an Indian international cricketer, widely regarded as one of the greatest batsmen in cricket history....
+  [5] user: Original user message:
+whats his recent score details like
+================================================================================
+
+2025-12-04 16:20:44,181 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.provider = $2::provider_type AND provider_keys.is_active = $3::VARCHAR
+2025-12-04 16:20:44,181 INFO sqlalchemy.engine.Engine [cached since 666.1s ago] ('org_demo', 'perplexity', 'true')
+[NORMAL MODE] provider=perplexity model=sonar finish_reason=None prompt_tokens=1696 completion_tokens=225 total_tokens=1921 content_length=1022
+2025-12-04 16:20:50,502 INFO sqlalchemy.engine.Engine SELECT max(messages.sequence) AS max_1 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR
+2025-12-04 16:20:50,502 INFO sqlalchemy.engine.Engine [cached since 671.6s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e',)
+2025-12-04 16:20:50,504 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, prompt_tokens, completion_tokens, total_tokens, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::INTEGER, $10::INTEGER, $11::INTEGER, $12::INTEGER) RETURNING messages.created_at
+2025-12-04 16:20:50,504 INFO sqlalchemy.engine.Engine [cached since 671.6s ago] ('143a4985-0606-49e9-812c-71367fab396c', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', None, 'user', 'whats his recent score details like', None, None, None, None, None, None, 4)
+2025-12-04 16:20:50,506 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, meta, prompt_tokens, completion_tokens, total_tokens, citations, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::JSON, $10::INTEGER, $11::INTEGER, $12::INTEGER, $13::JSON, $14::INTEGER) RETURNING messages.created_at
+2025-12-04 16:20:50,506 INFO sqlalchemy.engine.Engine [cached since 671.6s ago] ('307bfd00-8413-4b87-ba92-4ee4b028e877', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', None, 'assistant', "Virat Kohli's recent score details include an impressive performance in the IPL 2025 season where he scored 657 runs in 15 innings with an average of ... (715 characters truncated) ... uth Africa and 74 against Australia in ODIs.\n\nOverall, Kohli continues to maintain high scoring form both in IPL and international matches in 2025.", 'perplexity', 'sonar', None, '{"latency_ms": 6318.23, "request_id": null}', 1696, 225, 1921, '["https://www.mykhel.com/cricket/virat-kohli-ipl-2025-stats-runs-highest-score-strike-rate-centuries-updated-rcb-vs-pbks-final-365355.html", "https:/ ... (286 characters truncated) ... net/articleshow/125745317.cms", "https://crex.com/player-profile/4I/virat-kohli/matches", "https://www.iplt20.com/index.php/players/virat-kohli/164"]', 5)
+2025-12-04 16:20:50,508 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-12-04 16:20:50,508 INFO sqlalchemy.engine.Engine [cached since 671.6s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e',)
+2025-12-04 16:20:50,510 INFO sqlalchemy.engine.Engine UPDATE threads SET last_message_preview=$1::VARCHAR, updated_at=now() WHERE threads.id = $2::VARCHAR
+2025-12-04 16:20:50,510 INFO sqlalchemy.engine.Engine [generated in 0.00019s] ('whats his recent score details like', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e')
+2025-12-04 16:20:50,512 INFO sqlalchemy.engine.Engine INSERT INTO audit_logs (id, thread_id, message_id, user_id, provider, model, reason, fragments_included, fragments_excluded, scope, package_hash, response_hash, prompt_tokens, completion_tokens, total_tokens) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::JSON, $9::JSON, $10::VARCHAR, $11::VARCHAR, $12::VARCHAR, $13::INTEGER, $14::INTEGER, $15::INTEGER) RETURNING audit_logs.created_at
+2025-12-04 16:20:50,512 INFO sqlalchemy.engine.Engine [cached since 671.6s ago] ('66c12200-30fe-4c74-a08a-df46f43b7103', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', '307bfd00-8413-4b87-ba92-4ee4b028e877', None, 'perplexity', 'sonar', 'Factual query - Perplexity Sonar provides real-time web search', '[]', '[]', 'private', '9e0bebed211ed47869e295502f02514edf9b5ee47de7c74ab2743017abd64732', '338e5caf2ed9b98c288e0a38567edf0057c81ae7961e3f8a2355915660fdbf6f', 1696, 225, 1921)
+2025-12-04 16:20:50,513 INFO sqlalchemy.engine.Engine COMMIT
+2025-12-04 16:20:50,516 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:20:50,517 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:20:50,517 INFO sqlalchemy.engine.Engine [cached since 671.6s ago] ('143a4985-0606-49e9-812c-71367fab396c',)
+2025-12-04 16:20:50,519 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:20:50,519 INFO sqlalchemy.engine.Engine [cached since 671.6s ago] ('307bfd00-8413-4b87-ba92-4ee4b028e877',)
+[THREAD_STORE] get_or_create_thread: existing id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, turns=4
+[THREAD_STORE] add_turn BEFORE: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=4
+[THREAD_STORE] add_turn AFTER: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=5
+[THREAD_STORE] get_or_create_thread: existing id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, turns=5
+[THREAD_STORE] add_turn BEFORE: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=5
+[THREAD_STORE] add_turn AFTER: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=6
+✅ Added turns to in-memory store for thread e52c38e2-3448-438f-9dd4-64d5e4ed7e0e
+⚠️  TTFT target missed: 6.32s (target: ≤1.5s)
+⚠️  Latency P95 target missed: 6.34s (target: ≤6s)
+INFO:     127.0.0.1:61344 - "POST /api/threads/e52c38e2-3448-438f-9dd4-64d5e4ed7e0e/messages HTTP/1.1" 200 OK
+2025-12-04 16:20:50,521 INFO sqlalchemy.engine.Engine ROLLBACK
+🔍 DEBUG: add_message called - collaboration_mode=False, content=As of december 3 whats his most recent score in cr...
+2025-12-04 16:21:30,018 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:21:30,019 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-04 16:21:30,019 INFO sqlalchemy.engine.Engine [cached since 712s ago] ()
+2025-12-04 16:21:30,031 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-04 16:21:30,031 INFO sqlalchemy.engine.Engine [cached since 711.9s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 'org_demo')
+2025-12-04 16:21:30,038 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-12-04 16:21:30,038 INFO sqlalchemy.engine.Engine [cached since 711.9s ago] ('org_demo',)
+2025-12-04 16:21:30,040 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-04 16:21:30,040 INFO sqlalchemy.engine.Engine [cached since 711.9s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 20)
+2025-12-04 16:21:30,042 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.is_active = $2::VARCHAR
+2025-12-04 16:21:30,042 INFO sqlalchemy.engine.Engine [cached since 711.9s ago] ('org_demo', 'true')
+[CTX] build_contextual_messages called with thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', type=str
+[CTX] _load_short_term_history called with thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', type=str
+[CTX] Attempting to load from in-memory thread storage...
+[THREAD_STORE] get_thread: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', exists=True, obj_id=4960627536, turns=6
+[THREAD_STORE] get_history: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=6
+[CTX] get_history returned 6 turns for thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e'
+[CTX] short_term_history_len=6
+✅ Loaded 6 messages from in-memory thread storage (thread_id: e52c38e2-3448-438f-9dd4-64d5e4ed7e0e)
+   History breakdown: 3 user, 3 assistant messages
+📚 Loaded 6 validated history messages
+[CTX] Conversation history turns: 6 (before adding current user message)
+[CTX] Memory retrieval disabled (memory_enabled=False)
+
+================================================================================
+🔧 CONTEXT BUILDER: thread_id=e52c38e2-3448-438f-9dd4-64d5e4ed7e0e
+================================================================================
+Short-term history turns: 6
+Memory snippet present: False
+Query rewritten: False
+Is ambiguous: False
+Total messages: 8
+System messages: 1
+Conversation history turns: 7
+
+Messages array preview:
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Hi there
+  [2] assistant: Hello!
+  [3] user: who is virat kholi?
+  [4] assistant: **Virat Kohli** is an Indian international cricketer, widely regarded as one of the greatest batsmen in cricket history....
+  [5] user: whats his recent score details like
+  [6] assistant: Virat Kohli's recent score details include an impressive performance in the IPL 2025 season where he scored 657 runs in ...
+  [7] user: Original user message:
+As of december 3 whats his most recent score in cricket
+
+Conversation history summary:
+  [0] assistant: Hello!
+  [1] user: who is virat kholi?
+  [2] assistant: **Virat Kohli** is an Indian international cricketer, widely regarded as one of ...
+  [3] user: whats his recent score details like
+  [4] assistant: Virat Kohli's recent score details include an impressive performance in the IPL ...
+================================================================================
+
+
+================================================================================
+📤 SENDING TO PROVIDER (non-streaming): perplexity/sonar
+================================================================================
+Using centralized context builder ✓
+Total messages: 8
+Conversation history turns: 6
+Memory snippet present: False
+Query rewritten: False
+
+Messages preview (first 120 chars each):
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Hi there
+  [2] assistant: Hello!
+  [3] user: who is virat kholi?
+  [4] assistant: **Virat Kohli** is an Indian international cricketer, widely regarded as one of the greatest batsmen in cricket history....
+  [5] user: whats his recent score details like
+  [6] assistant: Virat Kohli's recent score details include an impressive performance in the IPL 2025 season where he scored 657 runs in ...
+  [7] user: Original user message:
+As of december 3 whats his most recent score in cricket
+================================================================================
+
+2025-12-04 16:21:30,043 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.provider = $2::provider_type AND provider_keys.is_active = $3::VARCHAR
+2025-12-04 16:21:30,043 INFO sqlalchemy.engine.Engine [cached since 711.9s ago] ('org_demo', 'perplexity', 'true')
+[NORMAL MODE] provider=perplexity model=sonar finish_reason=None prompt_tokens=1922 completion_tokens=82 total_tokens=2004 content_length=300
+2025-12-04 16:21:34,079 INFO sqlalchemy.engine.Engine SELECT max(messages.sequence) AS max_1 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR
+2025-12-04 16:21:34,079 INFO sqlalchemy.engine.Engine [cached since 715.2s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e',)
+2025-12-04 16:21:34,083 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, prompt_tokens, completion_tokens, total_tokens, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::INTEGER, $10::INTEGER, $11::INTEGER, $12::INTEGER) RETURNING messages.created_at
+2025-12-04 16:21:34,083 INFO sqlalchemy.engine.Engine [cached since 715.2s ago] ('67e229ab-ea3a-48b2-8c90-8408f48fb063', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', None, 'user', 'As of december 3 whats his most recent score in cricket', None, None, None, None, None, None, 6)
+2025-12-04 16:21:34,086 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, meta, prompt_tokens, completion_tokens, total_tokens, citations, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::JSON, $10::INTEGER, $11::INTEGER, $12::INTEGER, $13::JSON, $14::INTEGER) RETURNING messages.created_at
+2025-12-04 16:21:34,087 INFO sqlalchemy.engine.Engine [cached since 715.2s ago] ('ad50dd20-f4ee-4ca3-9d84-4c08c981d6ce', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', None, 'assistant', "As of December 3, 2025, Virat Kohli's most recent score in cricket was **102 runs off 93 balls** in the second ODI against South Africa at Raipur. This was his 53rd ODI century and second consecutive century in the series, contributing significantly to India's total of 358/5 in 50 overs.", 'perplexity', 'sonar', None, '{"latency_ms": 4033.51, "request_id": null}', 1922, 82, 2004, '["https://www.hindustantimes.com/cricket/india-vs-south-africa-live-score-2nd-odi-match-today-3rd-december-2025-ind-vs-sa-latest-cricket-score-101764 ... (805 characters truncated) ... ve-updates-raipur-10399490/", "https://africa.espn.com/cricket/series/23277/report/1479574/india-vs-south-africa-2nd-odi-south-africa-india-2025-26"]', 7)
+2025-12-04 16:21:34,091 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-12-04 16:21:34,091 INFO sqlalchemy.engine.Engine [cached since 715.2s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e',)
+2025-12-04 16:21:34,093 INFO sqlalchemy.engine.Engine UPDATE threads SET last_message_preview=$1::VARCHAR, updated_at=now() WHERE threads.id = $2::VARCHAR
+2025-12-04 16:21:34,093 INFO sqlalchemy.engine.Engine [cached since 43.58s ago] ('As of december 3 whats his most recent score in cricket', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e')
+2025-12-04 16:21:34,095 INFO sqlalchemy.engine.Engine INSERT INTO audit_logs (id, thread_id, message_id, user_id, provider, model, reason, fragments_included, fragments_excluded, scope, package_hash, response_hash, prompt_tokens, completion_tokens, total_tokens) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::JSON, $9::JSON, $10::VARCHAR, $11::VARCHAR, $12::VARCHAR, $13::INTEGER, $14::INTEGER, $15::INTEGER) RETURNING audit_logs.created_at
+2025-12-04 16:21:34,095 INFO sqlalchemy.engine.Engine [cached since 715.2s ago] ('922396cc-cd75-4e4d-b81a-4d65e22b33c8', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 'ad50dd20-f4ee-4ca3-9d84-4c08c981d6ce', None, 'perplexity', 'sonar', 'Factual query - Perplexity Sonar provides real-time web search', '[]', '[]', 'private', 'f3a10dec3c8da218cd6a6b52c8ba9a2935ec87a80b9599a500b1019219cbf6d2', '4c22b4c0234687bf96f65ebec2ed7bca59802dd452a20dad7f732bccba7b85b0', 1922, 82, 2004)
+2025-12-04 16:21:34,097 INFO sqlalchemy.engine.Engine COMMIT
+2025-12-04 16:21:34,103 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:21:34,103 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:21:34,103 INFO sqlalchemy.engine.Engine [cached since 715.2s ago] ('67e229ab-ea3a-48b2-8c90-8408f48fb063',)
+2025-12-04 16:21:34,106 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:21:34,106 INFO sqlalchemy.engine.Engine [cached since 715.2s ago] ('ad50dd20-f4ee-4ca3-9d84-4c08c981d6ce',)
+[THREAD_STORE] get_or_create_thread: existing id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, turns=6
+[THREAD_STORE] add_turn BEFORE: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=6
+[THREAD_STORE] add_turn AFTER: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=7
+[THREAD_STORE] get_or_create_thread: existing id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, turns=7
+[THREAD_STORE] add_turn BEFORE: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=7
+[THREAD_STORE] add_turn AFTER: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=8
+✅ Added turns to in-memory store for thread e52c38e2-3448-438f-9dd4-64d5e4ed7e0e
+⚠️  TTFT target missed: 4.03s (target: ≤1.5s)
+INFO:     127.0.0.1:61368 - "POST /api/threads/e52c38e2-3448-438f-9dd4-64d5e4ed7e0e/messages HTTP/1.1" 200 OK
+2025-12-04 16:21:34,108 INFO sqlalchemy.engine.Engine ROLLBACK
+🔍 DEBUG: add_message called - collaboration_mode=False, content=where was this match held ?...
+2025-12-04 16:21:53,756 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:21:53,756 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-04 16:21:53,756 INFO sqlalchemy.engine.Engine [cached since 735.7s ago] ()
+2025-12-04 16:21:53,758 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-04 16:21:53,759 INFO sqlalchemy.engine.Engine [cached since 735.7s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 'org_demo')
+2025-12-04 16:21:53,760 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-12-04 16:21:53,761 INFO sqlalchemy.engine.Engine [cached since 735.7s ago] ('org_demo',)
+2025-12-04 16:21:53,762 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-04 16:21:53,762 INFO sqlalchemy.engine.Engine [cached since 735.7s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 20)
+2025-12-04 16:21:53,764 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.is_active = $2::VARCHAR
+2025-12-04 16:21:53,764 INFO sqlalchemy.engine.Engine [cached since 735.7s ago] ('org_demo', 'true')
+[CTX] build_contextual_messages called with thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', type=str
+[CTX] _load_short_term_history called with thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', type=str
+[CTX] Attempting to load from in-memory thread storage...
+[THREAD_STORE] get_thread: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', exists=True, obj_id=4960627536, turns=8
+[THREAD_STORE] get_history: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=8
+[CTX] get_history returned 8 turns for thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e'
+[CTX] short_term_history_len=8
+✅ Loaded 8 messages from in-memory thread storage (thread_id: e52c38e2-3448-438f-9dd4-64d5e4ed7e0e)
+   History breakdown: 4 user, 4 assistant messages
+📚 Loaded 8 validated history messages
+[CTX] Conversation history turns: 8 (before adding current user message)
+[CTX] Memory retrieval disabled (memory_enabled=False)
+
+================================================================================
+🔧 CONTEXT BUILDER: thread_id=e52c38e2-3448-438f-9dd4-64d5e4ed7e0e
+================================================================================
+Short-term history turns: 8
+Memory snippet present: False
+Query rewritten: False
+Is ambiguous: False
+Total messages: 10
+System messages: 1
+Conversation history turns: 9
+
+Messages array preview:
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Hi there
+  [2] assistant: Hello!
+  [3] user: who is virat kholi?
+  [4] assistant: **Virat Kohli** is an Indian international cricketer, widely regarded as one of the greatest batsmen in cricket history....
+  [5] user: whats his recent score details like
+  [6] assistant: Virat Kohli's recent score details include an impressive performance in the IPL 2025 season where he scored 657 runs in ...
+  [7] user: As of december 3 whats his most recent score in cricket
+  [8] assistant: As of December 3, 2025, Virat Kohli's most recent score in cricket was **102 runs off 93 balls** in the second ODI again...
+  [9] user: Original user message:
+where was this match held ?
+
+Conversation history summary:
+  [0] assistant: **Virat Kohli** is an Indian international cricketer, widely regarded as one of ...
+  [1] user: whats his recent score details like
+  [2] assistant: Virat Kohli's recent score details include an impressive performance in the IPL ...
+  [3] user: As of december 3 whats his most recent score in cricket
+  [4] assistant: As of December 3, 2025, Virat Kohli's most recent score in cricket was **102 run...
+================================================================================
+
+
+================================================================================
+📤 SENDING TO PROVIDER (non-streaming): gemini/gemini-2.5-flash
+================================================================================
+Using centralized context builder ✓
+Total messages: 10
+Conversation history turns: 8
+Memory snippet present: False
+Query rewritten: False
+
+Messages preview (first 120 chars each):
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Hi there
+  [2] assistant: Hello!
+  [3] user: who is virat kholi?
+  [4] assistant: **Virat Kohli** is an Indian international cricketer, widely regarded as one of the greatest batsmen in cricket history....
+  [5] user: whats his recent score details like
+  [6] assistant: Virat Kohli's recent score details include an impressive performance in the IPL 2025 season where he scored 657 runs in ...
+  [7] user: As of december 3 whats his most recent score in cricket
+  [8] assistant: As of December 3, 2025, Virat Kohli's most recent score in cricket was **102 runs off 93 balls** in the second ODI again...
+  [9] user: Original user message:
+where was this match held ?
+================================================================================
+
+2025-12-04 16:21:53,766 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.provider = $2::provider_type AND provider_keys.is_active = $3::VARCHAR
+2025-12-04 16:21:53,766 INFO sqlalchemy.engine.Engine [cached since 735.7s ago] ('org_demo', 'gemini', 'true')
+[NORMAL MODE] provider=gemini model=gemini-2.5-flash finish_reason=None prompt_tokens=2185 completion_tokens=9 total_tokens=2194 content_length=34
+2025-12-04 16:21:56,190 INFO sqlalchemy.engine.Engine SELECT max(messages.sequence) AS max_1 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR
+2025-12-04 16:21:56,190 INFO sqlalchemy.engine.Engine [cached since 737.3s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e',)
+2025-12-04 16:21:56,193 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, prompt_tokens, completion_tokens, total_tokens, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::INTEGER, $10::INTEGER, $11::INTEGER, $12::INTEGER) RETURNING messages.created_at
+2025-12-04 16:21:56,193 INFO sqlalchemy.engine.Engine [cached since 737.3s ago] ('62c52885-1bed-45f5-b642-807119dd6aa5', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', None, 'user', 'where was this match held ?', None, None, None, None, None, None, 8)
+2025-12-04 16:21:56,195 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, meta, prompt_tokens, completion_tokens, total_tokens, citations, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::JSON, $10::INTEGER, $11::INTEGER, $12::INTEGER, $13::JSON, $14::INTEGER) RETURNING messages.created_at
+2025-12-04 16:21:56,195 INFO sqlalchemy.engine.Engine [cached since 737.3s ago] ('db2b8cb6-4d30-483f-8628-c6b5f7b475ea', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', None, 'assistant', 'That match was held in **Raipur**.', 'gemini', 'gemini-2.5-flash', None, '{"latency_ms": 2421.28, "request_id": null}', 2185, 9, 2194, 'null', 9)
+2025-12-04 16:21:56,197 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-12-04 16:21:56,197 INFO sqlalchemy.engine.Engine [cached since 737.3s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e',)
+2025-12-04 16:21:56,200 INFO sqlalchemy.engine.Engine UPDATE threads SET last_message_preview=$1::VARCHAR, last_provider=$2::VARCHAR, last_model=$3::VARCHAR, updated_at=now() WHERE threads.id = $4::VARCHAR
+2025-12-04 16:21:56,201 INFO sqlalchemy.engine.Engine [cached since 737.3s ago] ('where was this match held ?', 'gemini', 'gemini-2.5-flash', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e')
+2025-12-04 16:21:56,202 INFO sqlalchemy.engine.Engine INSERT INTO audit_logs (id, thread_id, message_id, user_id, provider, model, reason, fragments_included, fragments_excluded, scope, package_hash, response_hash, prompt_tokens, completion_tokens, total_tokens) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::JSON, $9::JSON, $10::VARCHAR, $11::VARCHAR, $12::VARCHAR, $13::INTEGER, $14::INTEGER, $15::INTEGER) RETURNING audit_logs.created_at
+2025-12-04 16:21:56,203 INFO sqlalchemy.engine.Engine [cached since 737.3s ago] ('a86d4b0d-7f33-42ca-88f6-4f8140218a3b', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 'db2b8cb6-4d30-483f-8628-c6b5f7b475ea', None, 'gemini', 'gemini-2.5-flash', 'Simple conversation - Gemini Flash for quick responses', '[]', '[]', 'private', 'ec6b223291aa170d987bb6928fe9ca2db5ff313ce0a59f399b20370c49d34369', '1d374bddcc956d30670cbcaaaeb2d02ea719f20c005170d3d9528fa82bb2a732', 2185, 9, 2194)
+2025-12-04 16:21:56,205 INFO sqlalchemy.engine.Engine COMMIT
+2025-12-04 16:21:56,209 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:21:56,209 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:21:56,210 INFO sqlalchemy.engine.Engine [cached since 737.3s ago] ('62c52885-1bed-45f5-b642-807119dd6aa5',)
+2025-12-04 16:21:56,211 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:21:56,211 INFO sqlalchemy.engine.Engine [cached since 737.3s ago] ('db2b8cb6-4d30-483f-8628-c6b5f7b475ea',)
+[THREAD_STORE] get_or_create_thread: existing id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, turns=8
+[THREAD_STORE] add_turn BEFORE: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=8
+[THREAD_STORE] add_turn AFTER: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=9
+[THREAD_STORE] get_or_create_thread: existing id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, turns=9
+[THREAD_STORE] add_turn BEFORE: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=9
+[THREAD_STORE] add_turn AFTER: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=10
+✅ Added turns to in-memory store for thread e52c38e2-3448-438f-9dd4-64d5e4ed7e0e
+⚠️  TTFT target missed: 2.42s (target: ≤1.5s)
+INFO:     127.0.0.1:61373 - "POST /api/threads/e52c38e2-3448-438f-9dd4-64d5e4ed7e0e/messages HTTP/1.1" 200 OK
+2025-12-04 16:21:56,214 INFO sqlalchemy.engine.Engine ROLLBACK
+🔍 DEBUG: add_message called - collaboration_mode=False, content=what is Raipur...
+2025-12-04 16:22:02,778 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:22:02,779 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-04 16:22:02,779 INFO sqlalchemy.engine.Engine [cached since 744.8s ago] ()
+2025-12-04 16:22:02,780 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-04 16:22:02,780 INFO sqlalchemy.engine.Engine [cached since 744.7s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 'org_demo')
+2025-12-04 16:22:02,782 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-12-04 16:22:02,782 INFO sqlalchemy.engine.Engine [cached since 744.7s ago] ('org_demo',)
+2025-12-04 16:22:02,783 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-04 16:22:02,783 INFO sqlalchemy.engine.Engine [cached since 744.7s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 20)
+2025-12-04 16:22:02,785 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.is_active = $2::VARCHAR
+2025-12-04 16:22:02,785 INFO sqlalchemy.engine.Engine [cached since 744.7s ago] ('org_demo', 'true')
+[CTX] build_contextual_messages called with thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', type=str
+[CTX] _load_short_term_history called with thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', type=str
+[CTX] Attempting to load from in-memory thread storage...
+[THREAD_STORE] get_thread: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', exists=True, obj_id=4960627536, turns=10
+[THREAD_STORE] get_history: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=10
+[CTX] get_history returned 10 turns for thread_id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e'
+[CTX] short_term_history_len=10
+✅ Loaded 10 messages from in-memory thread storage (thread_id: e52c38e2-3448-438f-9dd4-64d5e4ed7e0e)
+   History breakdown: 5 user, 5 assistant messages
+📚 Loaded 10 validated history messages
+[CTX] Conversation history turns: 10 (before adding current user message)
+[CTX] Memory retrieval disabled (memory_enabled=False)
+
+================================================================================
+🔧 CONTEXT BUILDER: thread_id=e52c38e2-3448-438f-9dd4-64d5e4ed7e0e
+================================================================================
+Short-term history turns: 10
+Memory snippet present: False
+Query rewritten: False
+Is ambiguous: False
+Total messages: 12
+System messages: 1
+Conversation history turns: 11
+
+Messages array preview:
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Hi there
+  [2] assistant: Hello!
+  [3] user: who is virat kholi?
+  [4] assistant: **Virat Kohli** is an Indian international cricketer, widely regarded as one of the greatest batsmen in cricket history....
+  [5] user: whats his recent score details like
+  [6] assistant: Virat Kohli's recent score details include an impressive performance in the IPL 2025 season where he scored 657 runs in ...
+  [7] user: As of december 3 whats his most recent score in cricket
+  [8] assistant: As of December 3, 2025, Virat Kohli's most recent score in cricket was **102 runs off 93 balls** in the second ODI again...
+  [9] user: where was this match held ?
+  [10] assistant: That match was held in **Raipur**.
+  [11] user: Original user message:
+what is Raipur
+
+Conversation history summary:
+  [0] assistant: Virat Kohli's recent score details include an impressive performance in the IPL ...
+  [1] user: As of december 3 whats his most recent score in cricket
+  [2] assistant: As of December 3, 2025, Virat Kohli's most recent score in cricket was **102 run...
+  [3] user: where was this match held ?
+  [4] assistant: That match was held in **Raipur**.
+================================================================================
+
+
+================================================================================
+📤 SENDING TO PROVIDER (non-streaming): perplexity/sonar
+================================================================================
+Using centralized context builder ✓
+Total messages: 12
+Conversation history turns: 10
+Memory snippet present: False
+Query rewritten: False
+
+Messages preview (first 120 chars each):
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Hi there
+  [2] assistant: Hello!
+  [3] user: who is virat kholi?
+  [4] assistant: **Virat Kohli** is an Indian international cricketer, widely regarded as one of the greatest batsmen in cricket history....
+  [5] user: whats his recent score details like
+  [6] assistant: Virat Kohli's recent score details include an impressive performance in the IPL 2025 season where he scored 657 runs in ...
+  [7] user: As of december 3 whats his most recent score in cricket
+  [8] assistant: As of December 3, 2025, Virat Kohli's most recent score in cricket was **102 runs off 93 balls** in the second ODI again...
+  [9] user: where was this match held ?
+  [10] assistant: That match was held in **Raipur**.
+  [11] user: Original user message:
+what is Raipur
+================================================================================
+
+2025-12-04 16:22:02,786 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.provider = $2::provider_type AND provider_keys.is_active = $3::VARCHAR
+2025-12-04 16:22:02,787 INFO sqlalchemy.engine.Engine [cached since 744.7s ago] ('org_demo', 'perplexity', 'true')
+[NORMAL MODE] provider=perplexity model=sonar finish_reason=None prompt_tokens=2016 completion_tokens=127 total_tokens=2143 content_length=589
+2025-12-04 16:22:08,531 INFO sqlalchemy.engine.Engine SELECT max(messages.sequence) AS max_1 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR
+2025-12-04 16:22:08,531 INFO sqlalchemy.engine.Engine [cached since 749.7s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e',)
+2025-12-04 16:22:08,532 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, prompt_tokens, completion_tokens, total_tokens, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::INTEGER, $10::INTEGER, $11::INTEGER, $12::INTEGER) RETURNING messages.created_at
+2025-12-04 16:22:08,532 INFO sqlalchemy.engine.Engine [cached since 749.7s ago] ('e712ed7d-5bc4-44da-bf74-6890e5fa4f00', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', None, 'user', 'what is Raipur', None, None, None, None, None, None, 10)
+2025-12-04 16:22:08,533 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, meta, prompt_tokens, completion_tokens, total_tokens, citations, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::JSON, $10::INTEGER, $11::INTEGER, $12::INTEGER, $13::JSON, $14::INTEGER) RETURNING messages.created_at
+2025-12-04 16:22:08,533 INFO sqlalchemy.engine.Engine [cached since 749.6s ago] ('f8f60e32-7e5a-4816-871d-a371b67e004d', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', None, 'assistant', '**Raipur** is the capital city of the Indian state of Chhattisgarh, located in east-central India on the central Chhattisgarh Plain near the Mahanadi ... (282 characters truncated) ...  with modern urban development. It is also a center for education and various industries such as rice milling, furniture making, and agro-industries.', 'perplexity', 'sonar', None, '{"latency_ms": 5742.88, "request_id": null}', 2016, 127, 2143, '["https://www.britannica.com/place/Raipur", "https://en.wikipedia.org/wiki/Raipur", "https://www.incredibleindia.gov.in/en/chhattisgarh/raipur", "htt ... (184 characters truncated) ... byjus.com/social-science/capital-of-chhattisgarh/", "https://raipur.gov.in/en/about-district/", "https://tourism.cgstate.gov.in/destinations/Raipur"]', 11)
+2025-12-04 16:22:08,534 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-12-04 16:22:08,534 INFO sqlalchemy.engine.Engine [cached since 749.6s ago] ('e52c38e2-3448-438f-9dd4-64d5e4ed7e0e',)
+2025-12-04 16:22:08,534 INFO sqlalchemy.engine.Engine UPDATE threads SET last_message_preview=$1::VARCHAR, last_provider=$2::VARCHAR, last_model=$3::VARCHAR, updated_at=now() WHERE threads.id = $4::VARCHAR
+2025-12-04 16:22:08,534 INFO sqlalchemy.engine.Engine [cached since 749.6s ago] ('what is Raipur', 'perplexity', 'sonar', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e')
+2025-12-04 16:22:08,535 INFO sqlalchemy.engine.Engine INSERT INTO audit_logs (id, thread_id, message_id, user_id, provider, model, reason, fragments_included, fragments_excluded, scope, package_hash, response_hash, prompt_tokens, completion_tokens, total_tokens) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::JSON, $9::JSON, $10::VARCHAR, $11::VARCHAR, $12::VARCHAR, $13::INTEGER, $14::INTEGER, $15::INTEGER) RETURNING audit_logs.created_at
+2025-12-04 16:22:08,535 INFO sqlalchemy.engine.Engine [cached since 749.6s ago] ('3b7380ba-8b22-4af5-9bae-fcc9c0d6b832', 'e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', 'f8f60e32-7e5a-4816-871d-a371b67e004d', None, 'perplexity', 'sonar', 'Factual query - Perplexity Sonar provides real-time web search', '[]', '[]', 'private', '38cc3f87f55c43673abf5209dd2aa0ec83770d3ad85997f28a39bd73dcab2ec3', '3a096ddf64459fb14a40c014aad4f7cef5e2c4c7a690e8db4ba0ba7446390420', 2016, 127, 2143)
+2025-12-04 16:22:08,536 INFO sqlalchemy.engine.Engine COMMIT
+2025-12-04 16:22:08,537 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:22:08,537 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:22:08,537 INFO sqlalchemy.engine.Engine [cached since 749.6s ago] ('e712ed7d-5bc4-44da-bf74-6890e5fa4f00',)
+2025-12-04 16:22:08,538 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-04 16:22:08,538 INFO sqlalchemy.engine.Engine [cached since 749.6s ago] ('f8f60e32-7e5a-4816-871d-a371b67e004d',)
+[THREAD_STORE] get_or_create_thread: existing id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, turns=10
+[THREAD_STORE] add_turn BEFORE: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=10
+[THREAD_STORE] add_turn AFTER: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=11
+[THREAD_STORE] get_or_create_thread: existing id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, turns=11
+[THREAD_STORE] add_turn BEFORE: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=11
+[THREAD_STORE] add_turn AFTER: id='e52c38e2-3448-438f-9dd4-64d5e4ed7e0e', obj_id=4960627536, len(turns)=12
+✅ Added turns to in-memory store for thread e52c38e2-3448-438f-9dd4-64d5e4ed7e0e
+⚠️  TTFT target missed: 5.74s (target: ≤1.5s)
+INFO:     127.0.0.1:61375 - "POST /api/threads/e52c38e2-3448-438f-9dd4-64d5e4ed7e0e/messages HTTP/1.1" 200 OK
+2025-12-04 16:22:08,539 INFO sqlalchemy.engine.Engine ROLLBACK
+WARNING:  WatchFiles detected changes in 'app/models/message.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [45771]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [38749]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 16:38:36,541 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 16:38:36,541 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:38:36,543 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 16:38:36,544 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:38:36,545 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 16:38:36,545 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:38:36,546 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:38:36,546 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/chat_encryption.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [38749]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [38838]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 16:38:43,815 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 16:38:43,815 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:38:43,817 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 16:38:43,817 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:38:43,819 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 16:38:43,819 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:38:43,820 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:38:43,820 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'migrations/versions/20250204_add_e2e_encryption.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [38838]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [39005]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 16:38:55,138 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 16:38:55,138 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:38:55,140 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 16:38:55,140 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:38:55,142 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 16:38:55,142 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:38:55,143 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:38:55,143 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/message_encryption_helper.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [39005]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [39723]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 16:39:58,215 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 16:39:58,215 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:39:58,219 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 16:39:58,219 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:39:58,221 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 16:39:58,221 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:39:58,223 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:39:58,223 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'test_e2e_encryption.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [39723]
+/Users/rao305/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [39815]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-04 16:40:05,845 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-04 16:40:05,845 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:40:05,847 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-04 16:40:05,847 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:40:05,849 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-04 16:40:05,849 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-04 16:40:05,850 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-04 16:40:05,850 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.

@@ -1,6 +1,6 @@
 "use client"
 
-import { Brain, Copy, RefreshCw, Share2, Bookmark, Bug, ChevronDown, ChevronUp } from "lucide-react"
+import { Copy, RefreshCw, Share2, Bookmark, Bug, ChevronDown, ChevronUp } from "lucide-react"
 import { useState } from "react"
 import * as React from "react"
 import { cn } from "@/lib/utils"
@@ -11,6 +11,7 @@ import { ThinkingStream } from "@/components/thinking-stream"
 import { useWorkflowStore } from "@/store/workflow-store"
 import { CollabPanel, type CollabPanelState } from "@/components/collaborate/CollabPanel"
 import { CollaborateTimeline } from "@/components/collaborate-timeline"
+import { SimpleLoadingIndicator } from "@/components/simple-loading-indicator"
 import type { StageState, StageId, StageStatus } from "@/lib/collabStages"
 
 interface ImageFile {
@@ -372,14 +373,11 @@ export function EnhancedChatInterface({
         <div className="max-w-4xl mx-auto pt-8 pb-40 space-y-6">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center">
-                <Brain className="w-8 h-8 text-zinc-400" />
-              </div>
-              <h2 className="text-xl font-semibold text-zinc-200">
-                How can I help you today?
+              <h2 className="text-2xl font-semibold bg-gradient-to-r from-green-400 to-zinc-400 bg-clip-text text-transparent">
+                Your Multi-Agent Workspace Starts Here.
               </h2>
-              <p className="text-zinc-400 max-w-md">
-                I'm your AI assistant powered by DAC. Ask me anything and I'll reason through it step by step.
+              <p className="bg-gradient-to-r from-green-400 to-zinc-400 bg-clip-text text-transparent max-w-lg">
+                I'm powered by a network of specialized models. Ask anything — I'll gather the right experts and reason step-by-step.
               </p>
             </div>
           )}
@@ -401,29 +399,6 @@ export function EnhancedChatInterface({
               ) : (
                 <div className="flex justify-start">
                   <div className="max-w-[90%]">
-                    {/* Chain of Thought Toggle */}
-                    {message.chainOfThought && (
-                      <div
-                        className="flex items-center gap-2 text-xs text-zinc-400 ml-1 cursor-pointer hover:text-zinc-300 transition-colors w-fit"
-                        onClick={() => toggleThought(message.id)}
-                      >
-                        <Brain className="w-3.5 h-3.5" />
-                        <span>Chain of Thought</span>
-                        {expandedThoughts.has(message.id) ? (
-                          <ChevronUp className="w-3 h-3" />
-                        ) : (
-                          <ChevronDown className="w-3 h-3" />
-                        )}
-                      </div>
-                    )}
-
-                    {/* Expanded Chain of Thought */}
-                    {message.chainOfThought && expandedThoughts.has(message.id) && (
-                      <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 ml-1 text-sm text-zinc-300 leading-relaxed">
-                        {message.chainOfThought}
-                      </div>
-                    )}
-
                     {/* Message Content */}
                     {message.collaboration ? (
                       <div className="px-1">
@@ -502,29 +477,35 @@ export function EnhancedChatInterface({
             </div>
           ))}
 
-          {/* Loading Indicator - Timeline when in collaboration mode */}
+          {/* Loading Indicator - Simple loading with expandable prompt */}
           {isLoading && (
             <div className="flex justify-start">
               <div className="max-w-[90%] space-y-2 w-full">
                 {isCollaborateMode ? (
-                  <CollaborateTimeline stages={collaborationStages} />
+                  // Use SimpleLoadingIndicator for collaboration mode
+                  (() => {
+                    const activeStage = collaborationStages.find((s) => s.status === "running")
+                    const stageName = activeStage?.label ? `${activeStage.label} in progress…` : "Processing your request…"
+                    const modelName = activeStage?.modelName || "Processing"
+                    // Get the model output from the running step
+                    const runningStep = steps.find((s) => s.status === "running")
+                    const modelOutput = runningStep?.outputDraft || runningStep?.outputFinal || ""
+                    return (
+                      <SimpleLoadingIndicator
+                        modelName={modelName}
+                        stageName={stageName}
+                        modelOutput={modelOutput}
+                        isVisible={true}
+                      />
+                    )
+                  })()
                 ) : (
-                  <>
-                    <div className="flex items-center gap-2 text-xs text-zinc-400 ml-1">
-                      <Brain className="w-3.5 h-3.5 animate-pulse" />
-                      <span>Thinking...</span>
-                    </div>
-                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 ml-1">
-                      <div className="flex items-center gap-2 text-sm text-zinc-400">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                          <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                          <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce"></div>
-                        </div>
-                        <span>Processing your request</span>
-                      </div>
-                    </div>
-                  </>
+                  <SimpleLoadingIndicator
+                    modelName={selectedModel || "Processing"}
+                    stageName="Processing your request…"
+                    modelOutput=""
+                    isVisible={true}
+                  />
                 )}
               </div>
             </div>

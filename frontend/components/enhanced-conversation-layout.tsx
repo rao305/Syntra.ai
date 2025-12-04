@@ -31,6 +31,8 @@ interface EnhancedConversationLayoutProps {
   onUpdateMessage?: (messageId: string, updates: Partial<Message>) => void
   onNewChat: () => void
   onHistoryClick: (id: string) => void
+  onDeleteChat?: (id: string) => void
+  onRenameChat?: (id: string, newName: string) => void
   isLoading: boolean
   selectedModel: string
   onModelSelect: (modelId: string) => void
@@ -46,6 +48,8 @@ export function EnhancedConversationLayout({
   onUpdateMessage,
   onNewChat,
   onHistoryClick,
+  onDeleteChat,
+  onRenameChat,
   isLoading,
   selectedModel,
   onModelSelect,
@@ -64,6 +68,8 @@ export function EnhancedConversationLayout({
         history={history}
         onNewChat={onNewChat}
         onHistoryClick={onHistoryClick}
+        onDeleteChat={onDeleteChat}
+        onRenameChat={onRenameChat}
         user={user}
       />
       <main className="flex-1 flex flex-col h-full relative transition-all duration-300 ease-in-out">

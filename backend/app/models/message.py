@@ -1,5 +1,5 @@
 """Message model."""
-from sqlalchemy import Column, String, DateTime, ForeignKey, Text, Enum as SQLEnum, Integer, JSON
+from sqlalchemy import Column, String, DateTime, ForeignKey, Text, Enum as SQLEnum, Integer, JSON, LargeBinary
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import uuid
@@ -38,6 +38,10 @@ class Message(Base):
         nullable=False
     )
     content = Column(Text, nullable=False)
+
+    # E2E Encryption fields
+    encrypted_content = Column(LargeBinary, nullable=True)  # Encrypted message content
+    encryption_key_id = Column(String, nullable=True)  # Reference to encryption key version
 
     # Provider metadata
     provider = Column(String, nullable=True)  # Which provider generated this (for assistant messages)
