@@ -1347,7 +1347,7 @@ async def add_message_streaming(
     if provider_enum == ProviderType.OPENAI:
         api_key = os.getenv("OPENAI_API_KEY") or settings.openai_api_key
     elif provider_enum == ProviderType.GEMINI:
-        api_key = os.getenv("GEMINI_API_KEY") or settings.google_api_key
+        api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or settings.google_api_key
     elif provider_enum == ProviderType.PERPLEXITY:
         api_key = os.getenv("PERPLEXITY_API_KEY") or settings.perplexity_api_key
     elif provider_enum == ProviderType.KIMI:

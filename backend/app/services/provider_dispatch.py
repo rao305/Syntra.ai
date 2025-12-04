@@ -46,9 +46,12 @@ async def call_provider_adapter(
     model: str,
     messages: List[Dict[str, str]],
     api_key: str,
+    max_tokens: int = None,
+    **kwargs
 ) -> ProviderResponse:
     """Call the appropriate adapter."""
-    max_tokens = _completion_budget(provider)
+    if max_tokens is None:
+        max_tokens = _completion_budget(provider)
 
     if provider == ProviderType.PERPLEXITY:
         return await call_perplexity(messages, model, api_key, max_tokens=max_tokens)
@@ -73,9 +76,12 @@ async def call_provider_adapter_streaming(
     model: str,
     messages: List[Dict[str, str]],
     api_key: str,
+    max_tokens: int = None,
+    **kwargs
 ) -> AsyncIterator[Dict]:
     """Call the appropriate adapter with streaming."""
-    max_tokens = _completion_budget(provider)
+    if max_tokens is None:
+        max_tokens = _completion_budget(provider)
 
     if provider == ProviderType.PERPLEXITY:
         async for chunk in call_perplexity_streaming(messages, model, api_key, max_tokens=max_tokens):

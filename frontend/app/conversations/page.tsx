@@ -135,7 +135,8 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
     setIsLoading(true)
 
     // Activate collab panel if in collaborate mode
-    if (isCollaborateMode) {
+    const { isCollaborateMode: collabMode } = useWorkflowStore.getState()
+    if (collabMode) {
       setCollabPanel(prev => ({
         ...prev,
         active: true,
@@ -218,7 +219,8 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
 
       // Update collab panel if in collaborate mode
       // Note: step.model represents the selected model ID from the router
-      if (isCollaborateMode) {
+      const { isCollaborateMode: collabModeRunning } = useWorkflowStore.getState()
+      if (collabModeRunning) {
         updateCollabPanelForStep(step.role, "running", undefined, undefined, step.model)
       }
 
@@ -319,7 +321,8 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         })
 
         // Update collab panel if in collaborate mode and step is done
-        if (isCollaborateMode && status === "done" && outputDraft) {
+        const { isCollaborateMode: collabModeDone } = useWorkflowStore.getState()
+        if (collabModeDone && status === "done" && outputDraft) {
           // Extract preview (first 150 characters)
           const preview = outputDraft.substring(0, 150).replace(/\n/g, ' ')
           const duration = metadata?.processing_time_ms || metadata?.latency_ms || undefined
@@ -562,7 +565,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
 
     console.log(`🏁 All workflow steps completed`)
     setIsLoading(false)
-  }, [updateStep, setMessages, toggleCollaborateMode, isCollaborateMode, updateCollabPanelForStep])
+  }, [updateStep, setMessages, toggleCollaborateMode, updateCollabPanelForStep])
 
   const handleContinueWorkflow = React.useCallback(() => {
     // Find the last user message to use as context

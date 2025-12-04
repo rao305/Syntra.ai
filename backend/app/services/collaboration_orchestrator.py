@@ -119,19 +119,33 @@ class CollaborationOrchestrator:
             
             # Run external reviews
             yield {"type": "stage_start", "stage_id": "reviews"}
-            
-            if stage_outputs.get("creator"):
-                reviews_start = time.perf_counter()
-                external_reviews = await self._run_external_reviews(
-                    user_message, stage_outputs["creator"], api_keys, run_id
-                )
-                
+
+            reviews_start = time.perf_counter()
+            external_reviews = []
+
+            try:
+                if stage_outputs.get("creator"):
+                    external_reviews = await self._run_external_reviews(
+                        user_message, stage_outputs["creator"], api_keys, run_id
+                    )
+                    logger.info(f"✅ External reviews completed: {len(external_reviews)} review(s) collected")
+                else:
+                    logger.warning("⚠️ No creator output available for reviews stage")
+
                 if self.db:
                     await self._save_stage_record(
                         run_id, "reviews", "multi-model", "external-council",
                         "success", (time.perf_counter() - reviews_start) * 1000
                     )
-            
+            except Exception as e:
+                logger.error(f"❌ Error in reviews stage: {str(e)}")
+                if self.db:
+                    await self._save_stage_record(
+                        run_id, "reviews", "multi-model", "external-council",
+                        "error", (time.perf_counter() - reviews_start) * 1000,
+                        str(e)
+                    )
+
             yield {"type": "stage_end", "stage_id": "reviews"}
             
             # Run director synthesis
@@ -152,12 +166,12 @@ class CollaborationOrchestrator:
             
             yield {"type": "stage_end", "stage_id": "director"}
             
-            # Stream final answer in chunks
-            chunk_size = 50
+            # Stream final answer in larger chunks for better performance
+            chunk_size = 1000  # Increased from 50 for better UX
             for i in range(0, len(final_answer), chunk_size):
                 chunk = final_answer[i:i + chunk_size]
                 yield {"type": "final_chunk", "text": chunk}
-                await asyncio.sleep(0.05)  # Small delay for streaming effect
+                await asyncio.sleep(0.01)  # Minimal delay for streaming effect
             
             # Update run status
             total_time = (time.perf_counter() - start_time) * 1000
@@ -246,33 +260,53 @@ class CollaborationOrchestrator:
         api_keys: Dict[str, str],
         run_id: str
     ) -> List[Dict[str, Any]]:
-        """Run external multi-model reviews"""
-        
+        """Run external multi-model reviews (MANDATORY STAGE - always executes)"""
+
         reviews = []
-        
+
+        # Log available API keys for debugging
+        available_providers = list(api_keys.keys())
+        logger.info(f"🔑 Available API keys for reviews: {available_providers}")
+
         # Compress creator output if too long
         compressed_report = creator_output
         if len(creator_output) > 2000:
             compressed_report = creator_output[:2000] + "...[truncated]"
-        
+
         # Run reviews in parallel
         review_tasks = []
+        review_configs_list = []
+
         for review_config in REVIEW_MODELS:
-            if api_keys.get(review_config["provider"].value):
+            provider_key = review_config["provider"].value
+            review_configs_list.append(review_config)
+
+            if api_keys.get(provider_key):
+                logger.info(f"📋 Queuing review from {review_config['name']} ({provider_key})")
                 task = self._run_single_review(
                     user_message, compressed_report, review_config, api_keys, run_id
                 )
                 review_tasks.append(task)
-        
+            else:
+                logger.warning(f"⚠️ No API key for {review_config['name']} ({provider_key}) - will use fallback review")
+                # Create a fallback review task that doesn't require API keys
+                task = self._run_fallback_review(user_message, compressed_report, review_config, run_id)
+                review_tasks.append(task)
+
+        logger.info(f"🚀 Starting {len(review_tasks)} review task(s) (including fallback reviews)")
+
         if review_tasks:
             review_results = await asyncio.gather(*review_tasks, return_exceptions=True)
-            
-            for result in review_results:
+
+            for i, result in enumerate(review_results):
                 if isinstance(result, Exception):
+                    logger.error(f"❌ Review task {i+1} failed: {str(result)}")
                     continue  # Skip failed reviews
                 if result:
                     reviews.append(result)
-        
+                    logger.info(f"✅ Review {i+1} completed: {result.get('source', 'unknown')}")
+
+        logger.info(f"✅ Council review stage complete: {len(reviews)} review(s) collected")
         return reviews
     
     async def _run_single_review(
@@ -337,7 +371,89 @@ class CollaborationOrchestrator:
         except Exception as e:
             print(f"Review from {review_config['name']} failed: {e}")
             return None
-    
+
+    async def _run_fallback_review(
+        self,
+        user_message: str,
+        report: str,
+        review_config: Dict[str, Any],
+        run_id: str
+    ) -> Dict[str, Any]:
+        """
+        Provide a basic fallback review without requiring API keys.
+        This ensures the council review stage always happens.
+        """
+        import time as time_module
+
+        # Simulate a quick review based on content analysis
+        start_time = time_module.time()
+
+        # Basic quality checks (no LLM call needed)
+        feedback_points = []
+
+        # Check 1: Length assessment
+        word_count = len(report.split())
+        if word_count < 100:
+            feedback_points.append("• Report is quite brief - consider expanding for more comprehensive coverage")
+        elif word_count > 5000:
+            feedback_points.append("• Report is lengthy - consider if all content is essential")
+        else:
+            feedback_points.append("• Report length appears appropriate for the complexity of the question")
+
+        # Check 2: Structure assessment
+        has_sections = report.count('\n') > 5
+        if has_sections:
+            feedback_points.append("• Good: Report has clear section structure")
+        else:
+            feedback_points.append("• Consider adding more structured sections for clarity")
+
+        # Check 3: Detail assessment
+        has_examples = "example" in report.lower() or "e.g." in report.lower()
+        if has_examples:
+            feedback_points.append("• Good: Report includes examples for illustration")
+        else:
+            feedback_points.append("• Consider adding concrete examples to support key points")
+
+        # Check 4: Technical depth
+        technical_terms = ["model", "parameter", "algorithm", "data", "training", "performance"]
+        tech_term_count = sum(1 for term in technical_terms if term in report.lower())
+        if tech_term_count > 0:
+            feedback_points.append(f"• Good: Report demonstrates technical depth ({tech_term_count} key concepts identified)")
+        else:
+            feedback_points.append("• Consider adding more technical depth if appropriate for the topic")
+
+        # Compile fallback review
+        content = "## Fallback Council Review\n\n(This review was generated without external API key)\n\n" + "\n".join(feedback_points)
+
+        latency_ms = int((time_module.time() - start_time) * 1000)
+
+        # Save review record if DB available
+        if self.db:
+            try:
+                review = CollaborateReview(
+                    run_id=run_id,
+                    source=f"{review_config['name']}-fallback",
+                    provider="internal",
+                    model="content-analysis",
+                    content=content,
+                    prompt_tokens=0,
+                    completion_tokens=0,
+                    total_tokens=0,
+                    latency_ms=latency_ms
+                )
+                self.db.add(review)
+                await self.db.flush()
+            except Exception as e:
+                logger.warning(f"Failed to save fallback review record: {e}")
+
+        logger.info(f"✅ Fallback review from {review_config['name']} completed in {latency_ms}ms")
+
+        return {
+            "source": f"{review_config['name']} (fallback)",
+            "content": content,
+            "latency_ms": latency_ms
+        }
+
     async def _run_director_synthesis(
         self,
         user_message: str,
@@ -384,9 +500,10 @@ class CollaborationOrchestrator:
             model=model,
             messages=messages,
             api_key=api_key,
-            temperature=0.5
+            temperature=0.5,
+            max_tokens=16000  # Allow for comprehensive final answer (doubled from default 8192)
         )
-        
+
         return response.get("content", "Failed to generate final synthesis.")
     
     async def resume_collaboration_stream(
@@ -498,11 +615,11 @@ class CollaborationOrchestrator:
                         )
                     
                     # Stream final answer
-                    chunk_size = 50
+                    chunk_size = 1000  # Increased from 50 for better UX
                     for i in range(0, len(final_answer), chunk_size):
                         chunk = final_answer[i:i + chunk_size]
                         yield {"type": "final_chunk", "text": chunk}
-                        await asyncio.sleep(0.05)
+                        await asyncio.sleep(0.01)  # Minimal delay for streaming effect
                 
                 else:  # critic
                     # Run critic stage

@@ -10,6 +10,8 @@ import { CodePanel } from "@/components/code-panel"
 import { ThinkingStream } from "@/components/thinking-stream"
 import { useWorkflowStore } from "@/store/workflow-store"
 import { CollabPanel, type CollabPanelState } from "@/components/collaborate/CollabPanel"
+import { CollaborateTimeline } from "@/components/collaborate-timeline"
+import type { StageState, StageId, StageStatus } from "@/lib/collabStages"
 
 interface ImageFile {
   file?: File
@@ -125,7 +127,7 @@ export function EnhancedChatInterface({
     }
 
     // Get model name
-    const modelName = step.model === "gpt" ? "GPT" : 
+    const modelName = step.model === "gpt" ? "GPT" :
                      step.model === "gemini" ? "Gemini" :
                      step.model === "perplexity" ? "Perplexity" :
                      step.model === "kimi" ? "Kimi" : step.model
@@ -140,6 +142,31 @@ export function EnhancedChatInterface({
       summary: step.outputDraft ? step.outputDraft.substring(0, 150) + "..." : undefined,
       context: [modelName, ...(step.metadata?.providerName ? [step.metadata.providerName] : [])],
       error: step.error?.message
+    }
+  })
+
+  // Convert workflow steps to collaboration stages format for timeline
+  const collaborationStages: StageState[] = (steps || []).map((step) => {
+    let stageStatus: StageStatus = "idle"
+    switch (step.status) {
+      case "pending": stageStatus = "idle"; break
+      case "running": stageStatus = "running"; break
+      case "awaiting_user": stageStatus = "running"; break
+      case "done": stageStatus = "done"; break
+      case "error": stageStatus = "error"; break
+      case "cancelled": stageStatus = "error"; break
+    }
+
+    const modelName = step.model === "gpt" ? "GPT" :
+                     step.model === "gemini" ? "Gemini" :
+                     step.model === "perplexity" ? "Perplexity" :
+                     step.model === "kimi" ? "Kimi" : step.model
+
+    return {
+      id: step.role as StageId,
+      label: step.role.charAt(0).toUpperCase() + step.role.slice(1),
+      modelName,
+      status: stageStatus,
     }
   })
 
@@ -475,24 +502,30 @@ export function EnhancedChatInterface({
             </div>
           ))}
 
-          {/* Loading Indicator */}
+          {/* Loading Indicator - Timeline when in collaboration mode */}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="max-w-[90%] space-y-2">
-                <div className="flex items-center gap-2 text-xs text-zinc-400 ml-1">
-                  <Brain className="w-3.5 h-3.5 animate-pulse" />
-                  <span>Thinking...</span>
-                </div>
-                <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 ml-1">
-                  <div className="flex items-center gap-2 text-sm text-zinc-400">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                      <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                      <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce"></div>
+              <div className="max-w-[90%] space-y-2 w-full">
+                {isCollaborateMode ? (
+                  <CollaborateTimeline stages={collaborationStages} />
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2 text-xs text-zinc-400 ml-1">
+                      <Brain className="w-3.5 h-3.5 animate-pulse" />
+                      <span>Thinking...</span>
                     </div>
-                    <span>{isCollaborateMode ? 'Collaborating across models...' : 'Processing your request'}</span>
-                  </div>
-                </div>
+                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 ml-1">
+                      <div className="flex items-center gap-2 text-sm text-zinc-400">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                          <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                          <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce"></div>
+                        </div>
+                        <span>Processing your request</span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
