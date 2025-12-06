@@ -96,6 +96,32 @@ Syntra is a unified AI assistant platform that intelligently routes queries acro
 - **Qdrant** (via Docker)
 - **Redis** (via Docker)
 
+### Quick Reference
+
+```bash
+# 1. Clone and setup environment
+git clone https://github.com/your-org/syntra.git
+cd syntra
+./setup-env.sh  # Creates .env files from templates
+
+# 2. Start infrastructure
+docker compose up -d
+
+# 3. Backend setup
+cd backend
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+alembic upgrade head
+python main.py
+
+# 4. Frontend setup (in new terminal)
+cd frontend
+npm install
+npm run dev
+```
+
+**📝 Don't forget:** Edit `backend/.env` and `frontend/.env.local` after running `setup-env.sh`!
+
 ### 1. Clone Repository
 
 ```bash
@@ -103,7 +129,48 @@ git clone https://github.com/your-org/syntra.git
 cd syntra
 ```
 
-### 2. Start Infrastructure Services
+### 2. Environment Setup ⚙️
+
+**🚀 Quick Setup (Recommended):**
+
+Run the automated setup script to configure environment variables:
+
+```bash
+# Make script executable (if needed)
+chmod +x setup-env.sh
+
+# Run the setup script
+./setup-env.sh
+```
+
+This script will:
+- ✅ Create `backend/.env` from `backend/env.example`
+- ✅ Create `frontend/.env.local` from `frontend/env.example`
+- ✅ Optionally generate secure `SECRET_KEY` and `ENCRYPTION_KEY`
+- ✅ Check for existing files before overwriting
+
+**📝 Manual Setup (Alternative):**
+
+If you prefer to set up manually:
+
+```bash
+# Backend
+cp backend/env.example backend/.env
+# Edit backend/.env with your configuration
+
+# Frontend
+cp frontend/env.example frontend/.env.local
+# Edit frontend/.env.local with your backend API URL
+```
+
+**⚠️ Important:** After setting up environment files, you'll need to:
+1. Edit `backend/.env` with your database, Qdrant, and Redis URLs
+2. Generate secure keys for `SECRET_KEY` and `ENCRYPTION_KEY` (or let the script do it)
+3. Edit `frontend/.env.local` with your backend API URL (`NEXT_PUBLIC_API_URL`)
+
+See the [Environment Variables](#environment-variables) section below for detailed configuration.
+
+### 3. Start Infrastructure Services
 
 ```bash
 # Start PostgreSQL, Qdrant, and Redis
@@ -113,7 +180,7 @@ docker compose up -d
 docker compose ps
 ```
 
-### 3. Backend Setup
+### 4. Backend Setup
 
 #### Option A: AWS Parameter Store (Recommended for Team Development)
 
@@ -134,33 +201,47 @@ aws configure
 **Step 2: Fetch Secrets from Parameter Store**
 
 ```bash
-cd backend
-
-# Fetch all secrets from AWS Parameter Store into .env.local
+# Fetch all secrets from AWS Parameter Store
 ./scripts/fetch-secrets.sh
 
-# This creates backend/.env.local (gitignored, never commit)
+# This creates:
+# - backend/.env.local (backend variables, gitignored, never commit)
+# - frontend/.env.local (frontend variables, gitignored, never commit)
 ```
 
-**Step 3: Verify and Use**
+**✅ All 47 parameters are uploaded with correct names and real values (no placeholders)**
+
+**Verify everything is correct:**
+```bash
+# Check that all secrets are properly uploaded
+./scripts/verify-all-secrets.sh
+
+# List all uploaded parameters
+./scripts/list-all-parameters.sh
+```
+
+**Step 3: Install Dependencies and Start**
 
 ```bash
+cd backend
+
 # Create virtual environment
 python3 -m venv venv
-source venv/bin/activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
 # Secrets are now available in .env.local
-# Source them (optional, backend auto-loads from .env.local):
-source .env.local
+# Backend automatically loads from .env.local
 
 # Run migrations
 alembic upgrade head
 
 # Start backend
 python main.py
+# OR
+uvicorn main:app --reload --port 8000
 ```
 
 #### Option B: Local Development (Manual Setup)
@@ -177,27 +258,37 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Copy environment template
-cp .env.example .env
+# Configure environment variables
+# If you haven't run setup-env.sh, copy the example:
+cp env.example .env
 
-# Generate security keys
+# Generate security keys (or let setup-env.sh do it)
 # Generate SECRET_KEY
-openssl rand -hex 32
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 
 # Generate ENCRYPTION_KEY
-python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 
 # Edit .env with your configuration
-# Required: DATABASE_URL, QDRANT_URL, REDIS_URL, SECRET_KEY, ENCRYPTION_KEY, API_KEYS
+# Required: DATABASE_URL, QDRANT_URL, UPSTASH_REDIS_URL, SECRET_KEY, ENCRYPTION_KEY
+# Optional: Provider API keys (OPENAI_API_KEY, GOOGLE_API_KEY, etc.)
 
 # Run migrations
 alembic upgrade head
 
 # Start backend
 python main.py
+# OR
+uvicorn main:app --reload --port 8000
 ```
 
-### 4. Frontend Setup
+**💡 Note:** The backend config includes sensible defaults for development. Required fields have placeholder values that work locally, but you should configure them properly for production.
+
+### 5. Frontend Setup
+
+#### Option A: AWS Parameter Store (Recommended for Team Development)
+
+If you're using AWS Parameter Store (see Backend Setup - Option A), the frontend variables are automatically fetched:
 
 ```bash
 cd frontend
@@ -205,17 +296,38 @@ cd frontend
 # Install dependencies
 npm install
 
-# Copy environment template
-cp .env.example .env.local
-
-# Edit .env.local
-# Required: NEXT_PUBLIC_API_URL=http://localhost:8000
+# Frontend variables are already in frontend/.env.local from fetch-secrets.sh
+# No manual configuration needed!
 
 # Start development server
 npm run dev
 ```
 
-### 5. Access Application
+#### Option B: Manual Setup
+
+If setting up locally without AWS:
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Configure environment variables
+# If you haven't run setup-env.sh, copy the example:
+cp env.example .env.local
+
+# Edit .env.local
+# Required: NEXT_PUBLIC_API_URL=http://localhost:8000/api
+# Optional: Firebase configuration (if using Firebase auth)
+
+# Start development server
+npm run dev
+```
+
+### 6. Access Application
+
+Once both backend and frontend are running:
 
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8000
@@ -225,6 +337,20 @@ npm run dev
 ---
 
 ## 📋 Detailed Setup
+
+### First-Time Setup Checklist
+
+After cloning the repository, follow these steps:
+
+1. ✅ **Run setup script**: `./setup-env.sh` (or manually copy env.example files)
+2. ✅ **Configure backend/.env**: Set database, Qdrant, Redis URLs and generate secure keys
+3. ✅ **Configure frontend/.env.local**: Set `NEXT_PUBLIC_API_URL` to your backend URL
+4. ✅ **Start infrastructure**: `docker compose up -d`
+5. ✅ **Install backend dependencies**: `cd backend && python3 -m venv venv && pip install -r requirements.txt`
+6. ✅ **Run migrations**: `cd backend && alembic upgrade head`
+7. ✅ **Install frontend dependencies**: `cd frontend && npm install`
+8. ✅ **Start backend**: `cd backend && python main.py` or `uvicorn main:app --reload`
+9. ✅ **Start frontend**: `cd frontend && npm run dev`
 
 ### Secrets Management
 
@@ -237,59 +363,96 @@ npm run dev
 **Setup for Team:**
 ```bash
 # 1. One-time setup: Upload secrets to Parameter Store
-./scripts/setup-parameter-store.sh  # Run after editing backend/.env
+#    (Reads from both backend/.env and frontend/.env.local)
+./scripts/setup-parameter-store.sh
 
 # 2. Give IAM permissions to team members
 # Share: scripts/setup-iam-policy.json with your AWS admin
 
-# 3. Team members fetch secrets
-aws configure  # Use credentials from developer-credentials.txt
-./scripts/fetch-secrets.sh
+# 3. Team members setup:
+#    a. Configure AWS: aws configure (use credentials from developer-credentials.txt)
+#    b. Fetch secrets: ./scripts/fetch-secrets.sh
+#       This creates:
+#       - backend/.env.local (backend variables)
+#       - frontend/.env.local (frontend variables)
+#    c. Verify: ./scripts/verify-all-secrets.sh
 ```
 
+**📊 Current Status:**
+- ✅ **47 parameters** uploaded to AWS Parameter Store
+- ✅ All parameter names are correct (no placeholders)
+- ✅ All values are real (no placeholder values)
+- ✅ Both backend and frontend variables included
+
 **For Single Developer:**
-- Create `backend/.env` directly (don't upload to Parameter Store)
-- Use Option B from Backend Setup section above
+- Run `./setup-env.sh` to create environment files from templates
+- Or manually copy `backend/env.example` to `backend/.env` and `frontend/env.example` to `frontend/.env.local`
+- Configure the files with your local settings
 
 ### Environment Variables
 
-#### Backend (`backend/.env` or `backend/.env.local` after fetching)
+**🚀 Quick Setup**: Run `./setup-env.sh` to automatically create environment files from templates.
+
+**📖 Full Guide**: See [ENV_SETUP_GUIDE.md](./ENV_SETUP_GUIDE.md) for detailed environment variable documentation and troubleshooting.
+
+#### Backend (`backend/.env`)
+
+See `backend/env.example` for a complete template with all available options. Minimum required configuration:
 
 ```env
-# Database
+# Database [REQUIRED]
 DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/syntra
 
-# Vector Database
+# Vector Database [REQUIRED]
 QDRANT_URL=http://localhost:6333
-QDRANT_API_KEY=
+QDRANT_API_KEY=  # Empty for local development
 
-# Redis
-REDIS_URL=redis://localhost:6379
+# Redis [REQUIRED]
+UPSTASH_REDIS_URL=redis://localhost:6379
+UPSTASH_REDIS_TOKEN=  # Empty for local Redis
 
-# Security
-SECRET_KEY=your-secret-key-here
-ENCRYPTION_KEY=your-encryption-key-here
+# Security [REQUIRED - Generate secure values!]
+SECRET_KEY=your-secret-key-here  # Generate: python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+ENCRYPTION_KEY=your-encryption-key-here  # Generate: python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 
-# CORS
-CORS_ORIGINS=http://localhost:3000
+# Frontend
+FRONTEND_URL=http://localhost:3000
+
+# Environment
+ENVIRONMENT=development
 
 # Optional: Provider API Keys (can be set per-org via API)
 OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
 GOOGLE_API_KEY=
 PERPLEXITY_API_KEY=
-
-# Firebase Auth (Google Sign-In)
-FIREBASE_CREDENTIALS_FILE=/absolute/path/to/serviceAccountKey.json
-FIREBASE_PROJECT_ID=your-project-id
-DEFAULT_ORG_ID=org_demo  # Org new Firebase users are assigned to
+KIMI_API_KEY=
 ```
+
+**💡 Important Notes:**
+- The backend config includes sensible defaults for development
+- Required fields have placeholder values that work locally
+- **You must configure them properly for production**
+- Generate secure keys: The setup script can do this, or use the commands shown above
 
 #### Frontend (`frontend/.env.local`)
 
+See `frontend/env.example` for a complete template. Minimum required configuration:
+
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
+# Backend API URL [REQUIRED]
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+
+# WebSocket URL (optional)
 NEXT_PUBLIC_WS_URL=ws://localhost:8000
+```
+
+**Firebase Auth (Optional)**:
+If using Firebase authentication, add these to `frontend/.env.local`:
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+# ... (see frontend/env.example for full list)
 ```
 
 ### Database Setup
@@ -466,8 +629,9 @@ alembic downgrade -1
 
 ## 📖 Documentation
 
-Comprehensive documentation is available in the [`/docs`](./docs/) directory:
+Comprehensive documentation is available:
 
+- **[Environment Setup Guide](./ENV_SETUP_GUIDE.md)** - Complete guide to setting up environment variables
 - **[System Design](./docs/SYSTEM_DESIGN.md)** - Architecture overview
 - **[Intelligent Routing Guide](./docs/INTELLIGENT_ROUTING_GUIDE.md)** - How routing works
 - **[Provider Switching Guide](./docs/PROVIDER_SWITCHING_GUIDE.md)** - Switching providers
@@ -484,12 +648,19 @@ Comprehensive documentation is available in the [`/docs`](./docs/) directory:
 3. Run: `aws configure`
 4. Enter your credentials when prompted
 5. Run: `./scripts/fetch-secrets.sh`
+   - This fetches all secrets and creates:
+     - `backend/.env.local` (backend variables)
+     - `frontend/.env.local` (frontend variables)
+6. Verify: `./scripts/verify-all-secrets.sh` (optional but recommended)
 
 **For Team Leads:**
 1. Create AWS IAM users and policies (see `scripts/setup-iam-policy.json`)
 2. Generate access keys for each developer
 3. Share credentials in `developer-credentials.txt`
-4. Upload your `backend/.env` to Parameter Store: `./scripts/setup-parameter-store.sh`
+4. Upload secrets to Parameter Store: `./scripts/setup-parameter-store.sh`
+   - Reads from both `backend/.env` and `frontend/.env.local`
+   - Uploads all 47 parameters with correct names and real values
+5. Verify upload: `./scripts/verify-all-secrets.sh`
 
 ---
 
@@ -539,11 +710,39 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🆘 Support
+## 🆘 Support & Troubleshooting
 
-- **Documentation**: See [`/docs`](./docs/) directory
-- **Issues**: [GitHub Issues](https://github.com/your-org/syntra/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/syntra/discussions)
+### Common Issues
+
+**"Missing environment variable" errors:**
+- ✅ Check that `.env` files exist: `backend/.env` and `frontend/.env.local`
+- ✅ Verify variable names match exactly (case-sensitive)
+- ✅ Restart the application after changing `.env` files
+- ✅ Run `./setup-env.sh` to create environment files from templates
+
+**Backend won't start:**
+- ✅ Check that database, Qdrant, and Redis are running: `docker compose ps`
+- ✅ Verify `DATABASE_URL`, `QDRANT_URL`, and `UPSTASH_REDIS_URL` in `backend/.env`
+- ✅ Ensure migrations are run: `cd backend && alembic upgrade head`
+- ✅ Check backend logs for specific error messages
+
+**Frontend can't connect to backend:**
+- ✅ Verify `NEXT_PUBLIC_API_URL` in `frontend/.env.local` matches your backend URL
+- ✅ Ensure backend is running on the port specified in `NEXT_PUBLIC_API_URL`
+- ✅ Check CORS settings in backend config
+- ✅ Verify backend is accessible: `curl http://localhost:8000/health`
+
+**API keys not working:**
+- ✅ Verify keys are set correctly in `backend/.env`
+- ✅ Check that keys are valid and have proper permissions
+- ✅ For frontend workflow features, ensure backend `.env` is accessible
+- ✅ Some features work without API keys (using mock mode in development)
+
+**Need more help?**
+- 📖 **Environment Setup**: See [ENV_SETUP_GUIDE.md](./ENV_SETUP_GUIDE.md) for detailed troubleshooting
+- 📚 **Documentation**: See [`/docs`](./docs/) directory
+- 🐛 **Issues**: [GitHub Issues](https://github.com/your-org/syntra/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/your-org/syntra/discussions)
 
 ---
 
