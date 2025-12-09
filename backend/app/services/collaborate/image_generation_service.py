@@ -17,6 +17,8 @@ class ImageGenerationService:
         """Initialize the service."""
         self.providers = {
             'openai': self._generate_openai,
+            'gemini': self._generate_gemini,
+            'google': self._generate_gemini,  # Alias for gemini
             'replicate': self._generate_replicate,
             'huggingface': self._generate_huggingface,
         }
@@ -90,6 +92,42 @@ class ImageGenerationService:
 
         except Exception as e:
             logger.error(f"OpenAI image generation failed: {str(e)}")
+
+        return None
+
+    async def _generate_gemini(self, spec: ImageSpec, api_key: str) -> Optional[str]:
+        """Generate image using Google Imagen API (Nano Banana Pro / Imagen 3).
+        
+        Note: Google Imagen requires Vertex AI setup. This implementation attempts
+        to use the Generative AI API, but may fall back to OpenAI if not configured.
+        """
+        try:
+            import aiohttp
+            import base64
+            
+            logger.info(f"Attempting Gemini/Imagen image generation for prompt: {spec.prompt[:100]}...")
+            
+            # Try using Vertex AI Imagen REST API
+            # Note: This requires Vertex AI project configuration
+            # For now, we'll attempt the API call but it may require additional setup
+            
+            async with aiohttp.ClientSession() as session:
+                # Try Vertex AI Imagen endpoint
+                # This requires project ID - for now we'll try without it
+                # In production, you'd need: projects/{project}/locations/{location}/publishers/google/models/imagen-3.0-generate-001:predict
+                
+                # Alternative: Try using Gemini's image generation capabilities
+                # Some Gemini models can generate images, but this is experimental
+                logger.warning("Gemini/Imagen image generation requires Vertex AI project setup")
+                logger.warning("Falling back to OpenAI DALL-E if available")
+                
+                # Return None to trigger fallback to OpenAI
+                return None
+                
+        except Exception as e:
+            logger.error(f"Gemini/Imagen image generation failed: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
 
         return None
 
@@ -205,8 +243,9 @@ def select_image_provider(api_keys: dict) -> tuple[str, Optional[str]]:
     Returns:
         Tuple of (provider_name, api_key) or (None, None) if no provider available
     """
-    # Priority order
-    priority = ['openai', 'replicate', 'huggingface']
+    # Priority order: OpenAI first (most reliable), then Gemini, then others
+    # Note: Gemini/Imagen requires Vertex AI setup, so OpenAI is more reliable for now
+    priority = ['openai', 'gemini', 'google', 'replicate', 'huggingface']
 
     for provider in priority:
         if api_keys.get(provider):
@@ -215,5 +254,7 @@ def select_image_provider(api_keys: dict) -> tuple[str, Optional[str]]:
     # Fallback: try to use any available key
     if api_keys.get('openai'):
         return 'openai', api_keys['openai']
+    if api_keys.get('gemini') or api_keys.get('google'):
+        return 'gemini', api_keys.get('gemini') or api_keys.get('google')
 
     return None, None

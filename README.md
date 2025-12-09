@@ -397,11 +397,18 @@ After cloning the repository, follow these steps:
 
 #### Backend (`backend/.env`)
 
-See `backend/env.example` for a complete template with all available options. Minimum required configuration:
+See `backend/env.example` for a complete template with all available options. Complete configuration example:
 
 ```env
+# LLM Provider API Keys [REQUIRED for full functionality]
+OPENAI_API_KEY=sk-proj-...
+GOOGLE_API_KEY=AIzaSy...
+PERPLEXITY_API_KEY=pplx-...
+KIMI_API_KEY=sk-...
+OPENROUTER_API_KEY=sk-or-v1-...
+
 # Database [REQUIRED]
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/syntra
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/dac
 
 # Vector Database [REQUIRED]
 QDRANT_URL=http://localhost:6333
@@ -413,30 +420,87 @@ UPSTASH_REDIS_TOKEN=  # Empty for local Redis
 
 # Security [REQUIRED - Generate secure values!]
 SECRET_KEY=your-secret-key-here  # Generate: python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 ENCRYPTION_KEY=your-encryption-key-here  # Generate: python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 
-# Frontend
+# Frontend URL (for CORS)
 FRONTEND_URL=http://localhost:3000
 
 # Environment
 ENVIRONMENT=development
 
-# Optional: Provider API Keys (can be set per-org via API)
-OPENAI_API_KEY=
-GOOGLE_API_KEY=
-PERPLEXITY_API_KEY=
-KIMI_API_KEY=
+# Memory & Intelligent Routing Features
+INTELLIGENT_ROUTING_ENABLED=1
+MEMORY_ENABLED=1  # Requires Qdrant to be healthy
+
+# SuperMemory API (long-term episodic memory)
+SUPERMEMORY_API_KEY=sm_...
+SUPERMEMORY_API_BASE_URL=https://api.supermemory.ai
+
+# Rate Limits (defaults)
+DEFAULT_REQUESTS_PER_DAY=1000
+DEFAULT_TOKENS_PER_DAY=100000
+
+# Provider Rate Limiting (Pacer Configuration)
+# Shape traffic to avoid 429s while maintaining responsive UX
+PERPLEXITY_RPS=1
+PERPLEXITY_BURST=2
+PERPLEXITY_CONCURRENCY=3
+
+OPENAI_RPS=2
+OPENAI_BURST=5
+OPENAI_CONCURRENCY=5
+
+GEMINI_RPS=2
+GEMINI_BURST=5
+GEMINI_CONCURRENCY=5
+
+OPENROUTER_RPS=2
+OPENROUTER_BURST=5
+OPENROUTER_CONCURRENCY=5
+
+# Feature Flags
+FEATURE_COREWRITE=1
+feature_corewrite=true
+
+# Email (for magic links - optional)
+EMAIL_FROM=noreply@example.com
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASSWORD=
+
+# Resend API (optional)
+RESEND_API_KEY=
+
+# Stripe (optional)
+STRIPE_SECRET_KEY=
+STRIPE_PUBLISHABLE_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_PRICE_ID=
+
+# Firebase / Auth Integration
+FIREBASE_CREDENTIALS_FILE=/path/to/firebase-adminsdk.json
+FIREBASE_PROJECT_ID=your-project-id
+DEFAULT_ORG_ID=org_demo
+
+# Clerk (optional - alternative auth provider)
+CLERK_SECRET_KEY=sk_test_...
 ```
 
 **💡 Important Notes:**
 - The backend config includes sensible defaults for development
-- Required fields have placeholder values that work locally
+- Required fields: `DATABASE_URL`, `QDRANT_URL`, `UPSTASH_REDIS_URL`, `SECRET_KEY`, `ENCRYPTION_KEY`
 - **You must configure them properly for production**
 - Generate secure keys: The setup script can do this, or use the commands shown above
+- Provider API keys can be set per-organization via API, or globally in `.env`
+- Rate limiting configuration helps prevent 429 errors from providers
+- Memory features require Qdrant to be running and healthy
 
 #### Frontend (`frontend/.env.local`)
 
-See `frontend/env.example` for a complete template. Minimum required configuration:
+See `frontend/env.example` for a complete template. Complete configuration example:
 
 ```env
 # Backend API URL [REQUIRED]
@@ -444,16 +508,21 @@ NEXT_PUBLIC_API_URL=http://localhost:8000/api
 
 # WebSocket URL (optional)
 NEXT_PUBLIC_WS_URL=ws://localhost:8000
+
+# Firebase Auth Configuration [REQUIRED if using Firebase]
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSy...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789012
+NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789012:web:abc123def456
 ```
 
-**Firebase Auth (Optional)**:
-If using Firebase authentication, add these to `frontend/.env.local`:
-```env
-NEXT_PUBLIC_FIREBASE_API_KEY=...
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
-# ... (see frontend/env.example for full list)
-```
+**💡 Important Notes:**
+- `NEXT_PUBLIC_API_URL` must match your backend server URL
+- Firebase configuration is required if using Firebase authentication
+- All `NEXT_PUBLIC_*` variables are exposed to the browser
+- Never put sensitive secrets in frontend environment variables
 
 ### Database Setup
 
@@ -487,6 +556,32 @@ curl -X POST http://localhost:8000/api/orgs/{org_id}/provider-keys \
     "api_key": "sk-...",
     "is_active": true
   }'
+```
+
+### Feature Flags & Configuration
+
+**Intelligent Routing:**
+- `INTELLIGENT_ROUTING_ENABLED=1` - Enables intent-based provider selection (always recommended)
+
+**Memory System:**
+- `MEMORY_ENABLED=1` - Enables Qdrant-based semantic memory (requires Qdrant to be healthy)
+- `SUPERMEMORY_API_KEY` - Long-term episodic memory via SuperMemory API
+
+**Query Rewriting:**
+- `FEATURE_COREWRITE=1` - Enables LLM-based context-aware query rewriting
+- Improves handling of ambiguous queries and coreference resolution
+
+**Rate Limiting:**
+Configure per-provider rate limits to prevent 429 errors:
+- `{PROVIDER}_RPS` - Requests per second
+- `{PROVIDER}_BURST` - Burst capacity
+- `{PROVIDER}_CONCURRENCY` - Concurrent request limit
+
+Example for Perplexity:
+```env
+PERPLEXITY_RPS=1
+PERPLEXITY_BURST=2
+PERPLEXITY_CONCURRENCY=3
 ```
 
 ---

@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation'
 import * as React from 'react'
 // Removed unused auth and conversation hooks
 import { runStep, startWorkflow } from '@/app/actions/workflow'
+import { type CollabPanelState, type CollabStageId } from '@/components/collaborate/CollabPanel'
 import { SYNTRA_MODELS } from '@/components/syntra-model-selector'
 import { apiFetch } from '@/lib/api'
 import { useWorkflowStore } from '@/store/workflow-store'
 import { toast } from 'sonner'
-import { CollabPanel, type CollabPanelState, type CollabStageId } from '@/components/collaborate/CollabPanel'
 
 interface ImageFile {
   file?: File
@@ -22,6 +22,12 @@ interface Message {
   role: 'user' | 'assistant'
   content: string
   images?: ImageFile[]
+  media?: Array<{
+    type: 'image' | 'graph'
+    url: string
+    alt?: string
+    mime_type?: string
+  }>
   chainOfThought?: string
   timestamp?: string
   modelId?: string
@@ -47,7 +53,7 @@ interface ConversationsLandingProps {
 export default function ConversationsLanding({ searchParams }: ConversationsLandingProps) {
   const router = useRouter()
   // Simplified without authentication
-  const user = null
+  const user: { uid: string } | null = null
   const orgId = 'org_demo'
   const accessToken = null
   const loading = false
@@ -59,6 +65,33 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
   const [autoRoutedModel, setAutoRoutedModel] = React.useState<string | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const [currentThreadId, setCurrentThreadId] = React.useState<string | null>(null)
+
+  // Update message helper function
+  const updateMessage = React.useCallback((messageId: string, updates: any) => {
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.id === messageId) {
+          const updateData = typeof updates === 'function' ? updates(msg) : updates
+          const merged: any = { ...msg }
+
+          // Handle each update field, supporting function-based updates
+          for (const [key, value] of Object.entries(updateData)) {
+            if (typeof value === 'function') {
+              // Function-based update (e.g., content: (prev) => prev + delta)
+              const currentValue = (msg as any)[key]
+              merged[key] = value(currentValue)
+            } else {
+              // Direct value update
+              merged[key] = value
+            }
+          }
+
+          return merged as Message
+        }
+        return msg
+      })
+    )
+  }, [])
 
   // Collaboration panel state - 6 stages with dynamic model selection
   const [collabPanel, setCollabPanel] = React.useState<CollabPanelState>({
@@ -73,8 +106,19 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
     ]
   })
 
-  // Unwrap the searchParams Promise using React.use()
-  const resolvedSearchParams = React.use(searchParams as Promise<typeof searchParams> || Promise.resolve(searchParams))
+  // Handle searchParams (can be a Promise or object in Next.js 15+)
+  const [resolvedSearchParams, setResolvedSearchParams] = React.useState<{
+    [key: string]: string | string[] | undefined
+    initialMessage?: string | string[]
+  } | null>(null)
+
+  React.useEffect(() => {
+    const resolveParams = async () => {
+      const params = await Promise.resolve(searchParams)
+      setResolvedSearchParams(params || null)
+    }
+    resolveParams()
+  }, [searchParams])
 
   const initialMessageFromSearch = React.useMemo(() => {
     if (!resolvedSearchParams?.initialMessage) return null
@@ -117,12 +161,12 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       stages: prev.stages.map(s =>
         s.id === stageId
           ? {
-              ...s,
-              status,
-              preview,
-              duration_ms,
-              model: modelId ?? s.model,
-            }
+            ...s,
+            status,
+            preview,
+            duration_ms,
+            model: modelId ?? s.model,
+          }
           : s
       )
     }))
@@ -237,8 +281,10 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
           stepTimeout
         ]) as Awaited<ReturnType<typeof runStep>>
 
-        console.log(`✅ runStep completed for ${step.id}, status: ${result?.status}`)
-        console.log(`📦 Raw result from server:`, JSON.stringify(result, null, 2))
+        // Only log detailed result if there's an error or in development
+        if (result?.status === 'error' || process.env.NODE_ENV === 'development') {
+          console.log(`✅ runStep completed for ${step.id}, status: ${result?.status}`)
+        }
 
         if (!result) {
           console.error(`❌ No result returned from step ${step.id}`)
@@ -250,26 +296,46 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
           return
         }
 
-        // Log all properties of the result for debugging
-        console.log(`📊 Result properties:`, {
-          keys: Object.keys(result),
-          status: result.status,
-          hasOutputDraft: 'outputDraft' in result,
-          hasErrorMessage: 'errorMessage' in result,
-          errorMessage: (result as any).errorMessage,
-          errorProvider: (result as any).errorProvider,
-          errorType: (result as any).errorType
-        })
-
-        console.log(`✅ Step ${step.id} (${step.role}) completed with status: ${result.status}`)
+        // Only log detailed properties in development mode
+        if (process.env.NODE_ENV === 'development' && result.status === 'error') {
+          console.log(`📊 Step ${step.id} (${step.role}) error details:`, {
+            status: result.status,
+            errorMessage: (result as any).errorMessage,
+            errorProvider: (result as any).errorProvider,
+            errorType: (result as any).errorType
+          })
+        }
 
         // Extract error from result - handle both nested and flat error structures
         const resultAny = result as any
         let error: { message: string; provider?: string; type?: "config" | "network" | "rate_limit" | "timeout" | "unknown" } | undefined = undefined
 
         if (result.status === "error") {
-          // Map error type string to valid type
-          const mapErrorType = (type: string | undefined): "config" | "network" | "rate_limit" | "timeout" | "unknown" => {
+          // Map error type string to valid type, but also re-classify based on error message
+          const mapErrorType = (type: string | undefined, errorMsg?: string): "config" | "network" | "rate_limit" | "timeout" | "unknown" => {
+            // First check the message to determine the correct type (message is more reliable)
+            if (errorMsg) {
+              const msgLower = String(errorMsg).toLowerCase();
+              if (msgLower.includes('authentication') ||
+                msgLower.includes('invalid_authentication') ||
+                (msgLower.includes('invalid') && (msgLower.includes('key') || msgLower.includes('token') || msgLower.includes('auth'))) ||
+                msgLower.includes('api key') ||
+                msgLower.includes('unauthorized') ||
+                msgLower.includes('forbidden') ||
+                msgLower.includes('kimi api authentication failed')) {
+                return "config";
+              }
+              if (msgLower.includes('rate limit') || msgLower.includes('429') || msgLower.includes('too many requests')) {
+                return "rate_limit";
+              }
+              if (msgLower.includes('timeout') || msgLower.includes('timed out') || msgLower.includes('exceeded')) {
+                return "timeout";
+              }
+              if (msgLower.includes('network') || msgLower.includes('connection') || msgLower.includes('fetch')) {
+                return "network";
+              }
+            }
+            // Fall back to the provided type if message doesn't give clear indication
             const validTypes = ["config", "network", "rate_limit", "timeout", "unknown"]
             return validTypes.includes(type || "") ? type as any : "unknown"
           }
@@ -279,7 +345,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
             error = {
               message: resultAny.errorMessage,
               provider: resultAny.errorProvider || step.model,
-              type: mapErrorType(resultAny.errorType)
+              type: mapErrorType(resultAny.errorType, resultAny.errorMessage)
             }
           }
           // Check for nested error object (old format)
@@ -287,7 +353,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
             error = {
               message: resultAny.error.message || "Unknown error",
               provider: resultAny.error.provider || step.model,
-              type: mapErrorType(resultAny.error.type)
+              type: mapErrorType(resultAny.error.type, resultAny.error.message)
             }
           }
           // Fallback error
@@ -300,14 +366,10 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
           }
         }
 
-        console.log(`📊 Step result details:`, {
-          hasOutput: !!result.outputDraft,
-          outputLength: result.outputDraft?.length || 0,
-          status: result.status,
-          hasError: !!error,
-          errorDetails: error,
-          fullResult: JSON.stringify(result, null, 2)
-        })
+        // Only log detailed result in development mode
+        if (process.env.NODE_ENV === 'development' && error) {
+          console.log(`📊 Step ${step.id} error:`, error)
+        }
 
         const { outputDraft, status, metadata } = result
 
@@ -325,7 +387,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         if (collabModeDone && status === "done" && outputDraft) {
           // Extract preview (first 150 characters)
           const preview = outputDraft.substring(0, 150).replace(/\n/g, ' ')
-          const duration = metadata?.processing_time_ms || metadata?.latency_ms || undefined
+          const duration = (metadata as any)?.processing_time_ms || (metadata as any)?.latency_ms || undefined
           updateCollabPanelForStep(step.role, "done", preview, duration, step.model)
         }
 
@@ -385,12 +447,27 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         // If error, stop workflow
         if (status === "error") {
           // Error is already extracted above with proper message
+          // Ensure we have a valid error object
+          if (!error) {
+            // If error object is missing, create one from the result
+            error = {
+              message: resultAny.errorMessage ||
+                (typeof resultAny.error === 'string' ? resultAny.error : resultAny.error?.message) ||
+                `${step.role} step failed with ${step.model}. Check API keys and model availability.`,
+              provider: resultAny.errorProvider || step.model,
+              type: (resultAny.errorType === 'config' || resultAny.errorType === 'network' ||
+                resultAny.errorType === 'rate_limit' || resultAny.errorType === 'timeout')
+                ? resultAny.errorType
+                : 'unknown' as const
+            }
+          }
+
           let errorMsg = error?.message || `${step.role} step failed with ${step.model}. Check API keys and model availability.`
           const errorType = error?.type || "unknown"
 
           // Try to parse nested JSON error messages (from API responses)
           try {
-            if (errorMsg.startsWith('{') && errorMsg.includes('error')) {
+            if (typeof errorMsg === 'string' && errorMsg.startsWith('{') && errorMsg.includes('error')) {
               const parsed = JSON.parse(errorMsg)
               if (parsed.error?.message) {
                 errorMsg = `${parsed.error.message} (${parsed.error.type || 'API error'})`
@@ -400,10 +477,13 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
             // Keep original message if parsing fails
           }
 
-          console.error(`❌ Workflow stopped due to error in step ${step.id} (${step.role}):`)
-          console.error(`   Error message: ${errorMsg}`)
-          console.error(`   Error type: ${errorType}`)
-          console.error(`   Error provider: ${error?.provider || step.model}`)
+          // Ensure errorMsg is a string
+          errorMsg = String(errorMsg || 'Unknown error occurred')
+
+          // Only log error in development mode (user already sees it in UI)
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`⚠️ Workflow step failed: ${step.role} (${step.model}) - ${errorMsg}`)
+          }
 
           // Update step with proper error (already done above, but ensure it's set)
           updateStep(step.id, {
@@ -421,10 +501,32 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
               step.model === "perplexity" ? "Perplexity" :
                 step.model === "kimi" ? "Kimi (Moonshot)" : step.model
 
+          // Provide more specific error messages based on error type
+          let fixInstructions = '';
+          if (errorType === 'config') {
+            if (step.model === 'kimi') {
+              fixInstructions = `**How to fix:**\n- Check that \`KIMI_API_KEY\` or \`MOONSHOT_API_KEY\` is set in your backend \`.env\` file\n- Verify the API key is valid and not expired (get it from https://platform.moonshot.cn/console/api-keys)\n- Restart the backend server after adding the key`;
+            } else if (step.model === 'gpt') {
+              fixInstructions = `**How to fix:**\n- Check that \`OPENAI_API_KEY\` is set in your backend \`.env\` file\n- Verify the API key is valid and has credits available\n- Restart the backend server after adding the key`;
+            } else if (step.model === 'gemini') {
+              fixInstructions = `**How to fix:**\n- Check that \`GEMINI_API_KEY\` or \`GOOGLE_API_KEY\` is set in your backend \`.env\` file\n- Get your API key from https://aistudio.google.com/app/apikey\n- Restart the backend server after adding the key`;
+            } else if (step.model === 'perplexity') {
+              fixInstructions = `**How to fix:**\n- Check that \`PERPLEXITY_API_KEY\` is set in your backend \`.env\` file\n- Get your API key from https://www.perplexity.ai/settings/api\n- Restart the backend server after adding the key`;
+            } else {
+              fixInstructions = `**How to fix:**\n- Check that the API key for ${modelName} is set correctly in your backend \`.env\` file\n- Verify the API key is valid and not expired\n- Restart the backend server after adding the key`;
+            }
+          } else if (errorType === 'rate_limit') {
+            fixInstructions = `**How to fix:**\n- You've hit the rate limit for ${modelName}\n- Wait a few minutes before trying again\n- Check your API usage and upgrade your plan if needed`;
+          } else if (errorType === 'timeout') {
+            fixInstructions = `**How to fix:**\n- The request to ${modelName} timed out\n- Try again with a shorter request\n- Check your network connection`;
+          } else {
+            fixInstructions = `**How to fix:**\n- Check your network connection\n- Verify the API key for ${modelName} is valid\n- Check the backend logs for more details`;
+          }
+
           const errorMessage: Message = {
             id: `error-${step.id}-${Date.now()}`,
             role: 'assistant',
-            content: `**Error in ${step.role} step using ${modelName}**\n\n${errorMsg}\n\n**How to fix:**\n- Check that the API key for ${modelName} is set correctly in your backend \`.env\` file\n- Verify the API key is valid and not expired\n- Check your API usage limits`,
+            content: `**Error in ${step.role} step using ${modelName}**\n\n${errorMsg}\n\n${fixInstructions}`,
             timestamp: new Date().toLocaleTimeString('en-US', {
               hour: '2-digit',
               minute: '2-digit',
@@ -467,33 +569,75 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         // Continue to next iteration of the loop
         console.log(`🔄 Continuing workflow loop to next step...`)
       } catch (error: any) {
-        console.error(`❌ Step ${step.id} (${step.role}) failed with error:`, error)
-        console.error('Error details:', {
-          message: error?.message,
-          stack: error?.stack,
-          name: error?.name,
-          errorType: typeof error,
-          errorString: String(error)
-        })
+        // Only log in development mode (user already sees error in UI)
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`⚠️ Step ${step.id} (${step.role}) exception:`, error?.message || String(error))
+        }
 
-        // Check if it's a timeout error
-        const isTimeout = error?.message?.includes("exceeded") || error?.message?.includes("timeout") || error?.message?.includes("timed out")
-        const errorType = isTimeout ? "timeout" : "unknown"
+        // Extract error message safely
+        let errorMsg = 'Unknown error occurred';
+        if (error instanceof Error) {
+          errorMsg = error.message;
+        } else if (typeof error === 'string') {
+          errorMsg = error;
+        } else if (error && typeof error === 'object') {
+          errorMsg = error.message || error.error || JSON.stringify(error);
+        }
+
+        // Determine error type
+        const errorMsgLower = String(errorMsg).toLowerCase();
+        let errorType: "config" | "network" | "rate_limit" | "timeout" | "unknown" = "unknown";
+        if (errorMsgLower.includes("timeout") || errorMsgLower.includes("exceeded") || errorMsgLower.includes("timed out")) {
+          errorType = "timeout";
+        } else if (errorMsgLower.includes("authentication") || errorMsgLower.includes("invalid") && (errorMsgLower.includes("key") || errorMsgLower.includes("api"))) {
+          errorType = "config";
+        } else if (errorMsgLower.includes("rate limit") || errorMsgLower.includes("429")) {
+          errorType = "rate_limit";
+        } else if (errorMsgLower.includes("network") || errorMsgLower.includes("fetch") || errorMsgLower.includes("connection")) {
+          errorType = "network";
+        }
+
+        const modelName = step.model === "gpt" ? "GPT (OpenAI)" :
+          step.model === "gemini" ? "Gemini (Google)" :
+            step.model === "perplexity" ? "Perplexity" :
+              step.model === "kimi" ? "Kimi (Moonshot)" : step.model
 
         updateStep(step.id, {
           status: "error",
           error: {
-            message: error?.message || `Step ${step.role} failed with ${step.model}`,
+            message: errorMsg,
             provider: step.model,
             type: errorType
           }
         })
 
+        // Provide fix instructions based on error type
+        let fixInstructions = '';
+        if (errorType === 'config') {
+          if (step.model === 'kimi') {
+            fixInstructions = `**How to fix:**\n- Check that \`KIMI_API_KEY\` or \`MOONSHOT_API_KEY\` is set in your backend \`.env\` file\n- Verify the API key is valid and not expired\n- Restart the backend server after adding the key`;
+          } else if (step.model === 'gpt') {
+            fixInstructions = `**How to fix:**\n- Check that \`OPENAI_API_KEY\` is set in your backend \`.env\` file\n- Verify the API key is valid and has credits available\n- Restart the backend server after adding the key`;
+          } else if (step.model === 'gemini') {
+            fixInstructions = `**How to fix:**\n- Check that \`GEMINI_API_KEY\` or \`GOOGLE_API_KEY\` is set in your backend \`.env\` file\n- Get your API key from https://aistudio.google.com/app/apikey\n- Restart the backend server after adding the key`;
+          } else if (step.model === 'perplexity') {
+            fixInstructions = `**How to fix:**\n- Check that \`PERPLEXITY_API_KEY\` is set in your backend \`.env\` file\n- Get your API key from https://www.perplexity.ai/settings/api\n- Restart the backend server after adding the key`;
+          } else {
+            fixInstructions = `**How to fix:**\n- Check that the API key for ${modelName} is set correctly in your backend \`.env\` file\n- Verify the API key is valid and not expired\n- Restart the backend server after adding the key`;
+          }
+        } else if (errorType === 'rate_limit') {
+          fixInstructions = `**How to fix:**\n- You've hit the rate limit for ${modelName}\n- Wait a few minutes before trying again\n- Check your API usage and upgrade your plan if needed`;
+        } else if (errorType === 'timeout') {
+          fixInstructions = `**How to fix:**\n- The request to ${modelName} timed out\n- Try again with a shorter request\n- Check your network connection`;
+        } else {
+          fixInstructions = `**How to fix:**\n- Check your network connection\n- Verify the API key for ${modelName} is valid\n- Check the backend logs for more details`;
+        }
+
         // Add error message to chat
         const errorMessage: Message = {
           id: `error-${step.id}-${Date.now()}`,
           role: 'assistant',
-          content: `**Error in ${step.role} step (${step.model}):** ${error?.message || "Step execution failed"}\n\nPlease check your API keys and model availability.`,
+          content: `**Error in ${step.role} step using ${modelName}**\n\n${errorMsg}\n\n${fixInstructions}`,
           timestamp: new Date().toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
@@ -517,19 +661,36 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
 
       // Clean up markdown artifacts while preserving valid markdown for rendering
       finalContent = finalContent
-        // Remove standalone separator lines (--- on their own line)
+        // Remove standalone separator lines (--- on their own line, but preserve list items)
+        // Only remove lines that are ONLY dashes (3+ dashes) with optional whitespace
         .replace(/^\s*-{3,}\s*$/gm, '')
         // Remove quadruple asterisks (invalid markdown)
         .replace(/\*\*\*\*/g, '')
         // Remove triple asterisks (invalid markdown, but keep ** for bold)
+        // Be careful not to remove list markers - only remove standalone ***
         .replace(/\*\*\*(?!\*)/g, '')
         // Remove headers deeper than h3 (keep h1, h2, h3)
         .replace(/^#{4,}\s+/gm, '### ')
-        // Clean up excessive whitespace
+        // Clean up excessive whitespace (but preserve list formatting)
         .replace(/\n{3,}/g, '\n\n')
-        // Remove leading/trailing separators
-        .replace(/^[\s\-*]+\n/gm, '')
-        .replace(/\n[\s\-*]+$/gm, '')
+        // Remove leading/trailing lines that are ONLY dashes or asterisks (separator lines)
+        // But preserve list items which have content after the dash/asterisk
+        .split('\n')
+        .filter(line => {
+          const trimmed = line.trim()
+          // Keep all lines that have actual content (not just separators)
+          // Remove lines that are ONLY dashes/asterisks (3+ chars) - these are separators
+          // But keep list items like "- item" or "* item" or "1. item"
+          if (/^[\s\-*]{3,}$/.test(trimmed)) {
+            // This is a separator line (only dashes/asterisks), remove it
+            return false
+          }
+          // Keep everything else (including valid list items and numbered lists)
+          return true
+        })
+        .join('\n')
+        // Clean up any remaining excessive whitespace
+        .replace(/\n{3,}/g, '\n\n')
         .trim()
 
       // Create clean final message - content will be rendered as markdown by EnhancedMessageContent
@@ -609,6 +770,9 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
     // Reset conversation state for new chat
     setMessages([])
     setCurrentThreadId(null)
+    setAutoRoutedModel(null)
+    // Clear any URL parameters
+    router.replace('/conversations', { scroll: false })
     console.log('🆕 Started new chat - reset thread ID and messages')
   }
 
@@ -737,6 +901,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       console.log('🤖 Selected model data:', selectedModelData)
 
       let threadId: string
+      const wasNewThread = !currentThreadId // Track before we create/set thread
 
       if (currentThreadId) {
         // Use existing thread for follow-up messages
@@ -751,6 +916,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         }>(`/threads/`, {
           method: 'POST',
           body: JSON.stringify({
+            user_id: (user as { uid: string } | null)?.uid || null,
             title: content.trim().substring(0, 50),
             description: '',
           }),
@@ -766,7 +932,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         content: content.trim(),
         collaboration_mode: isCollaborateMode,
       }
-      
+
       // Add images if present - convert to attachments format
       if (images && images.length > 0) {
         requestBody.attachments = images.map((img, index) => ({
@@ -782,30 +948,200 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         requestBody.model_preference = selectedModelData.provider
       }
 
-      // Step 2: Add message to the thread
-      const messageResponse = await apiFetch<{
-        user_message: { id: string; content: string }
-        assistant_message: {
-          id: string;
-          content: string;
-          provider?: string;
-          model?: string;
-          meta?: {
-            latency_ms?: number;
-            request_id?: string;
-          };
+      // Step 2: Use Next.js API route to proxy streaming request (avoids CORS issues)
+      const streamHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'x-org-id': orgId,
+      }
+      if (accessToken) {
+        streamHeaders['Authorization'] = `Bearer ${accessToken}`
+      }
+
+      // Prepare request body for /api/chat route
+      const chatRequestBody: any = {
+        prompt: content.trim(),
+        thread_id: threadId,
+      }
+
+      // Add attachments if provided
+      if (requestBody.attachments) {
+        chatRequestBody.attachments = requestBody.attachments
+      }
+
+      // Add user_id if available
+      const userId = (user as { uid?: string } | null)?.uid
+      if (userId) {
+        chatRequestBody.user_id = userId
+      }
+
+      console.log('📡 Starting streaming request to:', `/api/chat`)
+
+      let streamResponse: Response
+      try {
+        streamResponse = await fetch('/api/chat', {
+          method: 'POST',
+          headers: streamHeaders,
+          body: JSON.stringify(chatRequestBody),
+        })
+      } catch (error) {
+        console.error('🚨 Network error during fetch:', error)
+        console.error('🚨 Attempted URL:', `/api/chat`)
+
+        // Provide user-friendly error message
+        const errorMessage = error instanceof Error
+          ? error.message
+          : 'Unknown network error'
+
+        // Check if it's a connection error
+        if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+          toast.error('Unable to connect to the server. Please check your connection.')
+          throw new Error(`Connection failed: ${errorMessage}`)
         }
-      }>(`/threads/${threadId}/messages`, {
-        method: 'POST',
-        body: JSON.stringify(requestBody),
-      })
 
-      console.log('📋 Message response:', messageResponse)
-      console.log('🤖 Assistant message data:', messageResponse.assistant_message)
-      console.log('🔧 Provider:', messageResponse.assistant_message.provider)
-      console.log('🔧 Model:', messageResponse.assistant_message.model)
+        throw new Error(`Network error: ${errorMessage}`)
+      }
 
-      // Determine reasoning type based on content
+      if (!streamResponse.ok) {
+        const errorText = await streamResponse.text()
+        console.error('❌ Streaming failed:', streamResponse.status, errorText)
+
+        let errorDetails: any
+        try {
+          errorDetails = JSON.parse(errorText)
+        } catch {
+          errorDetails = { error: errorText }
+        }
+
+        throw new Error(errorDetails.details || errorDetails.error || `Failed to start streaming: ${errorText}`)
+      }
+
+      // Extract thread_id from response headers if available (for new threads)
+      const responseThreadId = streamResponse.headers.get('x-thread-id') || threadId
+      if (responseThreadId !== threadId && responseThreadId) {
+        console.log('🔄 Received new thread_id from server:', responseThreadId)
+        setCurrentThreadId(responseThreadId)
+      }
+
+      // Create assistant message placeholder
+      const assistantMessageId = `assistant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      let assistantMessage: Message = {
+        id: assistantMessageId,
+        role: 'assistant',
+        content: '',
+        media: [],
+        timestamp: new Date().toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        modelId: selectedModel,
+        modelName: selectedModelData?.name || 'DAC',
+      }
+
+      // Add placeholder message immediately
+      setMessages((prev) => [...prev, assistantMessage])
+
+      // Read SSE stream
+      const reader = streamResponse.body?.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      let sawFirstDelta = false
+      let provider = ''
+      let model = ''
+
+      if (!reader) {
+        throw new Error('No response body')
+      }
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          buffer += decoder.decode(value, { stream: true })
+
+          // Process complete SSE messages
+          let eom = buffer.indexOf('\n\n')
+          while (eom !== -1) {
+            const raw = buffer.slice(0, eom)
+            buffer = buffer.slice(eom + 2)
+            eom = buffer.indexOf('\n\n')
+
+            // Parse SSE event
+            let eventType = 'delta'
+            let dataLine = ''
+            for (const line of raw.split('\n')) {
+              if (line.startsWith('event:')) {
+                eventType = line.slice(6).trim()
+              }
+              if (line.startsWith('data:')) {
+                dataLine += line.slice(5).trim()
+              }
+            }
+
+            if (!dataLine) continue
+
+            try {
+              const eventData = JSON.parse(dataLine)
+
+              if (eventType === 'router') {
+                // Provider/model info
+                provider = eventData.provider || ''
+                model = eventData.model || ''
+                console.log('🔧 Router decision:', provider, model)
+              } else if (eventType === 'delta') {
+                // Text content
+                if (!sawFirstDelta) {
+                  sawFirstDelta = true
+                  console.log('🚀 First chunk received')
+                }
+                const delta = eventData.delta || dataLine
+                updateMessage(assistantMessageId, {
+                  content: (prev: string) => (prev || '') + delta,
+                })
+              } else if (eventType === 'media') {
+                // Generated image or graph
+                console.log('🎨 Media event received:', eventData)
+                updateMessage(assistantMessageId, {
+                  media: (prev: Array<{ type: 'image' | 'graph'; url: string; alt?: string; mime_type?: string }>) => [
+                    ...(prev || []),
+                    {
+                      type: eventData.type === 'graph' ? 'graph' : 'image',
+                      url: eventData.url,
+                      alt: eventData.alt,
+                      mime_type: eventData.mime_type,
+                    },
+                  ],
+                })
+              } else if (eventType === 'done') {
+                // Stream complete
+                console.log('✅ Stream complete')
+                // Update final message with any metadata
+                if (provider || model) {
+                  updateMessage(assistantMessageId, {
+                    modelName: model || provider || selectedModelData?.name || 'DAC',
+                  })
+                }
+              } else if (eventType === 'error') {
+                console.error('❌ Stream error:', eventData.error)
+                updateMessage(assistantMessageId, {
+                  content: (prev: string) => prev + `\n\n⚠️ Error: ${eventData.error}`,
+                })
+              }
+            } catch (parseError) {
+              // If it's not JSON, treat as plain text delta
+              if (eventType === 'delta') {
+                updateMessage(assistantMessageId, {
+                  content: (prev: string) => (prev || '') + dataLine,
+                })
+              }
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock()
+      }
+
+      // Update final message with reasoning type and other metadata
       const determineReasoningType = (content: string, query: string): 'coding' | 'analysis' | 'creative' | 'research' | 'conversation' => {
         const lowerContent = content.toLowerCase()
         const lowerQuery = query.toLowerCase()
@@ -825,77 +1161,28 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         return 'conversation'
       }
 
-      // Add assistant message with enhanced properties
-      const assistantMessage: Message = {
-        id: messageResponse.assistant_message.id,
-        role: 'assistant',
-        content: messageResponse.assistant_message.content,
-        chainOfThought: selectedModelData
-          ? `I analyzed your request using ${selectedModelData.name}. This model excels at ${selectedModelData.description?.toLowerCase() || 'advanced language processing'}. I applied systematic reasoning to understand your needs, gathered relevant context, synthesized the information, and formulated a comprehensive response. The reasoning process included: pattern recognition, logical inference, and knowledge integration to provide you with the most accurate and helpful answer.`
-          : undefined,
-        timestamp: new Date().toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        modelId: selectedModel,
-        modelName: (() => {
-          const model = messageResponse.assistant_message.model;
-          const provider = messageResponse.assistant_message.provider;
+      // Get final content to determine reasoning type
+      const finalMessage = messages.find((m) => m.id === assistantMessageId)
+      const finalContent = finalMessage?.content || ''
 
-          // Check model field first (contains actual model identifier)
-          if (model) {
-            const lowerModel = model.toLowerCase();
-            // OpenAI / ChatGPT models
-            if (lowerModel.includes('gpt')) return 'GPT';
-            // Google Gemini models
-            if (lowerModel.includes('gemini')) return 'Gemini';
-            // Perplexity models (includes sonar, llama variants)
-            if (lowerModel.includes('perplexity') || lowerModel.includes('sonar') || lowerModel.includes('llama')) {
-              return 'Perplexity';
-            }
-            // Kimi / Moonshot models (Zhipu AI)
-            if (lowerModel.includes('kimi') || lowerModel.includes('moonshot')) return 'Kimi';
-            // OpenRouter (will have format like "openai/gpt-4", "google/gemini", etc)
-            if (lowerModel.includes('openrouter') || lowerModel.includes('/')) {
-              // Extract provider name from OpenRouter format
-              const parts = lowerModel.split('/');
-              if (parts.length > 1) {
-                const providerPart = parts[0].toLowerCase();
-                if (providerPart.includes('openai') || providerPart.includes('gpt')) return 'GPT';
-                if (providerPart.includes('google') || providerPart.includes('gemini')) return 'Gemini';
-                if (providerPart.includes('perplexity')) return 'Perplexity';
-                if (providerPart.includes('zhipu') || providerPart.includes('kimi')) return 'Kimi';
-              }
-              return 'OpenRouter';
-            }
-          }
-
-          // Fallback to provider field if model not available
-          if (provider) {
-            const lowerProvider = provider.toLowerCase();
-            if (lowerProvider === 'gemini' || lowerProvider === 'google') return 'Gemini';
-            if (lowerProvider === 'openai') return 'GPT';
-            if (lowerProvider === 'perplexity') return 'Perplexity';
-            if (lowerProvider === 'kimi' || lowerProvider === 'zhipu') return 'Kimi';
-            if (lowerProvider === 'openrouter') return 'OpenRouter';
-            // Capitalize first letter for unknown providers
-            return provider.charAt(0).toUpperCase() + provider.slice(1);
-          }
-
-          return selectedModelData?.name || 'DAC';
-        })(),
-        reasoningType: determineReasoningType(messageResponse.assistant_message.content, content),
+      // Update final message with metadata
+      updateMessage(assistantMessageId, {
+        reasoningType: determineReasoningType(finalContent, content),
         confidence: Math.floor(85 + Math.random() * 15),
-        processingTime: messageResponse.assistant_message.meta?.latency_ms ?
-          Math.round(messageResponse.assistant_message.meta.latency_ms) :
-          Math.floor(800 + Math.random() * 1200),
-      }
-
-      setMessages((prev) => [...prev, assistantMessage])
+        processingTime: Math.floor(800 + Math.random() * 1200),
+        chainOfThought: selectedModelData
+          ? `I analyzed your request using ${selectedModelData.name}. This model excels at ${selectedModelData.description?.toLowerCase() || 'advanced language processing'}. I applied systematic reasoning to understand your needs, gathered relevant context, synthesized the information, and formulated a comprehensive response.`
+          : undefined,
+      })
 
       // Capture the auto-routed model if using auto mode
       if (selectedModel === 'auto' && assistantMessage.modelName) {
         setAutoRoutedModel(assistantMessage.modelName)
+      }
+
+      // If we just created a new thread, navigate to its page so it shows in sidebar
+      if (wasNewThread && threadId) {
+        router.push(`/conversations/${threadId}`)
       }
 
     } catch (error: any) {
@@ -905,7 +1192,11 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         stack: error.stack,
         name: error.name
       })
-      toast.error('Failed to send message. Please try again.')
+
+      // Show specific error message if available, otherwise show generic message
+      const errorMessage = error?.message || 'Failed to send message. Please try again.'
+      toast.error(errorMessage)
+
       // Remove the user message if the API call failed
       setMessages((prev) => prev.filter((m) => m.id !== userMessage.id))
     } finally {
@@ -946,6 +1237,8 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       onContinueWorkflow={handleContinueWorkflow}
       autoRoutedModel={autoRoutedModel}
       collabPanel={collabPanel}
+      currentThreadId={currentThreadId}
+      useNewThreadsSystem={true}
     />
   )
 }

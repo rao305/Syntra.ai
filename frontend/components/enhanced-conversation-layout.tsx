@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from 'react'
-import { EnhancedSidebar } from '@/components/enhanced-sidebar'
+import { type CollabPanelState } from '@/components/collaborate/CollabPanel'
 import { EnhancedChatInterface } from '@/components/enhanced-chat-interface'
-import { CollabPanel, type CollabPanelState } from '@/components/collaborate/CollabPanel'
+import { EnhancedSidebar } from '@/components/enhanced-sidebar'
+import { useState } from 'react'
 
 interface Message {
   id: string
@@ -39,6 +39,8 @@ interface EnhancedConversationLayoutProps {
   onContinueWorkflow?: () => void
   autoRoutedModel?: string | null
   collabPanel?: CollabPanelState
+  currentThreadId?: string | null
+  useNewThreadsSystem?: boolean
 }
 
 export function EnhancedConversationLayout({
@@ -55,7 +57,9 @@ export function EnhancedConversationLayout({
   onModelSelect,
   onContinueWorkflow,
   autoRoutedModel,
-  collabPanel
+  collabPanel,
+  currentThreadId = null,
+  useNewThreadsSystem = true,
 }: EnhancedConversationLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const user = null
@@ -71,6 +75,8 @@ export function EnhancedConversationLayout({
         onDeleteChat={onDeleteChat}
         onRenameChat={onRenameChat}
         user={user}
+        currentThreadId={currentThreadId}
+        useNewThreadsSystem={useNewThreadsSystem}
       />
       <main className="flex-1 flex flex-col h-full relative transition-all duration-300 ease-in-out">
         <EnhancedChatInterface

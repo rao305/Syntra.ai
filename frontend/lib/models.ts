@@ -1,11 +1,11 @@
 import {
     IS_MOCK_MODE,
-    isGptAvailable,
     isGeminiAvailable,
-    isPerplexityAvailable,
+    isGptAvailable,
     isKimiAvailable,
-    ProviderConfigError,
-    ProviderCallError
+    isPerplexityAvailable,
+    ProviderCallError,
+    ProviderConfigError
 } from "./providersConfig";
 
 export interface ModelResponse {
@@ -174,36 +174,36 @@ export async function callPerplexity(
 
         const data = await response.json();
         console.log(`[Perplexity] Full response data:`, JSON.stringify(data, null, 2));
-        
+
         // Validate response structure
         if (!data.choices || !Array.isArray(data.choices) || data.choices.length === 0) {
             throw new ProviderCallError("Perplexity", "Invalid API response: no choices array");
         }
-        
+
         if (!data.choices[0].message || !data.choices[0].message.content) {
             throw new ProviderCallError("Perplexity", "Invalid API response: no message content");
         }
-        
+
         const content = data.choices[0].message.content;
         console.log(`[Perplexity] Response received: ${content.substring(0, 50)}...`);
         return { content, isMock: false };
     } catch (error: any) {
         console.error("Perplexity Call Error:", error);
-        
+
         // Retry logic for timeout and network errors
         if ((error.name === 'AbortError' || error.name === 'NetworkError') && retryAttempt < 2) {
             console.warn(`[Perplexity] Retrying due to ${error.name} (attempt ${retryAttempt + 2}/3)...`);
             await new Promise(resolve => setTimeout(resolve, 2000 * (retryAttempt + 1))); // Exponential backoff
             return callPerplexity(messages, model, retryAttempt + 1);
         }
-        
+
         if (error.name === 'AbortError') {
             throw new ProviderCallError("Perplexity", "Request timed out after retries", 408);
         }
         if (error instanceof ProviderConfigError || error instanceof ProviderCallError) {
             throw error;
         }
-        
+
         // If we're in development, provide a fallback response instead of crashing
         if (process.env.NODE_ENV === "development") {
             console.warn("[Perplexity] Falling back to mock response due to API error");
@@ -213,7 +213,7 @@ export async function callPerplexity(
                 error: `Perplexity API Error: ${error.message}`
             };
         }
-        
+
         throw new ProviderCallError("Perplexity", error.message || "Unknown Perplexity API error");
     }
 }
@@ -238,11 +238,11 @@ export async function callKimi(
         const apiKey = process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY;
         console.log(`[Kimi] Calling Moonshot API with model ${model}...`);
         console.log(`[Kimi] API key present: ${!!apiKey}, starts with: ${apiKey?.substring(0, 8) || 'N/A'}...`);
-        
+
         if (!apiKey) {
             throw new ProviderConfigError("KIMI_API_KEY is not set");
         }
-        
+
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
@@ -264,7 +264,31 @@ export async function callKimi(
 
         if (!response.ok) {
             const error = await response.text();
-            throw new ProviderCallError("Kimi", error, response.status);
+            let errorMessage = error;
+            let statusCode = response.status;
+
+            // Try to parse error JSON for better error messages
+            try {
+                const errorJson = JSON.parse(error);
+                if (errorJson.error?.message) {
+                    errorMessage = errorJson.error.message;
+                } else if (errorJson.error) {
+                    errorMessage = typeof errorJson.error === 'string' ? errorJson.error : JSON.stringify(errorJson.error);
+                }
+            } catch {
+                // Keep original error text if parsing fails
+            }
+
+            // Check for authentication errors specifically
+            const errorLower = errorMessage.toLowerCase();
+            if (response.status === 401 || response.status === 403 ||
+                errorLower.includes('authentication') ||
+                errorLower.includes('invalid_authentication') ||
+                (errorLower.includes('invalid') && (errorLower.includes('key') || errorLower.includes('token') || errorLower.includes('auth')))) {
+                throw new ProviderConfigError(`Kimi API authentication failed: ${errorMessage}. Please check your KIMI_API_KEY or MOONSHOT_API_KEY in the backend .env file.`);
+            }
+
+            throw new ProviderCallError("Kimi", errorMessage, statusCode);
         }
 
         const data = await response.json();

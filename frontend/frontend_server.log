@@ -1,0 +1,16 @@
+
+> my-v0-project@0.1.0 dev
+> next dev
+
+   ▲ Next.js 16.0.0 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://100.70.52.119:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Ready in 784ms
+ ○ Compiling /conversations/[id] ...
+ GET / 200 in 2.7s (compile: 1941ms, render: 743ms)
+ GET /conversations/794d0cfe-9fdb-46bc-b057-97b9c0b0634c 200 in 4.6s (compile: 4.2s, render: 466ms)
+ GET / 200 in 1098ms (compile: 255ms, render: 843ms)

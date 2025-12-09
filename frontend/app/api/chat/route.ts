@@ -95,14 +95,28 @@ export async function POST(request: NextRequest) {
     const streamRequestBody: any = {
       content: messageContent,
       role: 'user',
-      provider: 'openrouter',  // Use openrouter as placeholder, backend will route
-      model: 'auto',           // Backend will choose model
       scope: 'private',
+      use_memory: true,
+      // Don't specify provider/model - let backend do intelligent routing
+      // The backend will analyze the content and select the best provider/model
     };
+
+    // Only add provider/model if explicitly specified in the request
+    if (body.provider) {
+      streamRequestBody.provider = body.provider;
+    }
+    if (body.model && body.model !== 'auto') {
+      streamRequestBody.model = body.model;
+    }
 
     // Add attachments if provided
     if (body.attachments && Array.isArray(body.attachments) && body.attachments.length > 0) {
       streamRequestBody.attachments = body.attachments;
+    }
+
+    // Add user_id if provided
+    if (body.user_id) {
+      streamRequestBody.user_id = body.user_id;
     }
 
     const streamHeaders: Record<string, string> = {
@@ -113,11 +127,31 @@ export async function POST(request: NextRequest) {
       streamHeaders['Authorization'] = authHeader;
     }
 
-    const streamResponse = await fetch(`${BACKEND_URL}/threads/${threadId}/messages/stream`, {
-      method: 'POST',
-      headers: streamHeaders,
-      body: JSON.stringify(streamRequestBody),
-    });
+    let streamResponse: Response;
+    try {
+      console.log('[API /chat] Calling backend streaming endpoint:', {
+        url: `${BACKEND_URL}/threads/${threadId}/messages/stream`,
+        method: 'POST',
+        headers: streamHeaders,
+        body: JSON.stringify(streamRequestBody),
+      });
+
+      streamResponse = await fetch(`${BACKEND_URL}/threads/${threadId}/messages/stream`, {
+        method: 'POST',
+        headers: streamHeaders,
+        body: JSON.stringify(streamRequestBody),
+      });
+    } catch (fetchError: any) {
+      console.error('[API /chat] Network error calling backend:', fetchError);
+      return new Response(
+        JSON.stringify({
+          error: 'Failed to connect to backend',
+          details: fetchError.message || 'Network error',
+          hint: 'Is the backend server running?'
+        }),
+        { status: 503, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
     // CRITICAL: Extract thread_id from response headers or URL
     // Backend should return thread_id in response headers for new threads
@@ -129,9 +163,26 @@ export async function POST(request: NextRequest) {
 
     if (!streamResponse.ok) {
       const errorText = await streamResponse.text();
-      console.error('[API /chat] Streaming failed:', streamResponse.status, errorText);
+      console.error('[API /chat] Backend streaming failed:', {
+        status: streamResponse.status,
+        statusText: streamResponse.statusText,
+        errorText,
+        url: streamResponse.url,
+      });
+
+      let errorDetails: any;
+      try {
+        errorDetails = JSON.parse(errorText);
+      } catch {
+        errorDetails = { error: errorText || 'Unknown error' };
+      }
+
       return new Response(
-        JSON.stringify({ error: 'Failed to start streaming', details: errorText }),
+        JSON.stringify({
+          error: 'Failed to start streaming',
+          details: errorDetails.error || errorDetails.detail || errorText,
+          status: streamResponse.status
+        }),
         { status: streamResponse.status, headers: { 'Content-Type': 'application/json' } }
       );
     }

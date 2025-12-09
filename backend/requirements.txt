@@ -30,6 +30,10 @@ httpx[http2]
 pydantic
 pydantic-settings
 
+# Media Generation
+matplotlib
+numpy
+
 # Stripe
 stripe
 

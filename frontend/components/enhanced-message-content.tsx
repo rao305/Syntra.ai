@@ -1,15 +1,15 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import ReactMarkdown from 'react-markdown'
-import 'katex/dist/katex.min.css'
-import { InlineMath, BlockMath } from 'react-katex'
-import { Copy, Check, Code2, Maximize2 } from 'lucide-react'
+import { ImageMessageDisplay } from '@/components/image-message-display'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { ImageMessageDisplay } from '@/components/image-message-display'
+import 'katex/dist/katex.min.css'
+import { Check, Copy, Maximize2 } from 'lucide-react'
+import React, { useState } from 'react'
+import { BlockMath, InlineMath } from 'react-katex'
+import ReactMarkdown from 'react-markdown'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 interface CodeBlockProps {
   children: React.ReactNode
@@ -36,11 +36,11 @@ const LARGE_CODE_THRESHOLD = 300
 const CodeBlock: React.FC<CodeBlockProps> = ({ children, className }) => {
   const [copied, setCopied] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-  
+
   const language = className?.replace('language-', '') || 'text'
   const codeString = String(children).replace(/\n$/, '')
   const isLargeCode = codeString.length > LARGE_CODE_THRESHOLD
-  
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(codeString)
@@ -206,7 +206,7 @@ const MathComponent: React.FC<{ children: string; display?: boolean }> = ({ chil
 // Process text to handle LaTeX math expressions
 const processLatexInText = (text: string): React.ReactNode[] => {
   if (!text) return []
-  
+
   // Pattern to match multiple LaTeX delimiters:
   // 1. Block math: $$...$$ and \[...\]
   // 2. Inline math: $...$ and \(...\)
@@ -215,9 +215,9 @@ const processLatexInText = (text: string): React.ReactNode[] => {
   const inlineMathRegex = /(\$(?![$])[^$\n]*?\$(?![$])|\\\([\s\S]*?\\\))/g
   // Bracket math: [expression with LaTeX commands or mathematical notation] - detect mathematical expressions in brackets
   const bracketMathRegex = /\[\s*\\?[^[\]]*?(?:\\[a-zA-Z]+|[(){}=+\-*/^_'x]|u\(|v\(|dx|dy|dt|[a-zA-Z]'?\([a-zA-Z]\))[^[\]]*?\s*\]/g
-  
+
   const parts: Array<{ type: 'text' | 'block-math' | 'inline-math' | 'bracket-math'; content: string; start: number; end: number }> = []
-  
+
   // First, find all block math matches
   let match
   const blockMatches: Array<{ start: number; end: number; content: string }> = []
@@ -229,7 +229,7 @@ const processLatexInText = (text: string): React.ReactNode[] => {
       content: match[0]
     })
   }
-  
+
   // Find bracket math matches that don't overlap with block math
   const bracketMatches: Array<{ start: number; end: number; content: string }> = []
   bracketMathRegex.lastIndex = 0
@@ -245,7 +245,7 @@ const processLatexInText = (text: string): React.ReactNode[] => {
       })
     }
   }
-  
+
   // Then find inline math matches that don't overlap with block math or bracket math
   const inlineMatches: Array<{ start: number; end: number; content: string }> = []
   inlineMathRegex.lastIndex = 0
@@ -264,14 +264,14 @@ const processLatexInText = (text: string): React.ReactNode[] => {
       })
     }
   }
-  
+
   // Combine and sort all matches
   const allMatches = [
-    ...blockMatches.map(m => ({ ...m, type: 'block-math' as const })), 
+    ...blockMatches.map(m => ({ ...m, type: 'block-math' as const })),
     ...bracketMatches.map(m => ({ ...m, type: 'bracket-math' as const })),
     ...inlineMatches.map(m => ({ ...m, type: 'inline-math' as const }))
   ].sort((a, b) => a.start - b.start)
-  
+
   // Build parts array
   let lastIndex = 0
   for (const mathMatch of allMatches) {
@@ -282,18 +282,18 @@ const processLatexInText = (text: string): React.ReactNode[] => {
         parts.push({ type: 'text', content: textContent, start: lastIndex, end: mathMatch.start })
       }
     }
-    
+
     // Add the math match
-    parts.push({ 
-      type: mathMatch.type, 
-      content: mathMatch.content, 
-      start: mathMatch.start, 
-      end: mathMatch.end 
+    parts.push({
+      type: mathMatch.type,
+      content: mathMatch.content,
+      start: mathMatch.start,
+      end: mathMatch.end
     })
-    
+
     lastIndex = mathMatch.end
   }
-  
+
   // Add remaining text
   if (lastIndex < text.length) {
     const textContent = text.substring(lastIndex)
@@ -301,12 +301,12 @@ const processLatexInText = (text: string): React.ReactNode[] => {
       parts.push({ type: 'text', content: textContent, start: lastIndex, end: text.length })
     }
   }
-  
+
   // If no matches found, return the whole text as a single part
   if (parts.length === 0) {
     parts.push({ type: 'text', content: text, start: 0, end: text.length })
   }
-  
+
   // Convert to React nodes
   return parts.map((part, index) => {
     if (part.type === 'block-math') {
@@ -343,12 +343,12 @@ const Paragraph: React.FC<{ children: React.ReactNode; node?: any }> = ({ childr
   // For string content, process LaTeX
   if (typeof children === 'string') {
     const processed = processLatexInText(children)
-    return <div className="mb-4">{processed}</div>
+    return <div className="mb-4 leading-relaxed text-zinc-200">{processed}</div>
   }
-  
+
   // For all other content, use div to avoid nesting issues
   // (div can contain any block or inline elements, unlike p which is restricted)
-  return <div className="mb-4">{children}</div>
+  return <div className="mb-4 leading-relaxed text-zinc-200">{children}</div>
 }
 
 export const EnhancedMessageContent: React.FC<EnhancedMessageContentProps> = ({
@@ -369,7 +369,10 @@ export const EnhancedMessageContent: React.FC<EnhancedMessageContentProps> = ({
 
   return (
     <div className={cn(
-      "prose prose-invert max-w-none",
+      "prose prose-invert prose-zinc max-w-none",
+      "prose-headings:text-zinc-100 prose-p:text-zinc-200 prose-strong:text-zinc-100",
+      "prose-ul:text-zinc-200 prose-ol:text-zinc-200 prose-li:text-zinc-200",
+      "prose-code:text-zinc-100 prose-pre:bg-zinc-900/50",
       role === 'user' ? "text-zinc-100" : "text-zinc-100"
     )}>
       {/* Image Display */}
@@ -380,53 +383,56 @@ export const EnhancedMessageContent: React.FC<EnhancedMessageContentProps> = ({
       {/* Text Content */}
       {content && (
         <ReactMarkdown
-        components={{
-          code({ node, inline, className, children, ...props }) {
-            if (inline) {
-              return <InlineCode>{children}</InlineCode>
-            }
-            return (
-              <CodeBlock className={className}>
+          components={{
+            code({ node, inline, className, children, ...props }) {
+              if (inline) {
+                return <InlineCode>{children}</InlineCode>
+              }
+              return (
+                <CodeBlock className={className}>
+                  {children}
+                </CodeBlock>
+              )
+            },
+            p: Paragraph,
+            // Style other markdown elements
+            h1: ({ children }) => <h1 className="text-2xl font-bold mb-4 mt-6 text-zinc-100 first:mt-0">{children}</h1>,
+            h2: ({ children }) => <h2 className="text-xl font-semibold mb-3 mt-5 text-zinc-200 first:mt-0">{children}</h2>,
+            h3: ({ children }) => <h3 className="text-lg font-medium mb-2 mt-4 text-zinc-200 first:mt-0">{children}</h3>,
+            h4: ({ children }) => <h4 className="text-base font-medium mb-2 mt-3 text-zinc-200 first:mt-0">{children}</h4>,
+            ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-2 text-zinc-200">{children}</ul>,
+            ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-2 text-zinc-200">{children}</ol>,
+            li: ({ children }) => <li className="text-zinc-200 leading-relaxed">{children}</li>,
+            strong: ({ children }) => <strong className="font-semibold text-zinc-100">{children}</strong>,
+            em: ({ children }) => <em className="italic text-zinc-200">{children}</em>,
+            blockquote: ({ children }) => (
+              <blockquote className="border-l-4 border-zinc-600 pl-4 italic text-zinc-300 my-4">
                 {children}
-              </CodeBlock>
+              </blockquote>
+            ),
+            a: ({ href, children }) => (
+              <a href={href} className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">
+                {children}
+              </a>
+            ),
+            table: ({ children }) => (
+              <div className="overflow-x-auto my-4">
+                <table className="min-w-full border border-zinc-700 rounded-lg">
+                  {children}
+                </table>
+              </div>
+            ),
+            th: ({ children }) => (
+              <th className="border border-zinc-700 px-3 py-2 bg-zinc-800 text-zinc-200 font-medium text-left">
+                {children}
+              </th>
+            ),
+            td: ({ children }) => (
+              <td className="border border-zinc-700 px-3 py-2 text-zinc-300">
+                {children}
+              </td>
             )
-          },
-          p: Paragraph,
-          // Style other markdown elements
-          h1: ({ children }) => <h1 className="text-2xl font-bold mb-4 text-zinc-100">{children}</h1>,
-          h2: ({ children }) => <h2 className="text-xl font-semibold mb-3 text-zinc-200">{children}</h2>,
-          h3: ({ children }) => <h3 className="text-lg font-medium mb-2 text-zinc-200">{children}</h3>,
-          ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>,
-          ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-1">{children}</ol>,
-          li: ({ children }) => <li className="text-zinc-200">{children}</li>,
-          blockquote: ({ children }) => (
-            <blockquote className="border-l-4 border-zinc-600 pl-4 italic text-zinc-300 my-4">
-              {children}
-            </blockquote>
-          ),
-          a: ({ href, children }) => (
-            <a href={href} className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">
-              {children}
-            </a>
-          ),
-          table: ({ children }) => (
-            <div className="overflow-x-auto my-4">
-              <table className="min-w-full border border-zinc-700 rounded-lg">
-                {children}
-              </table>
-            </div>
-          ),
-          th: ({ children }) => (
-            <th className="border border-zinc-700 px-3 py-2 bg-zinc-800 text-zinc-200 font-medium text-left">
-              {children}
-            </th>
-          ),
-          td: ({ children }) => (
-            <td className="border border-zinc-700 px-3 py-2 text-zinc-300">
-              {children}
-            </td>
-          )
-        }}
+          }}
         >
           {content}
         </ReactMarkdown>

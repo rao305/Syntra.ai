@@ -1,17 +1,32 @@
 'use client'
 
-import { create } from 'zustand'
+import { create } from 'zustand';
+
+export type WorkflowRole = "analyst" | "researcher" | "creator" | "critic" | "reviews" | "director" | "synthesizer";
+export type WorkflowModel = "gpt" | "gemini" | "perplexity" | "kimi" | "multi";
+export type WorkflowMode = "manual" | "auto";
+export type WorkflowStatus = "pending" | "running" | "awaiting_user" | "done" | "error" | "cancelled";
 
 export interface WorkflowStep {
   id: string
-  role: 'analyst' | 'researcher' | 'creator' | 'critic' | 'synthesizer'
-  status: 'pending' | 'running' | 'awaiting_user' | 'done' | 'error' | 'cancelled'
-  model?: string
-  inputContext?: string
+  role: WorkflowRole
+  model: WorkflowModel
+  mode: WorkflowMode
+  status: WorkflowStatus
+  inputContext: string
   outputDraft?: string
   outputFinal?: string
-  error?: { message: string; code?: string }
-  metadata?: Record<string, any>
+  error?: {
+    message: string
+    provider?: string
+    type?: "config" | "network" | "rate_limit" | "timeout" | "unknown"
+  }
+  metadata?: {
+    isMock?: boolean
+    providerName?: string
+    processing_time_ms?: number
+    latency_ms?: number
+  }
 }
 
 interface WorkflowState {

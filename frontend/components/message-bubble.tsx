@@ -1,12 +1,11 @@
 'use client'
 
-import { format } from 'date-fns'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
+import { DisambiguationChips } from '@/components/disambiguation-chips'
 import { MessageActions } from '@/components/message-actions'
 import { MessageContent } from '@/components/message-content'
-import { DisambiguationChips } from '@/components/disambiguation-chips'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
+import { format } from 'date-fns'
 
 export interface MessageAttachment {
   type: 'image' | 'file'
@@ -27,6 +26,12 @@ export interface Message {
   ttftMs?: number // Phase 2: Time to first token in milliseconds
   cacheHit?: boolean // Phase 2: Whether this was a cache hit
   attachments?: MessageAttachment[]
+  media?: Array<{
+    type: 'image' | 'graph'
+    url: string
+    alt?: string
+    mime_type?: string
+  }>
   type?: 'message' | 'clarification' // Query rewriter disambiguation
   clarification?: {
     question: string
@@ -200,6 +205,29 @@ export function MessageBubble({
                     }
                   }}
                 />
+              )}
+
+              {/* Generated Media (Images/Graphs) */}
+              {message.media && message.media.length > 0 && (
+                <div className="mb-3 space-y-3">
+                  {message.media.map((mediaItem, idx) => (
+                    <div key={idx} className="rounded-lg overflow-hidden border border-[#2a2a2a] bg-[#0f0f0f]">
+                      {mediaItem.type === 'graph' && (
+                        <div className="p-2 bg-[#1a1a1a] border-b border-[#2a2a2a]">
+                          <div className="text-xs text-zinc-400 flex items-center gap-2">
+                            <span>📊</span>
+                            <span>Generated Graph</span>
+                          </div>
+                        </div>
+                      )}
+                      <img
+                        src={mediaItem.url}
+                        alt={mediaItem.alt || (mediaItem.type === 'graph' ? 'Generated graph' : 'Generated image')}
+                        className="max-w-full h-auto max-h-96 object-contain w-full"
+                      />
+                    </div>
+                  ))}
+                </div>
               )}
 
               {/* Attachments */}

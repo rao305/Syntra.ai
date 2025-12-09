@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/components/auth/auth-provider";
+import { apiFetch } from "@/lib/api";
 import { ensureConversationMetadata } from "@/lib/firestore-conversations";
+import { useCallback, useEffect, useState } from "react";
 
 export interface Thread {
   id: string;
@@ -13,6 +13,8 @@ export interface Thread {
   last_model: string | null;
   created_at: string;
   updated_at: string | null;
+  pinned?: boolean;
+  archived?: boolean;
 }
 
 interface UseThreadsReturn {
@@ -25,6 +27,12 @@ interface UseThreadsReturn {
     description?: string;
     user_id?: string;
   }) => Promise<{ thread_id: string; created_at: string }>;
+  searchThreads: (query: string, archived?: boolean) => Promise<Thread[]>;
+  archiveThread: (threadId: string, archived: boolean) => Promise<void>;
+  deleteThread: (threadId: string) => Promise<void>;
+  deleteAllThreads: () => Promise<void>;
+  updateThreadTitle: (threadId: string, title: string) => Promise<void>;
+  pinThread: (threadId: string, pinned: boolean) => Promise<void>;
 }
 
 const DEFAULT_ORG_ID = "org_demo";
@@ -40,9 +48,14 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await apiFetch("/threads?limit=50", orgId);
-      const data = await response.json();
-      setThreads(data);
+      // Fetch both active and archived threads so we can toggle between views
+      const [activeData, archivedData] = await Promise.all([
+        apiFetch<Thread[]>("/threads?limit=50&archived=false", orgId),
+        apiFetch<Thread[]>("/threads?limit=50&archived=true", orgId)
+      ]);
+
+      // Combine both sets
+      setThreads([...activeData, ...archivedData]);
 
       // Removed bulk Firestore sync - it was causing slow page loads
       // Individual threads will sync on-demand when needed
@@ -60,11 +73,10 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
       description?: string;
       user_id?: string;
     }) => {
-      const response = await apiFetch("/threads/", orgId, {
+      const data = await apiFetch<{ thread_id: string; created_at: string }>("/threads/", orgId, {
         method: "POST",
         body: JSON.stringify(params || {}),
       });
-      const data = await response.json();
 
       // Try to sync to Firestore asynchronously without blocking
       if (user?.uid && data?.thread_id) {
@@ -85,6 +97,142 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
     [orgId, user?.uid]
   );
 
+  const searchThreads = useCallback(
+    async (query: string, archived?: boolean): Promise<Thread[]> => {
+      if (!query.trim()) {
+        return [];
+      }
+
+      try {
+        const params = new URLSearchParams({
+          q: query.trim(),
+          limit: "50",
+        });
+        if (archived !== undefined) {
+          params.append("archived", archived.toString());
+        }
+
+        const response = await apiFetch<Thread[]>(`/threads/search?${params.toString()}`, orgId);
+        return response;
+      } catch (err) {
+        console.error("Failed to search threads:", err);
+        throw err;
+      }
+    },
+    [orgId]
+  );
+
+  const archiveThread = useCallback(
+    async (threadId: string, archived: boolean): Promise<void> => {
+      try {
+        await apiFetch(`/threads/${threadId}/archive?archived=${archived}`, orgId, {
+          method: "PATCH",
+        });
+
+        // Update local state optimistically
+        setThreads((prev) =>
+          prev.map((thread) =>
+            thread.id === threadId
+              ? {
+                ...thread,
+                archived,
+                updated_at: new Date().toISOString(),
+              }
+              : thread
+          )
+        );
+      } catch (err) {
+        console.error("Failed to archive thread:", err);
+        throw err;
+      }
+    },
+    [orgId]
+  );
+
+  const deleteThread = useCallback(
+    async (threadId: string): Promise<void> => {
+      try {
+        await apiFetch(`/threads/${threadId}`, orgId, {
+          method: "DELETE",
+        });
+
+        // Remove from local state
+        setThreads((prev) => prev.filter((thread) => thread.id !== threadId));
+      } catch (err) {
+        console.error("Failed to delete thread:", err);
+        throw err;
+      }
+    },
+    [orgId]
+  );
+
+  const deleteAllThreads = useCallback(
+    async (): Promise<void> => {
+      try {
+        // Delete all threads by making individual delete requests
+        // Note: We could add a bulk delete endpoint on the backend for better performance
+        const deletePromises = threads.map((thread) =>
+          apiFetch(`/threads/${thread.id}`, orgId, {
+            method: "DELETE",
+          })
+        );
+
+        await Promise.all(deletePromises);
+
+        // Clear local state
+        setThreads([]);
+      } catch (err) {
+        console.error("Failed to delete all threads:", err);
+        throw err;
+      }
+    },
+    [orgId, threads]
+  );
+
+  const updateThreadTitle = useCallback(
+    async (threadId: string, title: string): Promise<void> => {
+      try {
+        await apiFetch(`/threads/${threadId}`, orgId, {
+          method: "PATCH",
+          body: JSON.stringify({ title }),
+        });
+
+        // Update local state
+        setThreads((prev) =>
+          prev.map((thread) =>
+            thread.id === threadId ? { ...thread, title } : thread
+          )
+        );
+      } catch (err) {
+        console.error("Failed to update thread title:", err);
+        throw err;
+      }
+    },
+    [orgId]
+  );
+
+  const pinThread = useCallback(
+    async (threadId: string, pinned: boolean): Promise<void> => {
+      try {
+        await apiFetch(`/threads/${threadId}/settings`, orgId, {
+          method: "PATCH",
+          body: JSON.stringify({ pinned }),
+        });
+
+        // Update local state
+        setThreads((prev) =>
+          prev.map((thread) =>
+            thread.id === threadId ? { ...thread, pinned } : thread
+          )
+        );
+      } catch (err) {
+        console.error("Failed to pin thread:", err);
+        throw err;
+      }
+    },
+    [orgId]
+  );
+
   useEffect(() => {
     fetchThreads();
   }, [fetchThreads]);
@@ -95,5 +243,11 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
     error,
     mutate: fetchThreads,
     createThread,
+    searchThreads,
+    archiveThread,
+    deleteThread,
+    deleteAllThreads,
+    updateThreadTitle,
+    pinThread,
   };
 }

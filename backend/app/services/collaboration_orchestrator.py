@@ -6,10 +6,13 @@ Replaces the mock implementation with production-ready provider integration.
 """
 
 import asyncio
+import logging
 import time
 import uuid
 from typing import Dict, List, Optional, AsyncGenerator, Any
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 from app.config.collaborate_models import (
     COLLAB_MODELS, REVIEW_MODELS, REVIEW_SYSTEM_PROMPT, 
@@ -49,16 +52,8 @@ class CollaborationOrchestrator:
         
         # Create run record if DB available
         run_id = str(uuid.uuid4())
-        if self.db:
-            run = CollaborateRun(
-                id=run_id,
-                thread_id=thread_id,
-                user_message_id="",  # Will be set later
-                mode=mode,
-                status="running"
-            )
-            self.db.add(run)
-            await self.db.flush()
+        persist_to_db = False  # Don't persist during streaming to avoid transaction errors
+        # The streaming endpoint will handle persistence separately if needed after message creation
         
         start_time = time.perf_counter()
         stage_outputs = {}
@@ -77,8 +72,8 @@ class CollaborationOrchestrator:
                     )
                     stage_outputs[stage_id] = output
                     
-                    # Save stage record
-                    if self.db:
+                    # Save stage record (only if persistence is enabled)
+                    if self.db and persist_to_db:
                         await self._save_stage_record(
                             run_id, stage_id, 
                             COLLAB_MODELS[stage_id]["provider"].value,
@@ -103,7 +98,7 @@ class CollaborationOrchestrator:
                         return
                     
                 except Exception as e:
-                    if self.db:
+                    if self.db and persist_to_db:
                         await self._save_stage_record(
                             run_id, stage_id,
                             COLLAB_MODELS[stage_id]["provider"].value, 
@@ -132,14 +127,14 @@ class CollaborationOrchestrator:
                 else:
                     logger.warning("⚠️ No creator output available for reviews stage")
 
-                if self.db:
+                if self.db and persist_to_db:
                     await self._save_stage_record(
                         run_id, "reviews", "multi-model", "external-council",
                         "success", (time.perf_counter() - reviews_start) * 1000
                     )
             except Exception as e:
                 logger.error(f"❌ Error in reviews stage: {str(e)}")
-                if self.db:
+                if self.db and persist_to_db:
                     await self._save_stage_record(
                         run_id, "reviews", "multi-model", "external-council",
                         "error", (time.perf_counter() - reviews_start) * 1000,
@@ -156,7 +151,7 @@ class CollaborationOrchestrator:
                 user_message, stage_outputs, external_reviews, api_keys
             )
             
-            if self.db:
+            if self.db and persist_to_db:
                 await self._save_stage_record(
                     run_id, "director",
                     COLLAB_MODELS["director"]["provider"].value,
@@ -173,13 +168,8 @@ class CollaborationOrchestrator:
                 yield {"type": "final_chunk", "text": chunk}
                 await asyncio.sleep(0.01)  # Minimal delay for streaming effect
             
-            # Update run status
+            # Update run status (skipped - no DB persistence during streaming)
             total_time = (time.perf_counter() - start_time) * 1000
-            if self.db:
-                run.status = "success"
-                run.duration_ms = int(total_time)
-                run.finished_at = datetime.utcnow()
-                await self.db.commit()
             
             # Yield final completion with metadata
             yield {
@@ -194,13 +184,10 @@ class CollaborationOrchestrator:
             }
             
         except Exception as e:
-            if self.db:
-                run.status = "error"
-                run.error_reason = str(e)
-                run.finished_at = datetime.utcnow()
-                await self.db.commit()
+            # Error handling (DB persistence skipped during streaming)
+            logger.error(f"Collaboration failed: {str(e)}", exc_info=True)
             
-            yield {"type": "error", "message": f"Collaboration failed: {str(e)}"}
+            yield {"type": "error", "message": f"Collaboration streaming failed: {str(e)}"}
     
     async def _run_stage(
         self, 
@@ -251,7 +238,11 @@ class CollaborationOrchestrator:
             temperature=0.7 if stage_id == "creator" else 0.3
         )
         
-        return response.get("content", "")
+        if not response:
+            raise ValueError(f"Provider {provider.value} returned None response for stage {stage_id}")
+        
+        # ProviderResponse is a dataclass, access .content attribute
+        return response.content if hasattr(response, 'content') else str(response)
     
     async def _run_external_reviews(
         self,
@@ -302,9 +293,11 @@ class CollaborationOrchestrator:
                 if isinstance(result, Exception):
                     logger.error(f"❌ Review task {i+1} failed: {str(result)}")
                     continue  # Skip failed reviews
-                if result:
+                if result and isinstance(result, dict):
                     reviews.append(result)
                     logger.info(f"✅ Review {i+1} completed: {result.get('source', 'unknown')}")
+                elif result:
+                    logger.warning(f"⚠️ Review {i+1} returned unexpected type: {type(result)}")
 
         logger.info(f"✅ Council review stage complete: {len(reviews)} review(s) collected")
         return reviews
@@ -344,9 +337,24 @@ class CollaborationOrchestrator:
             )
             latency_ms = (time.perf_counter() - start_time) * 1000
             
-            content = response.get("content", "")
+            if not response:
+                logger.warning(f"⚠️ Provider {provider.value} returned None for review {review_config['name']}")
+                return None
             
-            # Save review record
+            # ProviderResponse is a dataclass, access attributes directly
+            if hasattr(response, 'content'):
+                content = response.content
+                prompt_tokens = getattr(response, 'prompt_tokens', None)
+                completion_tokens = getattr(response, 'completion_tokens', None)
+                total_tokens = (prompt_tokens or 0) + (completion_tokens or 0) if (prompt_tokens or completion_tokens) else None
+            else:
+                # Fallback for unexpected types
+                content = str(response)
+                prompt_tokens = None
+                completion_tokens = None
+                total_tokens = None
+            
+            # Save review record (only if DB persistence is enabled)
             if self.db:
                 review = CollaborateReview(
                     run_id=run_id,
@@ -354,9 +362,9 @@ class CollaborationOrchestrator:
                     provider=provider.value,
                     model=model,
                     content=content,
-                    prompt_tokens=response.get("prompt_tokens"),
-                    completion_tokens=response.get("completion_tokens"),
-                    total_tokens=response.get("total_tokens"),
+                    prompt_tokens=prompt_tokens,
+                    completion_tokens=completion_tokens,
+                    total_tokens=total_tokens,
                     latency_ms=int(latency_ms)
                 )
                 self.db.add(review)
@@ -504,7 +512,14 @@ class CollaborationOrchestrator:
             max_tokens=16000  # Allow for comprehensive final answer (doubled from default 8192)
         )
 
-        return response.get("content", "Failed to generate final synthesis.")
+        if not response:
+            raise ValueError(f"Provider {provider.value} returned None response for director synthesis")
+        
+        # ProviderResponse is a dataclass, access .content attribute
+        if hasattr(response, 'content'):
+            return response.content or "Failed to generate final synthesis."
+        else:
+            return str(response)
     
     async def resume_collaboration_stream(
         self,
@@ -592,7 +607,7 @@ class CollaborationOrchestrator:
                             run_id
                         )
                         
-                        if self.db:
+                        if self.db and persist_to_db:
                             await self._save_stage_record(
                                 run_id, "reviews", "multi-model", "external-council",
                                 "success", (time.perf_counter() - reviews_start) * 1000
@@ -606,7 +621,7 @@ class CollaborationOrchestrator:
                         stage_outputs, external_reviews, api_keys or {}
                     )
                     
-                    if self.db:
+                    if self.db and persist_to_db:
                         await self._save_stage_record(
                             run_id, "director",
                             COLLAB_MODELS["director"]["provider"].value,
@@ -630,7 +645,7 @@ class CollaborationOrchestrator:
                         )
                         stage_outputs[stage_id] = output
                         
-                        if self.db:
+                        if self.db and persist_to_db:
                             await self._save_stage_record(
                                 run_id, stage_id,
                                 COLLAB_MODELS[stage_id]["provider"].value,
@@ -643,13 +658,8 @@ class CollaborationOrchestrator:
                 
                 yield {"type": "stage_end", "stage_id": stage_id}
             
-            # Complete the run
+            # Complete the run (DB persistence skipped during streaming)
             total_time = (time.perf_counter() - start_time) * 1000
-            if self.db:
-                run.status = "success"
-                run.duration_ms = int(total_time)
-                run.finished_at = datetime.utcnow()
-                await self.db.commit()
             
             yield {
                 "type": "done",

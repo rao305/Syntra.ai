@@ -1,16 +1,16 @@
 'use client'
 
-import * as React from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useAuth } from '@/components/auth/auth-provider'
 import { EnhancedConversationLayout } from '@/components/enhanced-conversation-layout'
 import { SYNTRA_MODELS } from '@/components/syntra-model-selector'
-import { apiFetch } from '@/lib/api'
-import { useAuth } from '@/components/auth/auth-provider'
-import { toast } from 'sonner'
-import { ensureConversationMetadata, updateConversationMetadata } from '@/lib/firestore-conversations'
-import { useUserConversations } from '@/hooks/use-user-conversations'
-import { useWorkflowStore } from '@/store/workflow-store'
 import { useCollaborationStream } from '@/hooks/use-collaboration-stream'
+import { useUserConversations } from '@/hooks/use-user-conversations'
+import { apiFetch } from '@/lib/api'
+import { ensureConversationMetadata, updateConversationMetadata } from '@/lib/firestore-conversations'
+import { useWorkflowStore } from '@/store/workflow-store'
+import { useParams, useRouter } from 'next/navigation'
+import * as React from 'react'
+import { toast } from 'sonner'
 
 interface ImageFile {
   file?: File
@@ -59,7 +59,7 @@ export default function ConversationPage() {
   const threadId = params.id as string
   const { orgId: authOrgId, accessToken, user } = useAuth()
   const orgId = authOrgId || 'org_demo'
-  const { conversations: userConversations, loading: userConversationsLoading } = useUserConversations(user?.uid)
+  const { conversations: userConversations, loading: userConversationsLoading } = useUserConversations(user?.uid || undefined)
   const { isCollaborateMode } = useWorkflowStore()
 
   const [messages, setMessages] = React.useState<Message[]>([])
@@ -69,17 +69,17 @@ export default function ConversationPage() {
 
   // Collaboration streaming handlers
   const updateMessage = React.useCallback((messageId: string, updates: Partial<Message>) => {
-    setMessages(prev => prev.map(msg => 
-      msg.id === messageId 
-        ? { 
-            ...msg,
-            ...Object.fromEntries(
-              Object.entries(updates).map(([key, value]) => [
-                key,
-                typeof value === 'function' ? value(msg) : value
-              ])
-            )
-          }
+    setMessages(prev => prev.map(msg =>
+      msg.id === messageId
+        ? {
+          ...msg,
+          ...Object.fromEntries(
+            Object.entries(updates).map(([key, value]) => [
+              key,
+              typeof value === 'function' ? value(msg) : value
+            ])
+          )
+        }
         : msg
     ))
   }, [])
@@ -113,15 +113,22 @@ export default function ConversationPage() {
         )
 
         if (response.messages) {
-          const formattedMessages: Message[] = response.messages.map((msg: any) => ({
-            id: msg.id,
-            role: msg.role,
-            content: msg.content,
-            timestamp: new Date(msg.created_at).toLocaleTimeString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
-          }))
+          const formattedMessages: Message[] = response.messages.map((msg: any, index: number) => {
+            // Ensure ID is always valid - handle null/undefined/None from backend
+            const backendId = msg.id
+            const validId = backendId && backendId !== 'None' && backendId !== 'null' && String(backendId).trim() !== ''
+              ? String(backendId)
+              : `msg-${index}-${msg.role}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+            return {
+              id: validId,
+              role: msg.role,
+              content: msg.content,
+              timestamp: new Date(msg.created_at).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
+            }
+          })
           setMessages(formattedMessages)
         }
       } catch (error) {
@@ -195,20 +202,63 @@ export default function ConversationPage() {
     setIsLoading(true)
 
     try {
+      // Create thread if this is a new conversation (for both modes)
+      let actualThreadId = threadId
+      if (threadId === 'new') {
+        console.log('🧵 Creating new thread...')
+        const newThread = await apiFetch<{ thread_id: string; created_at: string }>('/threads/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-org-id': orgId,
+            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+          },
+          body: JSON.stringify({
+            user_id: user?.uid || null,
+            title: content.trim().substring(0, 50),
+            description: '',
+          }),
+        })
+        actualThreadId = newThread.thread_id
+        console.log('✅ Thread created:', actualThreadId)
+
+        // Navigate to the new thread immediately
+        router.push(`/conversations/${actualThreadId}`)
+      }
+
       // Check if we should use collaboration streaming
       if (isCollaborateMode) {
         console.log('🤝 Using collaboration streaming mode')
-        await startCollaboration(content.trim(), "auto")
-        
-        // Update conversation metadata for collaboration
-        if (user?.uid && threadId !== 'new') {
-          await updateConversationMetadata(user.uid, threadId, {
-            title: messages.length === 0 ? content.substring(0, 50) : undefined,
-            lastMessagePreview: `Collaboration: ${content.substring(0, 80)}...`,
-          })
+        try {
+          // Pass actualThreadId to startCollaboration if we just created a thread
+          await startCollaboration(content.trim(), "auto", actualThreadId)
+
+          // Update conversation metadata for collaboration
+          if (user?.uid) {
+            await updateConversationMetadata(user.uid, actualThreadId, {
+              title: messages.length === 0 ? content.substring(0, 50) : undefined,
+              lastMessagePreview: `Collaboration: ${content.substring(0, 80)}...`,
+            })
+          }
+        } catch (error: any) {
+          console.error('Collaboration error:', error)
+          const errorMessage = error?.message || error?.toString() || 'Collaboration failed'
+          toast.error(`Collaboration error: ${errorMessage}`)
+
+          // Add error message to chat
+          const errorMsg: Message = {
+            id: `error-${Date.now()}`,
+            role: 'assistant',
+            content: `**Collaboration Error**\n\n${errorMessage}\n\nPlease try again or switch to regular chat mode.`,
+            timestamp: new Date().toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+          }
+          setMessages((prev) => [...prev, errorMsg])
+        } finally {
+          setIsLoading(false)
         }
-        
-        setIsLoading(false)
         return
       }
       const selectedModelData = SYNTRA_MODELS.find((m) => m.id === selectedModel)
@@ -235,7 +285,7 @@ export default function ConversationPage() {
         requestBody.model_preference = selectedModelData.provider
       }
 
-      // Call DAC backend
+      // Call DAC backend (actualThreadId was set earlier)
       const response = await apiFetch<{
         user_message: { id: string; content: string }
         assistant_message: {
@@ -244,7 +294,7 @@ export default function ConversationPage() {
           provider?: string
           model?: string
         }
-      }>(`/threads/${threadId === 'new' ? '' : threadId}/messages`, {
+      }>(`/threads/${actualThreadId}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -253,16 +303,6 @@ export default function ConversationPage() {
         },
         body: JSON.stringify(requestBody),
       })
-
-      // If this was a new conversation, redirect to the thread
-      if (threadId === 'new' && response.user_message?.id) {
-        const match = response.user_message.id.match(/thread_(.+?)_/)
-        if (match) {
-          const newThreadId = match[1]
-          router.replace(`/conversations/${newThreadId}`)
-          return
-        }
-      }
 
       // Determine reasoning type based on content
       const determineReasoningType = (content: string, query: string): 'coding' | 'analysis' | 'creative' | 'research' | 'conversation' => {
@@ -335,6 +375,8 @@ export default function ConversationPage() {
       isLoading={isLoading}
       selectedModel={selectedModel}
       onModelSelect={handleModelSelect}
+      currentThreadId={threadId !== 'new' ? threadId : null}
+      useNewThreadsSystem={true}
     />
   )
 }

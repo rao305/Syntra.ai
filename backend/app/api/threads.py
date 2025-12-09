@@ -1,6 +1,6 @@
 """Threads API endpoints."""
 from __future__ import annotations
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
@@ -291,6 +291,7 @@ class ThreadListItem(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime]
     pinned: bool = False
+    archived: bool = False
 
 
 class UpdateThreadRequest(BaseModel):
@@ -326,18 +327,37 @@ class AuditEntry(BaseModel):
 @router.get("/", response_model=List[ThreadListItem])
 async def list_threads(
     limit: int = 50,
+    archived: Optional[bool] = None,  # None = exclude archived, True = only archived, False = only non-archived
     org_id: str = Depends(require_org_id),
     db: AsyncSession = Depends(get_db)
 ):
-    """List all threads for the organization, sorted by most recent first."""
+    """List all threads for the organization, sorted by most recent first.
+    
+    Args:
+        limit: Maximum number of threads to return (default 50)
+        archived: Filter by archived status. None = exclude archived (default), 
+                 True = only archived, False = only non-archived
+    """
     # Set RLS context
     await set_rls_context(db, org_id)
 
+    # Build query
+    query = select(Thread).where(Thread.org_id == org_id)
+    
+    # Filter archived threads (default: exclude archived)
+    if archived is None:
+        # Exclude archived threads by default
+        query = query.where(Thread.archived == False)
+    elif archived is True:
+        # Only archived threads
+        query = query.where(Thread.archived == True)
+    else:
+        # Only non-archived threads (explicit)
+        query = query.where(Thread.archived == False)
+
     # Query threads ordered by updated_at (most recent first), then created_at
     result = await db.execute(
-        select(Thread)
-        .where(Thread.org_id == org_id)
-        .order_by(Thread.updated_at.desc().nulls_last(), Thread.created_at.desc())
+        query.order_by(Thread.updated_at.desc().nulls_last(), Thread.created_at.desc())
         .limit(limit)
     )
     threads = result.scalars().all()
@@ -351,10 +371,117 @@ async def list_threads(
             last_model=thread.last_model,
             created_at=thread.created_at,
             updated_at=thread.updated_at,
-            pinned=thread.pinned or False
+            pinned=thread.pinned or False,
+            archived=thread.archived or False
         )
         for thread in threads
     ]
+
+
+@router.get("/search", response_model=List[ThreadListItem])
+async def search_threads(
+    q: str = Query(..., description="Search query"),
+    limit: int = 50,
+    archived: Optional[bool] = None,
+    org_id: str = Depends(require_org_id),
+    db: AsyncSession = Depends(get_db)
+):
+    """Search threads by title or message preview using full-text search.
+    
+    Args:
+        q: Search query string
+        limit: Maximum number of results (default 50)
+        archived: Filter by archived status. None = exclude archived (default),
+                 True = only archived, False = only non-archived
+    """
+    await set_rls_context(db, org_id)
+
+    if not q or not q.strip():
+        raise HTTPException(status_code=400, detail="Search query cannot be empty")
+
+    search_term = f"%{q.strip().lower()}%"
+    
+    # Build query with search conditions
+    from sqlalchemy import or_
+    query = select(Thread).where(
+        Thread.org_id == org_id,
+        or_(
+            Thread.title.ilike(search_term),
+            Thread.last_message_preview.ilike(search_term)
+        )
+    )
+    
+    # Filter archived threads (default: exclude archived)
+    if archived is None:
+        query = query.where(Thread.archived == False)
+    elif archived is True:
+        query = query.where(Thread.archived == True)
+    else:
+        query = query.where(Thread.archived == False)
+
+    # Order by relevance (exact matches first, then by recency)
+    result = await db.execute(
+        query.order_by(
+            Thread.title.ilike(f"{q.strip()}%").desc(),  # Exact match at start
+            Thread.updated_at.desc().nulls_last(),
+            Thread.created_at.desc()
+        )
+        .limit(limit)
+    )
+    threads = result.scalars().all()
+
+    return [
+        ThreadListItem(
+            id=thread.id,
+            title=thread.title,
+            last_message_preview=thread.last_message_preview,
+            last_provider=thread.last_provider,
+            last_model=thread.last_model,
+            created_at=thread.created_at,
+            updated_at=thread.updated_at,
+            pinned=thread.pinned or False,
+            archived=thread.archived or False
+        )
+        for thread in threads
+    ]
+
+
+@router.patch("/{thread_id}/archive")
+async def archive_thread(
+    thread_id: str,
+    archived: bool = Query(..., description="True to archive, False to unarchive"),
+    org_id: str = Depends(require_org_id),
+    db: AsyncSession = Depends(get_db)
+):
+    """Archive or unarchive a thread."""
+    await set_rls_context(db, org_id)
+
+    # Get thread
+    result = await db.execute(
+        select(Thread).where(Thread.id == thread_id, Thread.org_id == org_id)
+    )
+    thread = result.scalar_one_or_none()
+
+    if not thread:
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    # Update archived status
+    thread.archived = archived
+    if archived:
+        from datetime import datetime, timezone
+        thread.archived_at = datetime.now(timezone.utc)
+    else:
+        thread.archived_at = None
+
+    await db.commit()
+    await db.refresh(thread)
+
+    return {
+        "success": True,
+        "thread_id": thread_id,
+        "archived": thread.archived,
+        "archived_at": thread.archived_at.isoformat() if thread.archived_at else None
+    }
 
 
 @router.patch("/{thread_id}")
@@ -1089,6 +1216,42 @@ async def add_message_streaming(
     
     user_content = sanitized_content
     
+    # Step 1.4: Check for media generation intent (images/graphs)
+    from app.services.media_intent_detector import media_intent_detector
+    from app.services.media_generation import media_generation_service
+    
+    # Get previous assistant message for context (in case user says "just generate")
+    previous_ai_message = None
+    try:
+        from app.services.threads_store import get_history
+        history_turns = get_history(thread_id, max_turns=5)
+        print(f"🔍 Checking history for previous AI message. Found {len(history_turns)} turns")
+        # Find the last assistant message (skip the current user message which was just added)
+        for turn in reversed(history_turns):
+            role_str = str(turn.role).lower() if hasattr(turn, 'role') else ''
+            print(f"  Turn role: {role_str}, content: {turn.content[:50] if turn.content else 'empty'}...")
+            if role_str == 'assistant':
+                previous_ai_message = turn.content
+                print(f"✅ Found previous AI message: {previous_ai_message[:100]}...")
+                break
+        if not previous_ai_message:
+            print(f"⚠️  No previous assistant message found in history")
+    except Exception as e:
+        print(f"⚠️  Could not get previous message for context: {e}")
+        import traceback
+        print(traceback.format_exc())
+    
+    media_intent, media_metadata = media_intent_detector.detect_intent(user_content, previous_ai_message)
+    should_generate_media = media_intent != "none"
+    
+    # Log intent detection for debugging
+    if should_generate_media:
+        print(f"🎨 Media generation intent detected: {media_intent}, metadata: {media_metadata}")
+        if media_metadata and media_metadata.get("use_previous"):
+            print(f"📝 Using previous AI message as prompt: {previous_ai_message[:100] if previous_ai_message else 'None'}...")
+    else:
+        print(f"ℹ️  No media generation intent detected for: {user_content[:50]}...")
+    
     # Step 1.5: Query Rewriter (if enabled)
     # Feature flag for query rewriting
     FEATURE_COREWRITE = settings.feature_corewrite
@@ -1235,7 +1398,7 @@ async def add_message_streaming(
     
     # CRITICAL: Use centralized context builder
     # This ensures ALL models get the same rich context (history + memory + rewritten query)
-    await rls_task
+    # Note: RLS context is already set on line 1355, no need to await again
     
     from app.services.context_builder import context_builder
     from app.services.syntra_persona import SYNTRA_SYSTEM_PROMPT, inject_syntra_persona
@@ -1359,8 +1522,7 @@ async def add_message_streaming(
     if not api_key:
         print(f"⚠️  No env var for {provider_enum.value}, fetching from DB...")
         start_wait = perf_time.perf_counter()
-        # Just await the tasks directly - no fancy stuff
-        await rls_task
+        # RLS context is already set on line 1355, just await the API key task
         api_key = await api_key_task
         print(f"⚡ DB fetch done in {(perf_time.perf_counter() - start_wait)*1000:.0f}ms")
     else:
@@ -1649,6 +1811,123 @@ async def add_message_streaming(
                 elif chunk_type == "done":
                     yield f"event: done\n"
                     yield f"data: {json.dumps(chunk)}\n\n"
+                    
+                    # Generate media if requested (after text response completes)
+                    if should_generate_media and media_metadata:
+                        try:
+                            if media_intent == "image":
+                                # Generate image
+                                prompt = media_metadata.get("prompt", user_content)
+                                
+                                # Log prompt being used
+                                print(f"📝 Image generation prompt: '{prompt[:200]}...'")
+                                
+                                # Get API keys for image generation
+                                api_keys_dict = {}
+                                
+                                # Try to get key from current provider first
+                                if provider_enum == ProviderType.GEMINI and api_key:
+                                    api_keys_dict["gemini"] = api_key
+                                    api_keys_dict["google"] = api_key  # Alias
+                                elif provider_enum == ProviderType.OPENAI and api_key:
+                                    api_keys_dict["openai"] = api_key
+                                
+                                # Fallback to settings/env - prioritize Gemini
+                                from app.config import get_settings
+                                settings = get_settings()
+                                
+                                if "gemini" not in api_keys_dict and settings.google_api_key:
+                                    api_keys_dict["gemini"] = settings.google_api_key
+                                    api_keys_dict["google"] = settings.google_api_key
+                                
+                                if "openai" not in api_keys_dict and settings.openai_api_key:
+                                    api_keys_dict["openai"] = settings.openai_api_key
+                                
+                                # Also try to get from DB if available
+                                if org_id:
+                                    try:
+                                        from app.services.provider_keys import get_api_key_for_org
+                                        # RLS context is already set at the start of the request (line 1355)
+                                        
+                                        # Try Gemini first
+                                        if "gemini" not in api_keys_dict:
+                                            gemini_key = await get_api_key_for_org(db, org_id, ProviderType.GEMINI)
+                                            if gemini_key:
+                                                api_keys_dict["gemini"] = gemini_key
+                                                api_keys_dict["google"] = gemini_key
+                                        
+                                        # Then OpenAI
+                                        if "openai" not in api_keys_dict:
+                                            openai_key = await get_api_key_for_org(db, org_id, ProviderType.OPENAI)
+                                            if openai_key:
+                                                api_keys_dict["openai"] = openai_key
+                                    except Exception:
+                                        pass  # Ignore errors, continue with what we have
+                                
+                                # Check if we have any image generation provider
+                                from app.services.collaborate.image_generation_service import select_image_provider
+                                selected_provider, selected_key = select_image_provider(api_keys_dict)
+                                
+                                print(f"🔍 Image generation check - Provider: {selected_provider}, Has key: {bool(selected_key)}, Available keys: {list(api_keys_dict.keys())}")
+                                
+                                if selected_provider and selected_key:
+                                    print(f"🎨 Generating image with {selected_provider} using prompt: '{prompt}'")
+                                    # Create a temporary API keys dict with just the selected provider
+                                    temp_api_keys = {selected_provider: selected_key}
+                                    
+                                    try:
+                                        generated_image = await media_generation_service.generate_image_from_prompt(
+                                            prompt, temp_api_keys
+                                        )
+                                        
+                                        if generated_image:
+                                            # Send image as SSE event
+                                            image_data = {
+                                                "type": "image",
+                                                "url": generated_image.url,
+                                                "alt": generated_image.alt or prompt[:100],
+                                                "mime_type": generated_image.mime_type or "image/png"
+                                            }
+                                            yield f"event: media\n"
+                                            yield f"data: {json.dumps(image_data)}\n\n"
+                                            print(f"✅ Image generated and sent to client: {generated_image.url[:100] if len(generated_image.url) > 100 else generated_image.url}")
+                                        else:
+                                            print(f"⚠️  Image generation returned no result (generated_image is None)")
+                                    except Exception as img_gen_error:
+                                        import traceback
+                                        print(f"❌ Image generation error: {img_gen_error}")
+                                        print(traceback.format_exc())
+                                else:
+                                    print(f"⚠️  No image generation provider available. Available providers: {list(api_keys_dict.keys())}")
+                                    
+                            elif media_intent == "graph":
+                                # Generate graph
+                                graph_request = media_metadata.get("request", user_content)
+                                print(f"📊 Generating graph from request: {graph_request[:100]}...")
+                                
+                                graph_data_uri = await media_generation_service.generate_graph_from_request(
+                                    graph_request
+                                )
+                                
+                                if graph_data_uri:
+                                    # Send graph as SSE event
+                                    graph_data = {
+                                        "type": "graph",
+                                        "url": graph_data_uri,
+                                        "alt": f"Graph visualization: {graph_request[:100]}",
+                                        "mime_type": "image/png"
+                                    }
+                                    yield f"event: media\n"
+                                    yield f"data: {json.dumps(graph_data)}\n\n"
+                                    print(f"✅ Graph generated and sent to client")
+                                else:
+                                    print(f"⚠️  Graph generation returned no result")
+                        except Exception as media_error:
+                            import traceback
+                            print(f"⚠️  Media generation error: {media_error}")
+                            print(traceback.format_exc())
+                            # Don't fail the request if media generation fails
+                            
         except Exception as e:
             import traceback
             error_trace = traceback.format_exc()

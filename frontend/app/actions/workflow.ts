@@ -500,10 +500,30 @@ export async function runStep(stepId: string, inputContext: string, previousStep
                     // Check if the response contains an error
                     if (response.error) {
                         console.error(`❌ Model ${model} returned error:`, response.error);
+                        // Determine error type based on error message
+                        const errorMsg = String(response.error).toLowerCase();
+                        let errorType: "config" | "network" | "rate_limit" | "timeout" | "unknown" = "unknown";
+
+                        // Check for authentication/config errors first
+                        if (errorMsg.includes('authentication') ||
+                            errorMsg.includes('invalid_authentication') ||
+                            (errorMsg.includes('invalid') && (errorMsg.includes('key') || errorMsg.includes('token') || errorMsg.includes('auth'))) ||
+                            errorMsg.includes('api key') ||
+                            errorMsg.includes('unauthorized') ||
+                            errorMsg.includes('forbidden')) {
+                            errorType = "config";
+                        } else if (errorMsg.includes('rate limit') || errorMsg.includes('429') || errorMsg.includes('too many requests')) {
+                            errorType = "rate_limit";
+                        } else if (errorMsg.includes('timeout') || errorMsg.includes('timed out') || errorMsg.includes('exceeded')) {
+                            errorType = "timeout";
+                        } else if (errorMsg.includes('network') || errorMsg.includes('connection') || errorMsg.includes('fetch')) {
+                            errorType = "network";
+                        }
+
                         errorDetails = {
                             message: response.error,
                             provider: model,
-                            type: "network"
+                            type: errorType
                         }
                     }
 
@@ -568,9 +588,21 @@ export async function runStep(stepId: string, inputContext: string, previousStep
             if (e.name === "ProviderConfigError") {
                 errorType = "config";
             } else if (e.name === "ProviderCallError") {
-                errorType = "network";
+                // ProviderCallError could be different types - check the message
+                const msgLower = e.message.toLowerCase();
+                if (msgLower.includes('authentication') || msgLower.includes('invalid') && msgLower.includes('key') || msgLower.includes('api key')) {
+                    errorType = "config";
+                } else if (msgLower.includes('rate limit') || msgLower.includes('429')) {
+                    errorType = "rate_limit";
+                } else if (msgLower.includes('timeout') || msgLower.includes('timed out')) {
+                    errorType = "timeout";
+                } else {
+                    errorType = "network";
+                }
             } else if (e.message?.includes("timeout") || e.message?.includes("timed out")) {
                 errorType = "timeout";
+            } else if (e.message?.includes("authentication") || (e.message?.includes("invalid") && e.message?.includes("key"))) {
+                errorType = "config";
             }
         } else if (typeof e === 'string') {
             errorMessage = e;

@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from 'react';
 import { getStoredSession } from '@/lib/session';
+import { useCallback, useRef, useState } from 'react';
 
 export type StreamState = {
   loading: boolean;
@@ -8,6 +8,12 @@ export type StreamState = {
   content: string;
   ttft_ms?: number;
   error?: string;
+  media?: Array<{
+    type: 'image' | 'graph';
+    url: string;
+    alt?: string;
+    mime_type?: string;
+  }>;
 };
 
 export function useSSEChat() {
@@ -54,7 +60,7 @@ export function useSSEChat() {
       const decoder = new TextDecoder();
       let buf = '';
 
-      for (;;) {
+      for (; ;) {
         const { value, done } = await reader.read();
         if (done) break;
         buf += decoder.decode(value, { stream: true });
@@ -82,7 +88,24 @@ export function useSSEChat() {
               if (typeof meta.cache_hit === 'boolean') {
                 setState(s => ({ ...s, cache_hit: meta.cache_hit }));
               }
-            } catch {}
+            } catch { }
+            continue;
+          }
+
+          // Handle media events (images/graphs)
+          if (eventType === 'media') {
+            try {
+              const mediaData = JSON.parse(dataLine);
+              setState(s => ({
+                ...s,
+                media: [...(s.media || []), {
+                  type: mediaData.type === 'graph' ? 'graph' : 'image',
+                  url: mediaData.url,
+                  alt: mediaData.alt,
+                  mime_type: mediaData.mime_type
+                }]
+              }));
+            } catch { }
             continue;
           }
 

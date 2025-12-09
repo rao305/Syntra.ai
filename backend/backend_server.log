@@ -1,0 +1,918 @@
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Will watch for changes in these directories: ['/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [69329] using WatchFiles
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [69471]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-05 23:58:30,467 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-05 23:58:30,467 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-05 23:58:30,468 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-05 23:58:30,468 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-05 23:58:30,469 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-05 23:58:30,469 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-05 23:58:30,469 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-05 23:58:30,469 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+INFO:     127.0.0.1:65277 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49255 - "OPTIONS /api/threads/4776bf26-a49d-40c0-bb90-eed747a2167c/messages/stream HTTP/1.1" 200 OK
+[THREAD_STORE] get_thread: id='4776bf26-a49d-40c0-bb90-eed747a2167c', exists=False, obj_id=None, turns=0
+[THREAD_STORE] get_history: no thread for id='4776bf26-a49d-40c0-bb90-eed747a2167c'
+🔍 Checking history for previous AI message. Found 0 turns
+⚠️  No previous assistant message found in history
+🎨 Media generation intent detected: image, metadata: {'prompt': 'can you a sunset'}
+[THREAD_STORE] get_thread: id='4776bf26-a49d-40c0-bb90-eed747a2167c', exists=False, obj_id=None, turns=0
+[THREAD_STORE] get_history: no thread for id='4776bf26-a49d-40c0-bb90-eed747a2167c'
+✏️  LLM rewrite: can you generate an image of a sunset... → Can you generate an image of a sunset?...
+   Reasoning: The user's request is clear and does not contain any pronouns or references that need to be resolved.
+✏️  LLM rewrite: can you generate an image of a sunset... → Can you generate an image of a sunset?...
+   Reasoning: 
+2025-12-06 00:26:31,372 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:31,374 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:31,374 INFO sqlalchemy.engine.Engine [generated in 0.00078s] ()
+⚡ Provider selected in 29ms -> perplexity/sonar-pro
+📝 LLM context-aware rewrite: 'can you generate an image of a sunset...' → 'Can you generate an image of a sunset?...'
+2025-12-06 00:26:31,379 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49257 - "POST /api/threads/4776bf26-a49d-40c0-bb90-eed747a2167c/messages/stream HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/fastapi/applications.py", line 1139, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/app/middleware.py", line 43, in dispatch
+    response: Response = await call_next(request)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/fastapi/routing.py", line 119, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/fastapi/routing.py", line 105, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/fastapi/routing.py", line 385, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/fastapi/routing.py", line 284, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/app/api/threads.py", line 1401, in add_message_streaming
+    await rls_task
+RuntimeError: cannot reuse already awaited coroutine
+INFO:     127.0.0.1:49265 - "OPTIONS /api/threads?limit=50&archived=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49268 - "OPTIONS /api/threads?limit=50&archived=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49269 - "OPTIONS /api/threads/794d0cfe-9fdb-46bc-b057-97b9c0b0634c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49271 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49269 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49271 - "OPTIONS /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49269 - "OPTIONS /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+2025-12-06 00:26:35,647 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:35,647 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:35,647 INFO sqlalchemy.engine.Engine [cached since 4.273s ago] ()
+2025-12-06 00:26:35,669 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-06 00:26:35,669 INFO sqlalchemy.engine.Engine [generated in 0.00015s] ('794d0cfe-9fdb-46bc-b057-97b9c0b0634c', 'org_demo')
+INFO:     127.0.0.1:49276 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49277 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+2025-12-06 00:26:35,902 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:35,902 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:35,902 INFO sqlalchemy.engine.Engine [cached since 4.529s ago] ()
+2025-12-06 00:26:35,903 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:35,903 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:35,903 INFO sqlalchemy.engine.Engine [cached since 4.529s ago] ()
+2025-12-06 00:26:35,904 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:35,904 INFO sqlalchemy.engine.Engine [generated in 0.00006s] ('org_demo', 50)
+2025-12-06 00:26:35,904 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:35,904 INFO sqlalchemy.engine.Engine [generated in 0.00005s] ('org_demo', 50)
+2025-12-06 00:26:35,950 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence
+2025-12-06 00:26:35,950 INFO sqlalchemy.engine.Engine [generated in 0.00010s] ('794d0cfe-9fdb-46bc-b057-97b9c0b0634c',)
+INFO:     127.0.0.1:49269 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49271 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+2025-12-06 00:26:35,954 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 00:26:35,954 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 00:26:35,956 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:35,956 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:35,956 INFO sqlalchemy.engine.Engine [cached since 4.582s ago] ()
+2025-12-06 00:26:35,956 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:35,956 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:35,956 INFO sqlalchemy.engine.Engine [cached since 4.582s ago] ()
+2025-12-06 00:26:35,956 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:35,956 INFO sqlalchemy.engine.Engine [cached since 0.05201s ago] ('org_demo', 50)
+2025-12-06 00:26:35,956 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:35,956 INFO sqlalchemy.engine.Engine [cached since 0.05268s ago] ('org_demo', 50)
+INFO:     127.0.0.1:49276 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49277 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+2025-12-06 00:26:35,957 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 00:26:35,958 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49268 - "GET /api/threads/794d0cfe-9fdb-46bc-b057-97b9c0b0634c HTTP/1.1" 200 OK
+2025-12-06 00:26:36,000 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49268 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49277 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49276 - "OPTIONS /api/threads/338e2856-4514-4a08-af76-61ccf104b682 HTTP/1.1" 200 OK
+2025-12-06 00:26:38,969 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:38,970 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:38,970 INFO sqlalchemy.engine.Engine [cached since 7.597s ago] ()
+2025-12-06 00:26:38,970 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:38,970 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:38,970 INFO sqlalchemy.engine.Engine [cached since 7.597s ago] ()
+2025-12-06 00:26:38,970 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:38,970 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:38,970 INFO sqlalchemy.engine.Engine [cached since 7.597s ago] ()
+2025-12-06 00:26:38,973 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:38,973 INFO sqlalchemy.engine.Engine [cached since 3.068s ago] ('org_demo', 50)
+2025-12-06 00:26:38,973 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-06 00:26:38,973 INFO sqlalchemy.engine.Engine [cached since 3.304s ago] ('338e2856-4514-4a08-af76-61ccf104b682', 'org_demo')
+2025-12-06 00:26:38,973 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:38,973 INFO sqlalchemy.engine.Engine [cached since 3.069s ago] ('org_demo', 50)
+2025-12-06 00:26:38,975 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence
+2025-12-06 00:26:38,975 INFO sqlalchemy.engine.Engine [cached since 3.025s ago] ('338e2856-4514-4a08-af76-61ccf104b682',)
+INFO:     127.0.0.1:49268 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49277 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+2025-12-06 00:26:38,976 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 00:26:38,977 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49271 - "GET /api/threads/338e2856-4514-4a08-af76-61ccf104b682 HTTP/1.1" 200 OK
+2025-12-06 00:26:38,980 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49271 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49277 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+2025-12-06 00:26:39,383 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:39,383 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:39,383 INFO sqlalchemy.engine.Engine [cached since 8.01s ago] ()
+2025-12-06 00:26:39,383 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:39,383 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:39,383 INFO sqlalchemy.engine.Engine [cached since 8.01s ago] ()
+2025-12-06 00:26:39,384 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:39,384 INFO sqlalchemy.engine.Engine [cached since 3.48s ago] ('org_demo', 50)
+2025-12-06 00:26:39,384 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:39,384 INFO sqlalchemy.engine.Engine [cached since 3.481s ago] ('org_demo', 50)
+INFO:     127.0.0.1:49271 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49277 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+2025-12-06 00:26:39,386 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 00:26:39,386 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49277 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49271 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+2025-12-06 00:26:39,583 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:39,584 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:39,584 INFO sqlalchemy.engine.Engine [cached since 8.21s ago] ()
+2025-12-06 00:26:39,601 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-06 00:26:39,601 INFO sqlalchemy.engine.Engine [cached since 3.933s ago] ('794d0cfe-9fdb-46bc-b057-97b9c0b0634c', 'org_demo')
+2025-12-06 00:26:39,603 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:39,603 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:39,603 INFO sqlalchemy.engine.Engine [cached since 8.23s ago] ()
+2025-12-06 00:26:39,603 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence
+2025-12-06 00:26:39,603 INFO sqlalchemy.engine.Engine [cached since 3.653s ago] ('794d0cfe-9fdb-46bc-b057-97b9c0b0634c',)
+2025-12-06 00:26:39,603 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:39,603 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:39,603 INFO sqlalchemy.engine.Engine [cached since 8.23s ago] ()
+2025-12-06 00:26:39,604 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:39,604 INFO sqlalchemy.engine.Engine [cached since 3.7s ago] ('org_demo', 50)
+INFO:     127.0.0.1:49277 - "GET /api/threads/794d0cfe-9fdb-46bc-b057-97b9c0b0634c HTTP/1.1" 200 OK
+2025-12-06 00:26:39,605 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:39,605 INFO sqlalchemy.engine.Engine [cached since 3.7s ago] ('org_demo', 50)
+2025-12-06 00:26:39,605 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49268 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49271 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+2025-12-06 00:26:39,606 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 00:26:39,606 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49271 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49268 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+2025-12-06 00:26:40,088 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:40,088 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:40,088 INFO sqlalchemy.engine.Engine [cached since 8.715s ago] ()
+2025-12-06 00:26:40,089 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:40,089 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:40,089 INFO sqlalchemy.engine.Engine [cached since 8.716s ago] ()
+2025-12-06 00:26:40,090 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:40,090 INFO sqlalchemy.engine.Engine [cached since 4.186s ago] ('org_demo', 50)
+2025-12-06 00:26:40,091 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:40,091 INFO sqlalchemy.engine.Engine [cached since 4.187s ago] ('org_demo', 50)
+INFO:     127.0.0.1:49271 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49268 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+2025-12-06 00:26:40,092 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 00:26:40,092 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49268 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49271 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+2025-12-06 00:26:41,744 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:41,745 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:41,745 INFO sqlalchemy.engine.Engine [cached since 10.37s ago] ()
+2025-12-06 00:26:41,745 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:41,745 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:41,745 INFO sqlalchemy.engine.Engine [cached since 10.37s ago] ()
+2025-12-06 00:26:41,747 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:41,747 INFO sqlalchemy.engine.Engine [cached since 5.843s ago] ('org_demo', 50)
+2025-12-06 00:26:41,747 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:41,747 INFO sqlalchemy.engine.Engine [cached since 5.843s ago] ('org_demo', 50)
+INFO:     127.0.0.1:49268 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49271 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+2025-12-06 00:26:41,749 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 00:26:41,750 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49271 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49268 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+2025-12-06 00:26:42,209 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:42,210 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:42,210 INFO sqlalchemy.engine.Engine [cached since 10.84s ago] ()
+2025-12-06 00:26:42,210 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:42,210 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:42,210 INFO sqlalchemy.engine.Engine [cached since 10.84s ago] ()
+2025-12-06 00:26:42,211 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:42,211 INFO sqlalchemy.engine.Engine [cached since 6.307s ago] ('org_demo', 50)
+2025-12-06 00:26:42,214 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:42,214 INFO sqlalchemy.engine.Engine [cached since 6.31s ago] ('org_demo', 50)
+INFO:     127.0.0.1:49271 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+2025-12-06 00:26:42,216 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49268 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+2025-12-06 00:26:42,217 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49268 - "OPTIONS /api/threads/ HTTP/1.1" 200 OK
+2025-12-06 00:26:47,005 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:47,006 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:47,006 INFO sqlalchemy.engine.Engine [cached since 15.63s ago] ()
+2025-12-06 00:26:47,044 INFO sqlalchemy.engine.Engine INSERT INTO threads (id, org_id, creator_id, title, description, last_message_preview, pinned, archived, archived_at, last_provider, last_model) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::BOOLEAN, $8::BOOLEAN, $9::TIMESTAMP WITH TIME ZONE, $10::VARCHAR, $11::VARCHAR) RETURNING threads.created_at, threads.updated_at
+2025-12-06 00:26:47,044 INFO sqlalchemy.engine.Engine [generated in 0.00037s] ('229d353c-64d4-4f0e-bdbd-56d44878d0fb', 'org_demo', None, 'generate and image of a sunset', '', None, False, False, None, None, None)
+2025-12-06 00:26:47,329 INFO sqlalchemy.engine.Engine COMMIT
+2025-12-06 00:26:47,332 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:47,332 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-12-06 00:26:47,332 INFO sqlalchemy.engine.Engine [generated in 0.00007s] ('229d353c-64d4-4f0e-bdbd-56d44878d0fb',)
+INFO:     127.0.0.1:49268 - "POST /api/threads/ HTTP/1.1" 200 OK
+2025-12-06 00:26:47,334 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49268 - "OPTIONS /api/threads/229d353c-64d4-4f0e-bdbd-56d44878d0fb/messages HTTP/1.1" 200 OK
+🔍 DEBUG: add_message called - collaboration_mode=False, content=generate and image of a sunset...
+2025-12-06 00:26:47,344 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:47,344 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:47,344 INFO sqlalchemy.engine.Engine [cached since 15.97s ago] ()
+2025-12-06 00:26:47,452 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-06 00:26:47,452 INFO sqlalchemy.engine.Engine [cached since 11.78s ago] ('229d353c-64d4-4f0e-bdbd-56d44878d0fb', 'org_demo')
+2025-12-06 00:26:47,453 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-12-06 00:26:47,453 INFO sqlalchemy.engine.Engine [generated in 0.00007s] ('org_demo',)
+2025-12-06 00:26:47,455 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:47,455 INFO sqlalchemy.engine.Engine [generated in 0.00009s] ('229d353c-64d4-4f0e-bdbd-56d44878d0fb', 20)
+2025-12-06 00:26:47,470 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.is_active = $2::VARCHAR
+2025-12-06 00:26:47,470 INFO sqlalchemy.engine.Engine [generated in 0.00029s] ('org_demo', 'true')
+INFO:     127.0.0.1:49280 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49282 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49280 - "OPTIONS /api/threads/229d353c-64d4-4f0e-bdbd-56d44878d0fb HTTP/1.1" 200 OK
+2025-12-06 00:26:47,491 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:47,491 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:47,491 INFO sqlalchemy.engine.Engine [cached since 16.12s ago] ()
+2025-12-06 00:26:47,492 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:47,492 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:47,492 INFO sqlalchemy.engine.Engine [cached since 16.12s ago] ()
+2025-12-06 00:26:47,492 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:47,492 INFO sqlalchemy.engine.Engine [cached since 11.59s ago] ('org_demo', 50)
+2025-12-06 00:26:47,492 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:47,493 INFO sqlalchemy.engine.Engine [cached since 11.59s ago] ('org_demo', 50)
+INFO:     127.0.0.1:49280 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49282 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+[CTX] build_contextual_messages called with thread_id='229d353c-64d4-4f0e-bdbd-56d44878d0fb', type=str
+[CTX] _load_short_term_history called with thread_id='229d353c-64d4-4f0e-bdbd-56d44878d0fb', type=str
+[CTX] Attempting to load from in-memory thread storage...
+[THREAD_STORE] get_thread: id='229d353c-64d4-4f0e-bdbd-56d44878d0fb', exists=False, obj_id=None, turns=0
+[THREAD_STORE] get_history: no thread for id='229d353c-64d4-4f0e-bdbd-56d44878d0fb'
+[CTX] get_history returned 0 turns for thread_id='229d353c-64d4-4f0e-bdbd-56d44878d0fb'
+[CTX] No history found for thread_id='229d353c-64d4-4f0e-bdbd-56d44878d0fb' (thread may not exist or has no turns)
+2025-12-06 00:26:47,500 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:47,501 INFO sqlalchemy.engine.Engine [cached since 0.04557s ago] ('229d353c-64d4-4f0e-bdbd-56d44878d0fb', 20)
+2025-12-06 00:26:47,501 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 00:26:47,501 INFO sqlalchemy.engine.Engine ROLLBACK
+⚠️  No messages found in DB for thread 229d353c-64d4-4f0e-bdbd-56d44878d0fb
+⚠️  No conversation history available for thread 229d353c-64d4-4f0e-bdbd-56d44878d0fb, starting fresh
+📚 Loaded 0 validated history messages
+[CTX] Conversation history turns: 0 (before adding current user message)
+[CTX] Memory retrieval disabled (memory_enabled=False)
+
+================================================================================
+🔧 CONTEXT BUILDER: thread_id=229d353c-64d4-4f0e-bdbd-56d44878d0fb
+================================================================================
+Short-term history turns: 0
+Memory snippet present: False
+Query rewritten: False
+Is ambiguous: False
+Total messages: 2
+System messages: 1
+Conversation history turns: 1
+
+Messages array preview:
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Original user message:
+generate and image of a sunset
+
+Conversation history summary:
+================================================================================
+
+
+================================================================================
+📤 SENDING TO PROVIDER (non-streaming): gemini/gemini-2.5-flash
+================================================================================
+Using centralized context builder ✓
+Total messages: 2
+Conversation history turns: 0
+Memory snippet present: False
+Query rewritten: False
+
+Messages preview (first 120 chars each):
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Original user message:
+generate and image of a sunset
+================================================================================
+
+2025-12-06 00:26:47,510 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.provider = $2::provider_type AND provider_keys.is_active = $3::VARCHAR
+2025-12-06 00:26:47,513 INFO sqlalchemy.engine.Engine [generated in 0.00292s] ('org_demo', 'gemini', 'true')
+2025-12-06 00:26:47,518 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:47,518 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:47,518 INFO sqlalchemy.engine.Engine [cached since 16.14s ago] ()
+2025-12-06 00:26:47,540 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-06 00:26:47,540 INFO sqlalchemy.engine.Engine [cached since 11.87s ago] ('229d353c-64d4-4f0e-bdbd-56d44878d0fb', 'org_demo')
+2025-12-06 00:26:47,542 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence
+2025-12-06 00:26:47,542 INFO sqlalchemy.engine.Engine [cached since 11.59s ago] ('229d353c-64d4-4f0e-bdbd-56d44878d0fb',)
+INFO:     127.0.0.1:49284 - "GET /api/threads/229d353c-64d4-4f0e-bdbd-56d44878d0fb HTTP/1.1" 200 OK
+2025-12-06 00:26:47,576 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49284 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49282 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+2025-12-06 00:26:47,923 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:47,923 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:47,923 INFO sqlalchemy.engine.Engine [cached since 16.55s ago] ()
+2025-12-06 00:26:47,923 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:47,923 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:26:47,923 INFO sqlalchemy.engine.Engine [cached since 16.55s ago] ()
+2025-12-06 00:26:47,925 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:47,925 INFO sqlalchemy.engine.Engine [cached since 12.02s ago] ('org_demo', 50)
+2025-12-06 00:26:47,925 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:26:47,926 INFO sqlalchemy.engine.Engine [cached since 12.02s ago] ('org_demo', 50)
+INFO:     127.0.0.1:49284 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49282 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+2025-12-06 00:26:47,928 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 00:26:47,928 INFO sqlalchemy.engine.Engine ROLLBACK
+[NORMAL MODE] provider=gemini model=gemini-2.5-flash finish_reason=None prompt_tokens=1462 completion_tokens=54 total_tokens=1516 content_length=235
+2025-12-06 00:26:49,112 INFO sqlalchemy.engine.Engine SELECT max(messages.sequence) AS max_1 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR
+2025-12-06 00:26:49,112 INFO sqlalchemy.engine.Engine [generated in 0.00029s] ('229d353c-64d4-4f0e-bdbd-56d44878d0fb',)
+2025-12-06 00:26:49,116 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, prompt_tokens, completion_tokens, total_tokens, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::INTEGER, $10::INTEGER, $11::INTEGER, $12::INTEGER) RETURNING messages.created_at
+2025-12-06 00:26:49,117 INFO sqlalchemy.engine.Engine [generated in 0.00045s] ('aa298589-1139-484d-b708-df163f24efbe', '229d353c-64d4-4f0e-bdbd-56d44878d0fb', None, 'user', 'generate and image of a sunset', None, None, None, None, None, None, 0)
+2025-12-06 00:26:49,125 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, provider, model, provider_message_id, meta, prompt_tokens, completion_tokens, total_tokens, citations, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::VARCHAR, $9::JSON, $10::INTEGER, $11::INTEGER, $12::INTEGER, $13::JSON, $14::INTEGER) RETURNING messages.created_at
+2025-12-06 00:26:49,125 INFO sqlalchemy.engine.Engine [generated in 0.00044s] ('ed8f617d-9523-4d68-8ef9-021f94d6e813', '229d353c-64d4-4f0e-bdbd-56d44878d0fb', None, 'assistant', 'A vibrant sunset over a calm ocean, with warm hues of orange, pink, and purple blending across the sky. The sun is low on the horizon, casting a golden glow on the water, and a few silhouetted palm trees are visible on a distant shore.', 'gemini', 'gemini-2.5-flash', None, '{"latency_ms": 1566.0, "request_id": null}', 1462, 54, 1516, 'null', 1)
+2025-12-06 00:26:49,128 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-12-06 00:26:49,128 INFO sqlalchemy.engine.Engine [generated in 0.00025s] ('229d353c-64d4-4f0e-bdbd-56d44878d0fb',)
+2025-12-06 00:26:49,139 INFO sqlalchemy.engine.Engine UPDATE threads SET last_message_preview=$1::VARCHAR, last_provider=$2::VARCHAR, last_model=$3::VARCHAR, updated_at=now() WHERE threads.id = $4::VARCHAR
+2025-12-06 00:26:49,139 INFO sqlalchemy.engine.Engine [generated in 0.00026s] ('generate and image of a sunset', 'gemini', 'gemini-2.5-flash', '229d353c-64d4-4f0e-bdbd-56d44878d0fb')
+2025-12-06 00:26:49,173 INFO sqlalchemy.engine.Engine INSERT INTO audit_logs (id, thread_id, message_id, user_id, provider, model, reason, fragments_included, fragments_excluded, scope, package_hash, response_hash, prompt_tokens, completion_tokens, total_tokens) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::JSON, $9::JSON, $10::VARCHAR, $11::VARCHAR, $12::VARCHAR, $13::INTEGER, $14::INTEGER, $15::INTEGER) RETURNING audit_logs.created_at
+2025-12-06 00:26:49,173 INFO sqlalchemy.engine.Engine [generated in 0.00037s] ('e5165f7b-9186-4864-8a5c-ac431a7ece60', '229d353c-64d4-4f0e-bdbd-56d44878d0fb', 'ed8f617d-9523-4d68-8ef9-021f94d6e813', None, 'gemini', 'gemini-2.5-flash', 'Simple conversation - Gemini Flash for quick responses', '[]', '[]', 'private', '5ce1a4d4f9ec7894895c84146f1475fc5a5a94f38162951c66c982625551797e', '5cafa0771e77f0d24bc72b3c9998ab5f7d14b964ef65daac1d0625444f41598d', 1462, 54, 1516)
+2025-12-06 00:26:49,177 INFO sqlalchemy.engine.Engine COMMIT
+2025-12-06 00:26:49,179 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:26:49,179 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-06 00:26:49,179 INFO sqlalchemy.engine.Engine [generated in 0.00009s] ('aa298589-1139-484d-b708-df163f24efbe',)
+2025-12-06 00:26:49,181 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-06 00:26:49,181 INFO sqlalchemy.engine.Engine [cached since 0.001551s ago] ('ed8f617d-9523-4d68-8ef9-021f94d6e813',)
+[THREAD_STORE] get_or_create_thread: NEW id='229d353c-64d4-4f0e-bdbd-56d44878d0fb', obj_id=5084001488
+[THREAD_STORE] add_turn BEFORE: id='229d353c-64d4-4f0e-bdbd-56d44878d0fb', obj_id=5084001488, len(turns)=0
+[THREAD_STORE] add_turn AFTER: id='229d353c-64d4-4f0e-bdbd-56d44878d0fb', obj_id=5084001488, len(turns)=1
+[THREAD_STORE] get_or_create_thread: existing id='229d353c-64d4-4f0e-bdbd-56d44878d0fb', obj_id=5084001488, turns=1
+[THREAD_STORE] add_turn BEFORE: id='229d353c-64d4-4f0e-bdbd-56d44878d0fb', obj_id=5084001488, len(turns)=1
+[THREAD_STORE] add_turn AFTER: id='229d353c-64d4-4f0e-bdbd-56d44878d0fb', obj_id=5084001488, len(turns)=2
+✅ Added turns to in-memory store for thread 229d353c-64d4-4f0e-bdbd-56d44878d0fb
+⚠️  TTFT target missed: 1.57s (target: ≤1.5s)
+INFO:     127.0.0.1:49268 - "POST /api/threads/229d353c-64d4-4f0e-bdbd-56d44878d0fb/messages HTTP/1.1" 200 OK
+2025-12-06 00:26:49,182 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49308 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49311 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+2025-12-06 00:27:48,864 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:27:48,867 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:27:48,868 INFO sqlalchemy.engine.Engine [cached since 77.49s ago] ()
+2025-12-06 00:27:48,868 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:27:48,868 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:27:48,869 INFO sqlalchemy.engine.Engine [cached since 77.5s ago] ()
+2025-12-06 00:27:48,879 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:27:48,879 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:27:48,879 INFO sqlalchemy.engine.Engine [cached since 77.51s ago] ()
+2025-12-06 00:27:48,895 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-06 00:27:48,895 INFO sqlalchemy.engine.Engine [cached since 73.23s ago] ('229d353c-64d4-4f0e-bdbd-56d44878d0fb', 'org_demo')
+2025-12-06 00:27:48,896 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:27:48,896 INFO sqlalchemy.engine.Engine [cached since 72.99s ago] ('org_demo', 50)
+2025-12-06 00:27:48,913 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:27:48,913 INFO sqlalchemy.engine.Engine [cached since 73.01s ago] ('org_demo', 50)
+INFO:     127.0.0.1:49311 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+2025-12-06 00:27:49,163 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:49311 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:49314 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+2025-12-06 00:27:49,215 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:27:49,215 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:27:49,215 INFO sqlalchemy.engine.Engine [cached since 77.84s ago] ()
+2025-12-06 00:27:49,257 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:27:49,257 INFO sqlalchemy.engine.Engine [cached since 73.35s ago] ('org_demo', 50)
+INFO:     127.0.0.1:49314 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49308 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+2025-12-06 00:27:49,534 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 00:27:49,534 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 00:27:49,537 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:27:49,537 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 00:27:49,537 INFO sqlalchemy.engine.Engine [cached since 78.16s ago] ()
+2025-12-06 00:27:49,537 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 00:27:49,537 INFO sqlalchemy.engine.Engine [cached since 73.63s ago] ('org_demo', 50)
+INFO:     127.0.0.1:49308 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+2025-12-06 00:27:49,538 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 00:27:49,554 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence
+2025-12-06 00:27:49,554 INFO sqlalchemy.engine.Engine [cached since 73.6s ago] ('229d353c-64d4-4f0e-bdbd-56d44878d0fb',)
+INFO:     127.0.0.1:49312 - "GET /api/threads/229d353c-64d4-4f0e-bdbd-56d44878d0fb HTTP/1.1" 200 OK
+2025-12-06 00:27:49,637 INFO sqlalchemy.engine.Engine ROLLBACK
+WARNING:  WatchFiles detected changes in 'app/services/collaborate/image_generation_service.py', 'app/services/collaboration_orchestrator.py', 'app/models/thread.py', 'app/api/threads.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [69471]
+WARNING:  WatchFiles detected changes in 'test_e2e_encryption.py', 'app/services/collaborate/image_generation_service.py', 'app/services/chat_encryption.py', 'app/services/collaboration_orchestrator.py', 'app/models/thread.py', 'app/services/message_encryption_helper.py', 'migrations/versions/20250204_add_e2e_encryption.py', 'app/api/threads.py', 'app/models/message.py'. Reloading...
+Warning: OpenTelemetry not available (install opentelemetry packages)
+INFO:     Started server process [94272]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-06 00:28:49,078 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-06 00:28:49,079 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-06 00:28:49,304 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-06 00:28:49,304 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-06 00:28:49,312 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-06 00:28:49,312 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-06 00:28:49,313 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 00:28:49,313 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+INFO:     127.0.0.1:50007 - "OPTIONS /api/threads?limit=50&archived=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50009 - "OPTIONS /api/threads?limit=50&archived=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50011 - "OPTIONS /api/threads/229d353c-64d4-4f0e-bdbd-56d44878d0fb HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50015 - "OPTIONS /api/threads?limit=50&archived=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50016 - "OPTIONS /api/threads?limit=50&archived=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50018 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:50020 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:50018 - "GET /api/threads?limit=50&archived=false HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:50024 - "GET /api/threads?limit=50&archived=true HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:50020 - "OPTIONS /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50026 - "OPTIONS /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+2025-12-06 02:33:29,924 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 02:33:29,959 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 02:33:29,963 INFO sqlalchemy.engine.Engine [generated in 0.00589s] ()
+2025-12-06 02:33:30,011 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 02:33:30,011 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 02:33:30,011 INFO sqlalchemy.engine.Engine [cached since 0.05729s ago] ()
+2025-12-06 02:33:30,011 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 02:33:30,011 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 02:33:30,011 INFO sqlalchemy.engine.Engine [cached since 0.05755s ago] ()
+2025-12-06 02:33:30,298 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 02:33:30,298 INFO sqlalchemy.engine.Engine [generated in 0.00041s] ('org_demo', 50)
+2025-12-06 02:33:30,300 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 02:33:30,300 INFO sqlalchemy.engine.Engine [generated in 0.00008s] ('org_demo', 50)
+2025-12-06 02:33:30,301 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-06 02:33:30,301 INFO sqlalchemy.engine.Engine [generated in 0.00005s] ('229d353c-64d4-4f0e-bdbd-56d44878d0fb', 'org_demo')
+2025-12-06 02:33:31,880 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.encrypted_content, messages.encryption_key_id, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence
+2025-12-06 02:33:31,881 INFO sqlalchemy.engine.Engine [generated in 0.00205s] ('229d353c-64d4-4f0e-bdbd-56d44878d0fb',)
+INFO:     127.0.0.1:50020 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50026 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+2025-12-06 02:33:32,009 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 02:33:32,010 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 02:33:32,098 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 02:33:32,098 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 02:33:32,098 INFO sqlalchemy.engine.Engine [cached since 2.144s ago] ()
+2025-12-06 02:33:32,098 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-06 02:33:32,098 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-06 02:33:32,098 INFO sqlalchemy.engine.Engine [cached since 2.144s ago] ()
+2025-12-06 02:33:32,098 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 02:33:32,098 INFO sqlalchemy.engine.Engine [cached since 1.8s ago] ('org_demo', 50)
+2025-12-06 02:33:32,098 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-06 02:33:32,099 INFO sqlalchemy.engine.Engine [cached since 1.798s ago] ('org_demo', 50)
+INFO:     127.0.0.1:50018 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50024 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+2025-12-06 02:33:32,100 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 02:33:32,100 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-06 02:33:32,298 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:50022 - "GET /api/threads/229d353c-64d4-4f0e-bdbd-56d44878d0fb HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 526, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        operation, self._invalidate_schema_cache_asof
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 773, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        operation, name=self._prepared_statement_name_func()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/asyncpg/connection.py", line 638, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/asyncpg/connection.py", line 657, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/asyncpg/connection.py", line 443, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedColumnError: column messages.encrypted_content does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self._prepare_and_execute(operation, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedColumnError'>: column messages.encrypted_content does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/fastapi/applications.py", line 1139, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/applications.py", line 107, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/app/middleware.py", line 43, in dispatch
+    response: Response = await call_next(request)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/fastapi/routing.py", line 119, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/fastapi/routing.py", line 105, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/fastapi/routing.py", line 385, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/fastapi/routing.py", line 284, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/app/api/threads.py", line 1968, in get_thread
+    result = await db.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/ext/asyncio/session.py", line 449, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self._prepare_and_execute(operation, parameters)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/kanavkhurana/Desktop/Syntra.ai/Syntra.ai/backend/venv/lib/python3.13/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column messages.encrypted_content does not exist
+[SQL: SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.encrypted_content, messages.encryption_key_id, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence]
+[parameters: ('229d353c-64d4-4f0e-bdbd-56d44878d0fb',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)

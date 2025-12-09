@@ -24,6 +24,8 @@ class Thread(Base):
     description = Column(Text, nullable=True)
     last_message_preview = Column(String, nullable=True)  # Preview of last user message (for sidebar)
     pinned = Column(Boolean, default=False, nullable=False)
+    archived = Column(Boolean, default=False, nullable=False)  # Whether thread is archived
+    archived_at = Column(DateTime(timezone=True), nullable=True)  # When thread was archived
     settings = Column(JSON, nullable=True)  # Stores mode, primaryModel, models, temperature, etc.
 
     # Current provider context (for UI display)

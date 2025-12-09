@@ -1,23 +1,23 @@
 "use client"
 
+import { CollaborateToggle } from "@/components/chat/CollaborateToggle"
+import { SYNTRA_MODELS } from "@/components/syntra-model-selector"
+import { useWorkflowStore } from "@/store/workflow-store"
 import {
-  Paperclip,
-  Search,
-  ChevronDown,
   ArrowUp,
   Brain,
-  Eye,
-  Lock,
+  ChevronDown,
   Code,
+  Eye,
   ImageIcon,
+  Lock,
   MessageSquare,
-  X,
+  Paperclip,
+  Search,
   Upload,
+  X,
 } from "lucide-react"
-import { useState, useRef, useEffect } from "react"
-import { SYNTRA_MODELS } from "@/components/syntra-model-selector"
-import { CollaborateToggle } from "@/components/chat/CollaborateToggle"
-import { useWorkflowStore } from "@/store/workflow-store"
+import { useEffect, useRef, useState } from "react"
 
 interface ImageFile {
   file: File
@@ -177,7 +177,7 @@ export function ImageInputArea({
 
   const filteredModels = SYNTRA_MODELS.filter(model =>
     model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    model.description.toLowerCase().includes(searchQuery.toLowerCase())
+    (model.description && model.description.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
   const codingModels = filteredModels.filter(model =>
@@ -308,7 +308,7 @@ export function ImageInputArea({
                       </div>
 
                       {filteredModels.map((model) => {
-                        const Icon = model.icon
+                        const Icon = model.icon || MessageSquare
                         const isSelected = model.id === selectedModel
 
                         return (
@@ -316,8 +316,8 @@ export function ImageInputArea({
                             key={model.id}
                             onClick={() => handleModelSelect(model.id)}
                             className={`flex items-center justify-between rounded-lg px-2 py-2 text-sm cursor-pointer transition-colors ${isSelected
-                                ? "bg-zinc-800 text-zinc-100"
-                                : "text-zinc-300 hover:bg-zinc-800"
+                              ? "bg-zinc-800 text-zinc-100"
+                              : "text-zinc-300 hover:bg-zinc-800"
                               }`}
                           >
                             <div className="flex items-center gap-2">

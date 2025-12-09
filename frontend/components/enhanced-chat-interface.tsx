@@ -1,18 +1,17 @@
 "use client"
 
-import { Copy, RefreshCw, Share2, Bookmark, Bug, ChevronDown, ChevronUp } from "lucide-react"
-import { useState } from "react"
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { ImageInputArea } from "@/components/image-input-area"
-import { EnhancedMessageContent } from "@/components/enhanced-message-content"
 import { CodePanel } from "@/components/code-panel"
-import { ThinkingStream } from "@/components/thinking-stream"
-import { useWorkflowStore } from "@/store/workflow-store"
 import { CollabPanel, type CollabPanelState } from "@/components/collaborate/CollabPanel"
-import { CollaborateTimeline } from "@/components/collaborate-timeline"
+import { EnhancedMessageContent } from "@/components/enhanced-message-content"
+import { ImageInputArea } from "@/components/image-input-area"
 import { SimpleLoadingIndicator } from "@/components/simple-loading-indicator"
-import type { StageState, StageId, StageStatus } from "@/lib/collabStages"
+import { ThinkingStream } from "@/components/thinking-stream"
+import type { StageId, StageState, StageStatus } from "@/lib/collabStages"
+import { cn } from "@/lib/utils"
+import { useWorkflowStore } from "@/store/workflow-store"
+import { Bookmark, Brain, Bug, ChevronDown, ChevronUp, Copy, RefreshCw, Share2 } from "lucide-react"
+import * as React from "react"
+import { useState } from "react"
 
 interface ImageFile {
   file?: File
@@ -102,7 +101,7 @@ export function EnhancedChatInterface({
           })
         }
       })
-      
+
       // Continue workflow after a short delay if there were steps to approve
       const hasApprovedSteps = updatedSteps.some(s => s.status === "awaiting_user")
       if (hasApprovedSteps && onContinueWorkflow) {
@@ -129,9 +128,9 @@ export function EnhancedChatInterface({
 
     // Get model name
     const modelName = step.model === "gpt" ? "GPT" :
-                     step.model === "gemini" ? "Gemini" :
-                     step.model === "perplexity" ? "Perplexity" :
-                     step.model === "kimi" ? "Kimi" : step.model
+      step.model === "gemini" ? "Gemini" :
+        step.model === "perplexity" ? "Perplexity" :
+          step.model === "kimi" ? "Kimi" : step.model
 
     return {
       id: step.id,
@@ -159,9 +158,9 @@ export function EnhancedChatInterface({
     }
 
     const modelName = step.model === "gpt" ? "GPT" :
-                     step.model === "gemini" ? "Gemini" :
-                     step.model === "perplexity" ? "Perplexity" :
-                     step.model === "kimi" ? "Kimi" : step.model
+      step.model === "gemini" ? "Gemini" :
+        step.model === "perplexity" ? "Perplexity" :
+          step.model === "kimi" ? "Kimi" : step.model
 
     return {
       id: step.role as StageId,
@@ -180,14 +179,14 @@ export function EnhancedChatInterface({
       console.log(`📍 Setting currentStepIndex to ${awaitingIndex} (step awaiting approval: ${steps[awaitingIndex].id})`)
       return
     }
-    
+
     // Priority 2: Find step that's currently running
     const runningIndex = steps.findIndex(s => s.status === "running")
     if (runningIndex !== -1) {
       setCurrentStepIndex(runningIndex)
       return
     }
-    
+
     // Priority 3: Find the last completed step and point to next
     const lastCompletedIndex = steps.map((s, i) => s.status === "done" ? i : -1).filter(i => i !== -1).pop()
     if (lastCompletedIndex !== undefined) {
@@ -246,13 +245,13 @@ export function EnhancedChatInterface({
     const step = steps.find(s => s.id === stepId)
     if (step && step.status === "awaiting_user") {
       // Update step to done and continue workflow
-      updateStep(stepId, { 
+      updateStep(stepId, {
         status: "done",
         outputFinal: step.outputDraft || step.outputFinal
       })
-      
+
       console.log(`✅ Step ${stepId} approved and set to done, continuing workflow...`)
-      
+
       // Use setTimeout to ensure state update propagates before continuing
       setTimeout(() => {
         // Continue workflow execution
@@ -264,7 +263,7 @@ export function EnhancedChatInterface({
     } else {
       console.warn(`⚠️ Cannot approve step ${stepId}: step not found or status is not awaiting_user (status: ${step?.status})`)
     }
-    
+
     // Move to next step in UI
     const stepIndex = agentSteps.findIndex(s => s.id === stepId)
     if (stepIndex !== -1 && stepIndex < agentSteps.length - 1) {
@@ -308,39 +307,39 @@ export function EnhancedChatInterface({
       setShowThinkingUI(false)
       return
     }
-    
+
     // Check if the workflow has actually started
     // Workflow has started if any step has a status other than "pending" or has output
-    const workflowHasStarted = agentSteps.some(s => 
+    const workflowHasStarted = agentSteps.some(s =>
       s.status !== "waiting" || s.output !== undefined
     )
-    
+
     // Don't show UI if workflow hasn't started yet
     // This allows user to see Auto/Manual toggle and send a message first
     if (!workflowHasStarted) {
       setShowThinkingUI(false)
       return
     }
-    
+
     // Check if all steps are completed (especially synthesizer)
     const allStepsDone = agentSteps.every(s => s.status === "done" || s.status === "error" || s.status === "skipped")
     const synthesizerDone = agentSteps.find(s => s.role === "synthesizer")?.status === "done"
-    
+
     // Hide modal if synthesizer is done (workflow complete)
     if (allStepsDone && synthesizerDone) {
       setShowThinkingUI(false)
       return
     }
-    
+
     // Show UI if there are any active steps (running, awaiting_approval) or if workflow is in progress
     const hasActiveSteps = agentSteps.some(s => s.status === "thinking" || s.status === "awaiting_approval")
     const hasPendingSteps = agentSteps.some(s => s.status === "waiting")
-    
+
     // Always show UI if there are steps awaiting approval, thinking, or pending
     // IMPORTANT: Keep UI visible if any step is awaiting approval, even if isLoading is false
     if (hasActiveSteps || hasPendingSteps || isLoading) {
       setShowThinkingUI(true)
-      
+
       // Update currentStepIndex to point to the step that needs attention
       const awaitingStepIndex = agentSteps.findIndex(s => s.status === "awaiting_approval")
       if (awaitingStepIndex !== -1) {
@@ -384,98 +383,128 @@ export function EnhancedChatInterface({
 
           {collabPanel && <CollabPanel state={collabPanel} />}
 
-          {messages.map((message, index) => (
-            <div key={message.id} className={cn(
-              "space-y-3 transition-all duration-200",
-              index > 0 && "pt-6 border-t border-zinc-800/50"
-            )}>
-              {message.role === 'user' ? (
-                <div className="flex justify-end">
-                  <div className="max-w-[80%] text-zinc-100 leading-relaxed text-right">
-                    <div className="text-xs text-zinc-400 mb-1">You</div>
-                    {message.content}
+          {messages.map((message, index) => {
+            // Ensure unique key - handle cases where id might be null, undefined, or "None"
+            // Always include index to guarantee uniqueness even if IDs are duplicated
+            const messageId = message.id && message.id !== 'None' && message.id !== 'null' && String(message.id).trim() !== ''
+              ? `${message.id}-${index}`
+              : `message-${index}-${message.role}`
+            return (
+              <div key={messageId} className={cn(
+                "space-y-3 transition-all duration-200",
+                index > 0 && "pt-6 border-t border-zinc-800/50"
+              )}>
+                {message.role === 'user' ? (
+                  <div className="flex justify-end">
+                    <div className="max-w-[80%] text-zinc-100 leading-relaxed text-right">
+                      <div className="text-xs text-zinc-400 mb-1">You</div>
+                      {message.content}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex justify-start">
-                  <div className="max-w-[90%]">
-                    {/* Message Content */}
-                    {message.collaboration ? (
-                      <div className="px-1">
-                        <ThinkingStream
-                          stages={message.collaboration.stages}
-                          mode={message.collaboration.mode}
-                          finalContent={message.content}
-                          onViewProcess={() => {
-                            // TODO: Open process details modal/panel
-                            console.log('View collaboration process for message:', message.id)
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <div className="text-zinc-100 leading-relaxed px-1">
-                        <EnhancedMessageContent
-                          content={message.content}
-                          role={message.role}
-                          images={message.images}
-                          onCodePanelOpen={handleCodePanelOpen}
-                        />
-                      </div>
-                    )}
+                ) : (
+                  <div className="flex justify-start">
+                    <div className="max-w-[90%]">
+                      {/* Chain of Thought Toggle */}
+                      {message.chainOfThought && (
+                        <div
+                          className="flex items-center gap-2 text-xs text-zinc-400 ml-1 cursor-pointer hover:text-zinc-300 transition-colors w-fit"
+                          onClick={() => toggleThought(message.id)}
+                        >
+                          <Brain className="w-3.5 h-3.5" />
+                          <span>Chain of Thought</span>
+                          {expandedThoughts.has(message.id) ? (
+                            <ChevronUp className="w-3 h-3" />
+                          ) : (
+                            <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      )}
 
-                    {/* Message Metadata - Plain Text */}
-                    {message.role === 'assistant' && (
-                      <div className="pt-2 text-xs text-zinc-400 flex items-center gap-3 flex-wrap">
-                        {/* Model */}
-                        {message.modelName && message.modelName !== 'DAC' && (
-                          <span>Model: <span className="text-zinc-200 font-medium">{message.modelName}</span></span>
-                        )}
+                      {/* Expanded Chain of Thought */}
+                      {message.chainOfThought && expandedThoughts.has(message.id) && (
+                        <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 ml-1 text-sm text-zinc-300 leading-relaxed">
+                          {message.chainOfThought}
+                        </div>
+                      )}
 
-                        {/* Accuracy */}
-                        {message.confidence && (
-                          <span>Accuracy: <span className="text-zinc-200 font-medium">{message.confidence}%</span></span>
-                        )}
+                      {/* Message Content */}
+                      {message.collaboration ? (
+                        <div className="px-1">
+                          <ThinkingStream
+                            stages={message.collaboration.stages}
+                            mode={message.collaboration.mode}
+                            finalContent={message.content}
+                            onViewProcess={() => {
+                              // TODO: Open process details modal/panel
+                              console.log('View collaboration process for message:', message.id)
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="text-zinc-100 leading-relaxed px-1 py-2">
+                          <EnhancedMessageContent
+                            content={message.content}
+                            role={message.role}
+                            images={message.images}
+                            onCodePanelOpen={handleCodePanelOpen}
+                          />
+                        </div>
+                      )}
 
-                        {/* Speed */}
-                        {message.processingTime && (
-                          <span>Speed: <span className="text-zinc-200 font-medium">{(message.processingTime / 1000).toFixed(2)}s</span></span>
-                        )}
-                      </div>
-                    )}
+                      {/* Message Metadata - Plain Text */}
+                      {message.role === 'assistant' && (
+                        <div className="pt-2 text-xs text-zinc-400 flex items-center gap-3 flex-wrap">
+                          {/* Model */}
+                          {message.modelName && message.modelName !== 'DAC' && (
+                            <span>Model: <span className="text-zinc-200 font-medium">{message.modelName}</span></span>
+                          )}
 
-                    {/* Message Actions */}
-                    <div className="flex items-center gap-1 pt-1">
-                      <div></div>
+                          {/* Accuracy */}
+                          {message.confidence && (
+                            <span>Accuracy: <span className="text-zinc-200 font-medium">{message.confidence}%</span></span>
+                          )}
 
-                      <div className="flex items-center">
-                        <ActionButton
-                          icon={Copy}
-                          onClick={() => copyToClipboard(message.content)}
-                          tooltip="Copy message"
-                        />
-                        <ActionButton
-                          icon={RefreshCw}
-                          tooltip="Regenerate"
-                        />
-                        <ActionButton
-                          icon={Share2}
-                          tooltip="Share"
-                        />
-                        <ActionButton
-                          icon={Bookmark}
-                          tooltip="Bookmark"
-                        />
-                        <ActionButton
-                          icon={Bug}
-                          tooltip="Report issue"
-                        />
+                          {/* Speed */}
+                          {message.processingTime && (
+                            <span>Speed: <span className="text-zinc-200 font-medium">{(message.processingTime / 1000).toFixed(2)}s</span></span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Message Actions */}
+                      <div className="flex items-center gap-1 pt-1">
+                        <div></div>
+
+                        <div className="flex items-center">
+                          <ActionButton
+                            icon={Copy}
+                            onClick={() => copyToClipboard(message.content)}
+                            tooltip="Copy message"
+                          />
+                          <ActionButton
+                            icon={RefreshCw}
+                            tooltip="Regenerate"
+                          />
+                          <ActionButton
+                            icon={Share2}
+                            tooltip="Share"
+                          />
+                          <ActionButton
+                            icon={Bookmark}
+                            tooltip="Bookmark"
+                          />
+                          <ActionButton
+                            icon={Bug}
+                            tooltip="Report issue"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          ))}
+                )}
+              </div>
+            )
+          })}
 
           {/* Loading Indicator - Simple loading with expandable prompt */}
           {isLoading && (
@@ -563,7 +592,7 @@ export function EnhancedChatInterface({
         onRerunAll={handleRerunAll}
       />
       */}
-    </div>
+    </div >
   )
 }
 

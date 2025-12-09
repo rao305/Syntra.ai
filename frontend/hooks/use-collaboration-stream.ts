@@ -1,5 +1,6 @@
 "use client"
 
+import { API_BASE_URL } from '@/lib/api'
 import { useCallback } from 'react'
 
 interface CollaborationStage {
@@ -27,7 +28,9 @@ interface SSEEvent {
   stage_id?: string
   text?: string
   message?: any
-  error?: string
+  error?: string | { message?: string; detail?: string; error?: string }
+  detail?: string
+  [key: string]: any // Allow additional properties
 }
 
 interface UseCollaborationStreamProps {
@@ -46,11 +49,14 @@ export function useCollaborationStream({
 
   const startCollaboration = useCallback(async (
     userMessage: string,
-    mode: "auto" | "manual" = "auto"
+    mode: "auto" | "manual" = "auto",
+    overrideThreadId?: string
   ) => {
+    // Use override thread ID if provided (for new threads), otherwise use the hook's threadId
+    const actualThreadId = overrideThreadId || threadId
     // Create initial collaboration message with thinking state
     const collaborationMessageId = `collab_${Date.now()}`
-    
+
     const initialStages: CollaborationStage[] = [
       { id: "analyst", label: "Analyzing the problem…", status: "active" },
       { id: "researcher", label: "Looking up relevant information…", status: "pending" },
@@ -78,14 +84,21 @@ export function useCollaborationStream({
     onAddMessage(initialMessage)
 
     // Start SSE connection
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002'
-    const sseUrl = `${baseUrl}/api/collaboration/${threadId}/collaborate/stream`
-    
+    // API_BASE_URL already includes /api, so we use /collaboration instead of /api/collaboration
+    const sseUrl = `${API_BASE_URL}/collaboration/${actualThreadId}/collaborate/stream`
+
+    console.log('🔗 Starting collaboration stream:', {
+      url: sseUrl,
+      threadId: actualThreadId,
+      orgId,
+      messageLength: userMessage.length
+    })
+
     // Include org_id in headers if available
     const headers: HeadersInit = {
       'Content-Type': 'application/json'
     }
-    
+
     if (orgId) {
       headers['X-Org-ID'] = orgId
     }
@@ -99,8 +112,26 @@ export function useCollaborationStream({
       })
     })
 
+    console.log('📡 Collaboration response:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+      headers: Object.fromEntries(response.headers.entries())
+    })
+
     if (!response.ok) {
-      throw new Error(`Collaboration failed: ${response.statusText}`)
+      let errorText = response.statusText
+      try {
+        const errorData = await response.json().catch(() => null)
+        if (errorData) {
+          errorText = errorData.detail || errorData.message || errorData.error || JSON.stringify(errorData)
+        } else {
+          errorText = await response.text().catch(() => response.statusText)
+        }
+      } catch {
+        errorText = await response.text().catch(() => response.statusText)
+      }
+      throw new Error(`Collaboration failed: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ''}`)
     }
 
     const reader = response.body?.getReader()
@@ -125,10 +156,39 @@ export function useCollaborationStream({
               await handleSSEEvent(collaborationMessageId, eventData)
             } catch (e) {
               console.warn('Failed to parse SSE event:', line, e)
+              // If parsing fails, try to handle it as an error event
+              onUpdateMessage(collaborationMessageId, {
+                content: `Error parsing collaboration event: ${e instanceof Error ? e.message : 'Unknown error'}`,
+                collaboration: (prevMessage: Message) => {
+                  if (!prevMessage.collaboration) return undefined
+                  return {
+                    ...prevMessage.collaboration,
+                    mode: "complete" as const
+                  }
+                }
+              } as any)
             }
           }
         }
       }
+    } catch (streamError) {
+      // Handle stream errors
+      const errorMsg = streamError instanceof Error
+        ? streamError.message
+        : typeof streamError === 'string'
+          ? streamError
+          : 'Collaboration stream error'
+      console.error('Collaboration stream error:', streamError)
+      onUpdateMessage(collaborationMessageId, {
+        content: `Error: ${errorMsg}`,
+        collaboration: (prevMessage: Message) => {
+          if (!prevMessage.collaboration) return undefined
+          return {
+            ...prevMessage.collaboration,
+            mode: "complete" as const
+          }
+        }
+      } as any)
     } finally {
       reader.releaseLock()
     }
@@ -144,13 +204,13 @@ export function useCollaborationStream({
           onUpdateMessage(messageId, {
             collaboration: (prevMessage: Message) => {
               if (!prevMessage.collaboration) return undefined
-              
+
               const updatedStages = prevMessage.collaboration.stages.map(stage => ({
                 ...stage,
-                status: stage.id === event.stage_id 
+                status: stage.id === event.stage_id
                   ? "active" as const
-                  : stage.status === "active" 
-                    ? "done" as const 
+                  : stage.status === "active"
+                    ? "done" as const
                     : stage.status
               }))
 
@@ -169,7 +229,7 @@ export function useCollaborationStream({
           onUpdateMessage(messageId, {
             collaboration: (prevMessage: Message) => {
               if (!prevMessage.collaboration) return undefined
-              
+
               const updatedStages = prevMessage.collaboration.stages.map(stage => ({
                 ...stage,
                 status: stage.id === event.stage_id ? "done" as const : stage.status
@@ -223,9 +283,41 @@ export function useCollaborationStream({
         break
 
       case 'error':
-        console.error('Collaboration error:', event.error)
+        // Handle different error formats - check all possible error locations
+        let errorMessage = 'Collaboration failed'
+
+        if (typeof event.error === 'string') {
+          errorMessage = event.error
+        } else if (event.error) {
+          errorMessage = event.error.message || event.error.detail || event.error.error || JSON.stringify(event.error)
+        } else if (event.message) {
+          // Check if error is in message object
+          if (typeof event.message === 'string') {
+            errorMessage = event.message
+          } else if (event.message.error) {
+            errorMessage = typeof event.message.error === 'string'
+              ? event.message.error
+              : event.message.error.message || event.message.error.detail || JSON.stringify(event.message.error)
+          } else if (event.message.detail) {
+            errorMessage = event.message.detail
+          }
+        } else if (event.detail) {
+          errorMessage = event.detail
+        } else if (event.text) {
+          // Sometimes error info might be in text field
+          errorMessage = event.text
+        } else {
+          // If event is empty, log the full event for debugging
+          console.error('Empty error event received:', JSON.stringify(event, null, 2))
+          errorMessage = 'Collaboration failed - no error details provided'
+        }
+
+        // Only log full error details in development mode
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('⚠️ Collaboration error:', errorMessage)
+        }
         onUpdateMessage(messageId, {
-          content: `Error: ${event.error || 'Collaboration failed'}`,
+          content: `**Collaboration Error**\n\n${errorMessage}\n\nPlease try again or switch to regular chat mode.`,
           collaboration: (prevMessage: Message) => {
             if (!prevMessage.collaboration) return undefined
             return {
