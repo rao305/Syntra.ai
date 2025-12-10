@@ -37,7 +37,7 @@ export default function ProductPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Column - Text */}
-            <Reveal>
+            
               <div className="space-y-6">
                 <motion.p
                   initial={{ opacity: 0, y: 10 }}
@@ -72,25 +72,25 @@ export default function ProductPage() {
                   </Link>
                 </div>
               </div>
-            </Reveal>
+            
 
             {/* Right Column - Multi-Model Demo */}
-            <Reveal delay={0.2}>
+            
               <div className="relative">
-                <HeroMultiModelDemo />
+                
               </div>
-            </Reveal>
+            
           </div>
         </div>
       </section>
 
       {/* Metrics Strip */}
-      <MetricsStrip />
+      
 
       {/* Logos / Social Proof */}
       <section className="py-12 border-b border-white/10 bg-zinc-900/20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Reveal>
+          
             <p className="text-center text-sm text-muted-foreground mb-6 uppercase tracking-wider">
               Used by leading teams
             </p>
@@ -110,7 +110,7 @@ export default function ProductPage() {
                 ),
               )}
             </div>
-          </Reveal>
+          
         </div>
       </section>
 
@@ -122,7 +122,7 @@ export default function ProductPage() {
             subtitle="Syntra sits between your users and multiple models, keeping one shared context and picking the right model for each task."
           />
 
-          <Stagger>
+          
             <div className="relative max-w-5xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
                 {/* User */}
@@ -180,7 +180,7 @@ export default function ProductPage() {
                 </motion.div>
               </div>
             </div>
-          </Stagger>
+          
         </div>
       </section>
 
@@ -320,7 +320,7 @@ export default function ProductPage() {
             subtitle="See how teams use Syntra to operate across multiple LLMs"
           />
 
-          <Stagger>
+          
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 {
@@ -366,7 +366,7 @@ export default function ProductPage() {
                 )
               })}
             </div>
-          </Stagger>
+          
 
           <div className="text-center mt-12">
             <Link href="/use-cases">
@@ -387,7 +387,7 @@ export default function ProductPage() {
             subtitle="See how teams are transforming their AI workflows with Syntra"
           />
 
-          <Stagger>
+          
             <div className="grid md:grid-cols-3 gap-6">
               {[
                 {
@@ -435,14 +435,14 @@ export default function ProductPage() {
                 </motion.div>
               ))}
             </div>
-          </Stagger>
+          
         </div>
       </section>
 
       {/* Final CTA */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-zinc-900/40 to-[#020409]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <Reveal>
+          
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -473,7 +473,7 @@ export default function ProductPage() {
                 </Link>
               </div>
             </motion.div>
-          </Reveal>
+          
         </div>
       </section>
     </div>

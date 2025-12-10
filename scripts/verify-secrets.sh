@@ -72,3 +72,4 @@ echo ""
 echo "💡 If you see placeholder values, update backend/.env with real values"
 echo "   Then run: ./scripts/setup-parameter-store.sh"
 
+

@@ -851,10 +851,10 @@ export default function UseCasesPage() {
   return (
     <div className="min-h-screen bg-[#020409]">
       {/* Hero Section */}
-      <UseCasesHero />
+      
 
       {/* Metrics Strip */}
-      <MetricsStrip />
+      
 
       {/* Use Cases Tabs */}
       <section className="py-16 md:py-24 border-b border-white/10">
@@ -883,7 +883,7 @@ export default function UseCasesPage() {
               return (
                 <TabsContent key={useCase.id} value={useCase.id} className="space-y-16 mt-8">
                   {/* Use Case Header */}
-                  <Reveal>
+                  
                     <div className="text-center space-y-6 max-w-4xl mx-auto">
                       <div className="flex justify-center">
                         <motion.div
@@ -901,12 +901,12 @@ export default function UseCasesPage() {
                         {useCase.description}
                       </p>
                     </div>
-                  </Reveal>
+                  
 
                   {/* Two Column Layout: Description + Demo */}
                   <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
                     {/* Left: Bullets */}
-                    <Reveal delay={0.2}>
+                    
                       <div className="space-y-6 lg:sticky lg:top-24">
                         <h3 className="text-lg font-semibold text-foreground mb-6">Key Features</h3>
                         <ul className="space-y-3">
@@ -927,14 +927,14 @@ export default function UseCasesPage() {
                           ))}
                         </ul>
                       </div>
-                    </Reveal>
+                    
 
                     {/* Right: Animated Demo */}
-                    <Reveal delay={0.4}>
+                    
                       <div className="lg:sticky lg:top-24">
                         <UseCaseDemo steps={demo.steps} models={demo.models} />
                       </div>
-                    </Reveal>
+                    
                   </div>
                 </TabsContent>
               )
@@ -946,7 +946,7 @@ export default function UseCasesPage() {
       {/* Final CTA */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-zinc-900/40 to-[#020409]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <Reveal>
+          
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -977,7 +977,7 @@ export default function UseCasesPage() {
                 </Link>
               </div>
             </motion.div>
-          </Reveal>
+          
         </div>
       </section>
     </div>

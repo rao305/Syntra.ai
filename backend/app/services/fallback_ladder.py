@@ -24,37 +24,39 @@ class IntentType(str, Enum):
 
 
 # Fallback ladder configuration
+# NOTE: Ordered by speed + quality for fast fallback switching
+# If primary is slow, system automatically tries next provider within 6 seconds
 FALLBACK_LADDERS: Dict[IntentType, List[Tuple[ProviderType, str, str]]] = {
     IntentType.CODING_HELP: [
-        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Fast code generation"),
-        (ProviderType.OPENAI, "gpt-4o-mini", "Failover: Reliable reasoning"),
+        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Fast code generation (Fastest)"),
+        (ProviderType.OPENAI, "gpt-4o-mini", "Fallback: Reliable reasoning (Fast)"),
         (ProviderType.KIMI, "moonshot-v1-32k", "Backup: Cost-effective alternative"),
         (ProviderType.PERPLEXITY, "sonar", "Final: General fallback"),
     ],
     IntentType.QA_RETRIEVAL: [
-        (ProviderType.PERPLEXITY, "sonar", "Primary: Search-augmented"),
-        (ProviderType.GEMINI, "gemini-2.5-flash", "Failover: Fast reasoning"),
+        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Fast reasoning (fastest, if Perplexity slow)"),
+        (ProviderType.PERPLEXITY, "sonar", "Fallback: Search-augmented"),
         (ProviderType.OPENAI, "gpt-4o-mini", "Final: General fallback"),
     ],
     IntentType.REASONING_MATH: [
-        (ProviderType.OPENAI, "gpt-4o-mini", "Primary: Superior reasoning"),
-        (ProviderType.GEMINI, "gemini-2.5-flash", "Failover: Fast reasoning"),
+        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Fast (switch from slow OpenAI)"),
+        (ProviderType.OPENAI, "gpt-4o-mini", "Fallback: Superior reasoning (but slower)"),
         (ProviderType.PERPLEXITY, "sonar", "Final: General fallback"),
     ],
     IntentType.SOCIAL_CHAT: [
-        (ProviderType.OPENAI, "gpt-4o-mini", "Primary: Conversational chat (no web, no citations)"),
-        (ProviderType.GEMINI, "gemini-2.5-flash", "Failover: Fast chat"),
+        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Fast chat (Fastest)"),
+        (ProviderType.OPENAI, "gpt-4o-mini", "Fallback: Conversational chat (slower)"),
         (ProviderType.PERPLEXITY, "sonar", "Final: General fallback"),
     ],
     IntentType.EDITING_WRITING: [
-        (ProviderType.PERPLEXITY, "sonar", "Primary: Web-grounded editing"),
-        (ProviderType.GEMINI, "gemini-2.5-flash", "Failover: Fast editing"),
+        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Fast editing (switch from slow Perplexity)"),
+        (ProviderType.PERPLEXITY, "sonar", "Fallback: Web-grounded editing"),
         (ProviderType.OPENAI, "gpt-4o-mini", "Final: General fallback"),
     ],
     IntentType.AMBIGUOUS: [
-        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Handles vague requests"),
-        (ProviderType.PERPLEXITY, "sonar", "Failover: Web-grounded"),
-        (ProviderType.OPENAI, "gpt-4o-mini", "Final: General fallback"),
+        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Fast (handles vague requests, Fastest)"),
+        (ProviderType.OPENAI, "gpt-4o-mini", "Fallback: Good reasoning"),
+        (ProviderType.PERPLEXITY, "sonar", "Final: Web-grounded"),
     ],
 }
 
@@ -83,18 +85,20 @@ def jittered_backoff(attempt: int, base_delay: float = 0.5) -> float:
 async def call_with_fallback(
     call_fn,
     fallback_chain: List[Tuple[ProviderType, str, str]],
-    timeout_seconds: float = 12.0,
-    max_retries: int = 1
+    timeout_seconds: float = 6.0,
+    max_retries: int = 0
 ) -> Dict[str, Any]:
     """
     Call a function with fallback ladder and retries.
-    
+
+    Intelligently switches to faster providers if current one is slow.
+
     Args:
         call_fn: Async function that takes (provider, model, ...) and returns result
         fallback_chain: List of (provider, model, reason) tuples
-        timeout_seconds: Timeout per attempt
-        max_retries: Maximum retries per provider (with jittered backoff)
-    
+        timeout_seconds: Timeout per attempt (reduced from 12s to 6s for faster fallback)
+        max_retries: Maximum retries per provider (reduced from 1 to 0 for faster switching)
+
     Returns:
         Dict with: {text, provider, model, usage, latency_ms, error, fallback_used}
     """
@@ -126,7 +130,12 @@ async def call_with_fallback(
                 
                 # Success - return result dict
                 latency_ms = (time.perf_counter() - start_time) * 1000
-                
+
+                # Extract TTFS from result if available
+                ttfs_ms = None
+                if isinstance(result, dict):
+                    ttfs_ms = result.get("ttfs_ms", None)
+
                 # Result is a dict with stream iterator and usage
                 if isinstance(result, dict) and "stream" in result:
                     # Streaming result
@@ -137,6 +146,7 @@ async def call_with_fallback(
                         "usage": result.get("usage", {}),
                         "raw": result.get("raw", result.get("usage", {})),
                         "latency_ms": latency_ms,
+                        "ttfs_ms": ttfs_ms,  # Time to first token
                         "error": None,
                         "fallback_used": fallback_used
                     }
@@ -144,11 +154,11 @@ async def call_with_fallback(
                     # Non-streaming result (fallback)
                     text = result.get("content", "") if isinstance(result, dict) else str(result)
                     usage = result.get("raw", {}) if isinstance(result, dict) else {}
-                    
+
                     # Wrap text as single-chunk async iterator
                     async def single_chunk():
                         yield text
-                    
+
                     return {
                         "provider": provider.value,
                         "model": validated_model,
@@ -156,6 +166,7 @@ async def call_with_fallback(
                         "usage": usage,
                         "raw": usage,
                         "latency_ms": latency_ms,
+                        "ttfs_ms": ttfs_ms,  # Time to first token
                         "error": None,
                         "fallback_used": fallback_used
                     }

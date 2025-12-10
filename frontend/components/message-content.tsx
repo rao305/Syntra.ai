@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { CodeBlock } from './code-block'
 import { InlineMath, BlockMath } from 'react-katex'
 import 'katex/dist/katex.min.css'
 import { cn } from '@/lib/utils'
@@ -262,11 +261,9 @@ export function MessageContent({ content, className }: MessageContentProps) {
       {parts.map((part, index) => {
         if (part.type === 'code') {
           return (
-            <CodeBlock
-              key={index}
-              code={part.content}
-              language={part.language}
-            />
+            <pre key={index} className="bg-[#1a1a1a] rounded p-4 overflow-x-auto border border-[#2a2a2a]">
+              <code className="text-sm font-mono text-white">{part.content}</code>
+            </pre>
           )
         } else if (part.type === 'math-display') {
           return (

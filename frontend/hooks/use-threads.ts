@@ -50,8 +50,8 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
       setError(null);
       // Fetch both active and archived threads so we can toggle between views
       const [activeData, archivedData] = await Promise.all([
-        apiFetch<Thread[]>("/threads?limit=50&archived=false", orgId),
-        apiFetch<Thread[]>("/threads?limit=50&archived=true", orgId)
+        apiFetch<Thread[]>("/threads/?limit=50&archived=false", orgId),
+        apiFetch<Thread[]>("/threads/?limit=50&archived=true", orgId)
       ]);
 
       // Combine both sets
@@ -112,7 +112,7 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
           params.append("archived", archived.toString());
         }
 
-        const response = await apiFetch<Thread[]>(`/threads/search?${params.toString()}`, orgId);
+        const response = await apiFetch<Thread[]>(`/threads/search/?${params.toString()}`, orgId);
         return response;
       } catch (err) {
         console.error("Failed to search threads:", err);
@@ -125,7 +125,7 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
   const archiveThread = useCallback(
     async (threadId: string, archived: boolean): Promise<void> => {
       try {
-        await apiFetch(`/threads/${threadId}/archive?archived=${archived}`, orgId, {
+        await apiFetch(`/threads/${threadId}/archive/?archived=${archived}`, orgId, {
           method: "PATCH",
         });
 
@@ -152,7 +152,7 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
   const deleteThread = useCallback(
     async (threadId: string): Promise<void> => {
       try {
-        await apiFetch(`/threads/${threadId}`, orgId, {
+        await apiFetch(`/threads/${threadId}/`, orgId, {
           method: "DELETE",
         });
 
@@ -172,7 +172,7 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
         // Delete all threads by making individual delete requests
         // Note: We could add a bulk delete endpoint on the backend for better performance
         const deletePromises = threads.map((thread) =>
-          apiFetch(`/threads/${thread.id}`, orgId, {
+          apiFetch(`/threads/${thread.id}/`, orgId, {
             method: "DELETE",
           })
         );
@@ -192,7 +192,7 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
   const updateThreadTitle = useCallback(
     async (threadId: string, title: string): Promise<void> => {
       try {
-        await apiFetch(`/threads/${threadId}`, orgId, {
+        await apiFetch(`/threads/${threadId}/`, orgId, {
           method: "PATCH",
           body: JSON.stringify({ title }),
         });
@@ -214,7 +214,7 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
   const pinThread = useCallback(
     async (threadId: string, pinned: boolean): Promise<void> => {
       try {
-        await apiFetch(`/threads/${threadId}/settings`, orgId, {
+        await apiFetch(`/threads/${threadId}/settings/`, orgId, {
           method: "PATCH",
           body: JSON.stringify({ pinned }),
         });

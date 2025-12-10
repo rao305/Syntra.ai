@@ -1,0 +1,54 @@
+
+> my-v0-project@0.1.0 dev
+> next dev
+
+   ▲ Next.js 16.0.0 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://100.70.17.215:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+ ✓ Ready in 831ms
+ ○ Compiling /conversations ...
+ GET /conversations 200 in 4.0s (compile: 3.1s, proxy.ts: 555ms, render: 353ms)
+[workflow] Current working directory: /Users/rao305/Documents/Syntra/frontend
+[workflow] Trying paths: [
+  '/Users/rao305/Documents/Syntra/backend/.env',
+  '/Users/rao305/Documents/Syntra/frontend/backend/.env',
+  '/Users/rao305/Documents/Syntra/backend/.env',
+  '/Users/rao305/Documents/Syntra/backend/.env',
+  '/ROOT/backend/.env',
+  '/backend/.env'
+]
+[workflow] Checking: /Users/rao305/Documents/Syntra/backend/.env, exists: true
+[dotenv@17.2.3] injecting env (49) from ../backend/.env -- tip: ⚙️  enable debug logging with { debug: true }
+[workflow] ✅ Loaded backend environment variables from /Users/rao305/Documents/Syntra/backend/.env
+[workflow] KIMI_API_KEY present: true
+[workflow] OPENAI_API_KEY present: true
+[workflow] GEMINI_API_KEY present: false
+[workflow] PERPLEXITY_API_KEY present: true
+ POST /conversations 200 in 48ms (compile: 4ms, proxy.ts: 26ms, render: 18ms)
+ GET /conversations 200 in 45ms (compile: 6ms, proxy.ts: 11ms, render: 27ms)
+ POST /conversations 200 in 33ms (compile: 7ms, proxy.ts: 14ms, render: 12ms)
+ GET /conversations 200 in 258ms (compile: 10ms, proxy.ts: 217ms, render: 31ms)
+ POST /conversations 200 in 47ms (compile: 6ms, proxy.ts: 28ms, render: 13ms)
+[API /chat] Calling backend streaming endpoint: {
+  url: 'http://localhost:8000/api/threads/c5221d98-f8a1-4da9-9845-67097a337f97/messages/stream',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-org-id': 'org_demo',
+    Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjOTc3MWFiOS1jMTk1LTQ5ZTEtYmVmNy0zNDgzMDBkZTAzMDUiLCJvcmdfaWQiOiJvcmdfZGVtbyIsImVtYWlsIjoicm9oaXRyYW8xMjA1QGdtYWlsLmNvbSIsImV4cCI6MTc2NTMzOTY2NH0.bEAwMIpz84FtHOb-FQVCvO475iQZy7zpl3hA4JrXNt4'
+  },
+  body: '{"content":"hi","role":"user","scope":"private","use_memory":true,"user_id":"user_36SM6Ee1NCgt4PqFQ2FAQMQbEdz"}'
+}
+[API /chat] Backend streaming failed: {
+  status: 500,
+  statusText: 'Internal Server Error',
+  errorText: 'Internal Server Error',
+  url: 'http://localhost:8000/api/threads/c5221d98-f8a1-4da9-9845-67097a337f97/messages/stream'
+}
+ POST /api/chat 500 in 494ms (compile: 134ms, proxy.ts: 82ms, render: 277ms)
+ ⚠ Fast Refresh had to perform a full reload when ./components/auth/auth-provider.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload

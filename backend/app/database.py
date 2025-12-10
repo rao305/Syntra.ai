@@ -8,7 +8,7 @@ settings = get_settings()
 # Create async engine
 engine = create_async_engine(
     settings.database_url,
-    echo=not settings.is_production,
+    echo=False,  # Disabled for performance - use SQLAlchemy logging if needed
     pool_pre_ping=True,
     pool_size=20,
     max_overflow=0

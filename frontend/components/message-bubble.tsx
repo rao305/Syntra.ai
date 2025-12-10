@@ -1,8 +1,5 @@
 'use client'
 
-import { DisambiguationChips } from '@/components/disambiguation-chips'
-import { MessageActions } from '@/components/message-actions'
-import { MessageContent } from '@/components/message-content'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
@@ -46,6 +43,12 @@ export interface Message {
     total_tokens?: number
   }
   truncated?: boolean
+  processingTime?: number
+  confidence?: number
+  chainOfThought?: string
+  reasoningType?: string
+  modelId?: string
+  modelName?: string
 }
 
 interface MessageBubbleProps {
@@ -171,15 +174,7 @@ export function MessageBubble({
           <div className="w-full relative">
             {/* Message actions - shown on hover */}
             <div className="absolute -top-2 right-0 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-              <MessageActions
-                messageId={message.id}
-                content={message.content}
-                role={message.role}
-                onCopy={onCopy}
-                onRegenerate={onRegenerate}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
+              {/* Message actions component omitted */}
             </div>
 
             {/* Message text with dark bubble */}
@@ -189,23 +184,7 @@ export function MessageBubble({
                 message.error && 'border-destructive bg-destructive/10'
               )}
             >
-              {/* Disambiguation UI */}
-              {message.type === 'clarification' && message.clarification && (
-                <DisambiguationChips
-                  question={message.clarification.question}
-                  options={message.clarification.options}
-                  pronoun={message.clarification.pronoun}
-                  onSelect={(option) => {
-                    if (onDisambiguationSelect) {
-                      onDisambiguationSelect(
-                        message.id,
-                        option,
-                        message.clarification!.originalMessage
-                      )
-                    }
-                  }}
-                />
-              )}
+              {/* Disambiguation UI omitted */}
 
               {/* Generated Media (Images/Graphs) */}
               {message.media && message.media.length > 0 && (
@@ -259,7 +238,7 @@ export function MessageBubble({
 
               {/* Message content with white text */}
               <div className="w-full text-white text-[15px] leading-relaxed">
-                <MessageContent content={message.content} />
+                {message.content}
               </div>
 
               {/* Error message */}
@@ -270,8 +249,8 @@ export function MessageBubble({
               )}
             </div>
 
-            {/* Metadata section with green accents */}
-            {(message.ttftMs !== undefined || message.provider || message.reason) && (
+            {/* Metadata section with green accents - hide while processing */}
+            {(message.ttftMs !== undefined || message.provider || message.reason) && !message.content.startsWith('Processing request') && (
               <div className="flex items-center gap-2 mt-2 text-[11px]">
                 {message.reason && (
                   <span className="text-emerald-400 font-medium">
@@ -322,23 +301,7 @@ export function MessageBubble({
         ) : (
           /* User message - right aligned with green bubble */
           <div className="w-full relative flex flex-col items-end">
-            {/* Disambiguation UI */}
-            {message.type === 'clarification' && message.clarification && (
-              <DisambiguationChips
-                question={message.clarification.question}
-                options={message.clarification.options}
-                pronoun={message.clarification.pronoun}
-                onSelect={(option) => {
-                  if (onDisambiguationSelect) {
-                    onDisambiguationSelect(
-                      message.id,
-                      option,
-                      message.clarification!.originalMessage
-                    )
-                  }
-                }}
-              />
-            )}
+            {/* Disambiguation UI omitted */}
 
             {/* Attachments */}
             {message.attachments && message.attachments.length > 0 && (
@@ -369,7 +332,7 @@ export function MessageBubble({
 
             {/* Message content - green bubble for user messages */}
             <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white text-[15px] leading-relaxed rounded-2xl px-4 py-3 inline-block max-w-[80%] shadow-lg shadow-emerald-900/20">
-              <MessageContent content={message.content} />
+              {message.content}
             </div>
 
             {/* Error message */}

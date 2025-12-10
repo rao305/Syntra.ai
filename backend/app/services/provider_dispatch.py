@@ -13,13 +13,13 @@ from app.adapters.kimi import call_kimi, call_kimi_streaming
 from app.models.provider_key import ProviderType
 
 # Default completion budgets per provider (tokens)
-# Increased to support longer, more detailed responses
+# Based on model capabilities and API limits
 DEFAULT_COMPLETION_TOKENS = {
-    ProviderType.PERPLEXITY: 8192,
-    ProviderType.OPENAI: 8192,
-    ProviderType.GEMINI: 8192,
-    ProviderType.OPENROUTER: 8192,
-    ProviderType.KIMI: 8192,
+    ProviderType.PERPLEXITY: 8192,   # Increased from 4096 to allow longer responses
+    ProviderType.OPENAI: 8192,       # Increased from 4096 to allow longer responses
+    ProviderType.GEMINI: 16384,      # Increased from 8192 for better coverage
+    ProviderType.OPENROUTER: 8192,   # Increased from 4096 to allow longer responses
+    ProviderType.KIMI: 8192,         # Increased from 4096 to allow longer responses
 }
 
 

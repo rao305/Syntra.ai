@@ -1,5 +1,3 @@
-import { CodeDemoPage } from '@/components/code-demo-page'
-
 export default function CodeDemo() {
-  return <CodeDemoPage />
+  return <div className="p-8"><p>Code demo page is currently disabled</p></div>
 }

@@ -7,9 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Check, ArrowRight, X, Sparkles, Brain, Code2, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import Reveal from '@/components/motion/Reveal'
-import Stagger, { item } from '@/components/motion/Stagger'
-import { MetricsStrip } from '@/components/metrics-strip'
 
 const plans = [
   {
@@ -190,7 +187,7 @@ export default function PricingPage() {
 
         {/* Content */}
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Reveal>
+          
             <div className="text-center space-y-6">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-100 tracking-tight">
                 Simple Pricing for a
@@ -231,17 +228,17 @@ export default function PricingPage() {
                 </div>
               </div>
             </div>
-          </Reveal>
+          
         </div>
       </section>
 
       {/* Metrics Strip */}
-      <MetricsStrip />
+      
 
       {/* Pricing Cards */}
       <section className="py-16 md:py-24 border-b border-white/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Stagger>
+          
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {plans.map((plan, index) => (
                 <motion.div
@@ -352,14 +349,14 @@ export default function PricingPage() {
                 </motion.div>
               ))}
             </div>
-          </Stagger>
+          
         </div>
       </section>
 
       {/* Cost Savings Section */}
       <section className="py-16 md:py-24 border-b border-white/10 bg-zinc-900/20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Reveal>
+          
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
                 Why Syntra is cheaper than using models directly
@@ -369,11 +366,11 @@ export default function PricingPage() {
                 infinite possibilities.
               </p>
             </div>
-          </Reveal>
+          
 
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {/* DIY Column */}
-            <Reveal delay={0.2}>
+            
               <Card className="border-red-500/20 bg-red-500/5 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="text-xl text-red-400">Building It Yourself</CardTitle>
@@ -405,10 +402,10 @@ export default function PricingPage() {
                   </ul>
                 </CardContent>
               </Card>
-            </Reveal>
+            
 
             {/* Syntra Column */}
-            <Reveal delay={0.4}>
+            
               <Card className="border-emerald-500/50 bg-emerald-500/10 backdrop-blur-sm shadow-lg shadow-emerald-500/10">
                 <CardHeader>
                   <CardTitle className="text-xl text-emerald-400">Syntra</CardTitle>
@@ -440,7 +437,7 @@ export default function PricingPage() {
                   </ul>
                 </CardContent>
               </Card>
-            </Reveal>
+            
           </div>
         </div>
       </section>
@@ -448,7 +445,7 @@ export default function PricingPage() {
       {/* Final CTA */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-zinc-900/40 to-[#020409]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <Reveal>
+          
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -478,7 +475,7 @@ export default function PricingPage() {
                 </Link>
               </div>
             </motion.div>
-          </Reveal>
+          
         </div>
       </section>
     </div>

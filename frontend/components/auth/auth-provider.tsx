@@ -1,136 +1,128 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { auth } from "@/lib/firebase";
-import {
-  signInWithPopup,
-  GoogleAuthProvider,
-  signOut as firebaseSignOut,
-  onAuthStateChanged,
-  User as FirebaseUser,
-} from "firebase/auth";
-import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/api";
+import { clearSession, saveSession, getStoredSession } from "@/lib/session";
+import { useAuth as useClerkAuth, useUser } from "@clerk/nextjs";
+import { useRouter, usePathname } from "next/navigation";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextType {
   user: any | null;
   loading: boolean;
   orgId?: string;
   accessToken?: string;
-  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const DEFAULT_ORG_ID = "org_demo";
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { getToken, signOut: clerkSignOut } = useClerkAuth();
+  const { user: clerkUser, isLoaded } = useUser();
   const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const [orgId, setOrgId] = useState<string | undefined>();
+  const [orgId, setOrgId] = useState<string | undefined>(DEFAULT_ORG_ID);
   const [accessToken, setAccessToken] = useState<string | undefined>();
   const router = useRouter();
+  const pathname = usePathname();
 
-  // Listen for Firebase auth state changes
+  // Initialize session from Clerk when user loads
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          // Get ID token from Firebase
-          const idToken = await firebaseUser.getIdToken();
-
-          // Exchange Firebase token for our backend JWT
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/auth/firebase`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ id_token: idToken }),
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`Auth failed: ${response.statusText}`);
+    const initializeAuth = async () => {
+      try {
+        // First, try to load from stored session (for faster initialization)
+        const storedSession = getStoredSession();
+        if (storedSession) {
+          setOrgId(storedSession.orgId);
+          setAccessToken(storedSession.accessToken);
+          if (storedSession.userId && storedSession.email) {
+            setUser({
+              id: storedSession.userId,
+              email: storedSession.email,
+            });
           }
-
-          const data = await response.json();
-          setUser(data.user);
-          setOrgId(data.org_id);
-          setAccessToken(data.access_token);
-
-          // Store token in session storage (will be cleared on tab close)
-          sessionStorage.setItem("access_token", data.access_token);
-          sessionStorage.setItem("org_id", data.org_id);
-        } catch (error) {
-          console.error("Failed to exchange Firebase token:", error);
-          setUser(null);
-          setAccessToken(undefined);
         }
-      } else {
+
+        if (isLoaded) {
+          if (clerkUser) {
+            // Get Clerk's session token
+            const clerkToken = await getToken();
+
+            if (clerkToken) {
+              // User is authenticated - exchange Clerk token for backend JWT
+              const response = await fetch(
+                `${API_BASE_URL}/auth/clerk`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    clerk_token: clerkToken,
+                    email: clerkUser.emailAddresses[0]?.emailAddress
+                  }),
+                }
+              );
+
+              if (response.ok) {
+                const data = await response.json();
+                const resolvedOrgId = data.org_id || DEFAULT_ORG_ID;
+
+                setUser({
+                  id: clerkUser.id,
+                  email: clerkUser.emailAddresses[0]?.emailAddress,
+                  name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim(),
+                });
+                setOrgId(resolvedOrgId);
+                setAccessToken(data.access_token);
+
+                // Save to persistent storage for API calls
+                saveSession({
+                  accessToken: data.access_token,
+                  orgId: resolvedOrgId,
+                  userId: clerkUser.id,
+                  email: clerkUser.emailAddresses[0]?.emailAddress,
+                });
+              } else {
+                const errorBody = await response.text();
+                console.error("Failed to exchange Clerk token:", response.status, response.statusText, errorBody);
+                setUser(null);
+                setAccessToken(undefined);
+              }
+            }
+          } else {
+            // User is not authenticated via Clerk
+            // Only clear session if we don't have a stored session
+            // (stored session might be valid even if Clerk isn't loaded yet)
+            if (!storedSession) {
+              clearSession();
+              setUser(null);
+              setAccessToken(undefined);
+              setOrgId(DEFAULT_ORG_ID);
+            }
+          }
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Failed to initialize auth:", error);
+        clearSession();
         setUser(null);
-        setOrgId(undefined);
         setAccessToken(undefined);
-        sessionStorage.removeItem("access_token");
-        sessionStorage.removeItem("org_id");
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    };
 
-    return unsubscribe;
-  }, []);
-
-  const signInWithGoogle = async () => {
-    try {
-      setLoading(true);
-      const provider = new GoogleAuthProvider();
-      // Request email scope
-      provider.addScopes(["email", "profile"]);
-      const result = await signInWithPopup(auth, provider);
-
-      // Get ID token
-      const idToken = await result.user.getIdToken();
-
-      // Exchange for backend JWT
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/auth/firebase`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id_token: idToken }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Auth exchange failed: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      setUser(data.user);
-      setOrgId(data.org_id);
-      setAccessToken(data.access_token);
-
-      // Store tokens
-      sessionStorage.setItem("access_token", data.access_token);
-      sessionStorage.setItem("org_id", data.org_id);
-
-      // Redirect to conversations
-      router.push("/conversations");
-    } catch (error) {
-      console.error("Google sign-in failed:", error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+    initializeAuth();
+  }, [isLoaded, clerkUser, getToken]);
 
   const signOut = async () => {
     try {
-      await firebaseSignOut(auth);
+      clearSession();
       setUser(null);
       setAccessToken(undefined);
-      setOrgId(undefined);
-      sessionStorage.removeItem("access_token");
-      sessionStorage.removeItem("org_id");
-      router.push("/auth/sign-in");
+      setOrgId(DEFAULT_ORG_ID);
+      await clerkSignOut({ redirectUrl: "/auth/sign-in" });
     } catch (error) {
       console.error("Sign out failed:", error);
       throw error;
@@ -139,25 +131,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshSession = async () => {
     try {
-      const firebaseUser = auth.currentUser;
-      if (firebaseUser) {
-        const idToken = await firebaseUser.getIdToken(true); // Force refresh
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/auth/firebase`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id_token: idToken }),
+      if (clerkUser) {
+        const clerkToken = await getToken();
+        if (clerkToken) {
+          const response = await fetch(
+            `${API_BASE_URL}/auth/clerk`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                clerk_token: clerkToken,
+                email: clerkUser.emailAddresses[0]?.emailAddress
+              }),
+            }
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            const resolvedOrgId = data.org_id || DEFAULT_ORG_ID;
+
+            setAccessToken(data.access_token);
+            setOrgId(resolvedOrgId);
+
+            saveSession({
+              accessToken: data.access_token,
+              orgId: resolvedOrgId,
+              userId: clerkUser.id,
+              email: clerkUser.emailAddresses[0]?.emailAddress,
+            });
           }
-        );
-
-        if (!response.ok) {
-          throw new Error("Token refresh failed");
         }
-
-        const data = await response.json();
-        setAccessToken(data.access_token);
-        sessionStorage.setItem("access_token", data.access_token);
       }
     } catch (error) {
       console.error("Session refresh failed:", error);
@@ -170,7 +173,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     orgId,
     accessToken,
-    signInWithGoogle,
     signOut,
     refreshSession,
   };

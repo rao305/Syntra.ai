@@ -2,7 +2,7 @@
 
 import { ChatSearch } from "@/components/chat-search"
 import { ThreadItem } from "@/components/thread-item"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,10 +11,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useThreads, type Thread } from "@/hooks/use-threads"
+import { useAuth } from "@/components/auth/auth-provider"
 import { getDateGroupLabel, groupThreadsByDate } from "@/lib/date-utils"
 import { cn } from "@/lib/utils"
-import { Archive, ChevronsUpDown, Clock, Edit2, ExternalLink, MoreVertical, PanelLeft, Pin, Plus, Trash2 } from "lucide-react"
+import { Archive, ChevronsUpDown, Clock, Edit2, ExternalLink, LogOut, MoreVertical, PanelLeft, Pin, Plus, Trash2 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
+import { useUser } from "@clerk/nextjs"
 import * as React from "react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
@@ -46,18 +48,23 @@ export function EnhancedSidebar({
   onHistoryClick,
   onDeleteChat,
   onRenameChat,
-  user,
+  user: propUser,
   currentThreadId = null,
   useNewThreadsSystem = true, // Default to new system
 }: SidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const { user: authUser, signOut } = useAuth()
+  const { user: clerkUser } = useUser()
   const [renameId, setRenameId] = React.useState<string | null>(null)
   const [renameName, setRenameName] = React.useState('')
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<Thread[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
+
+  // Use auth user or fallback to prop user
+  const user = authUser || propUser
 
   const handleRenameSubmit = (id: string) => {
     if (renameName.trim()) {
@@ -684,31 +691,90 @@ export function EnhancedSidebar({
           </Button>
         )}
 
-        <div
-          className={cn(
-            "flex items-center gap-3 rounded-lg p-2 hover:bg-zinc-900 cursor-pointer transition-colors",
-            isCollapsed && "justify-center px-0",
-          )}
-        >
-          <Avatar className="h-8 w-8 bg-zinc-800 text-zinc-400 border border-zinc-700">
-            <AvatarFallback>
-              {user?.email ? user.email.charAt(0).toUpperCase() : 'G'}
-            </AvatarFallback>
-          </Avatar>
-          {!isCollapsed && (
-            <>
-              <div className="flex-1 overflow-hidden text-left">
-                <p className="text-sm font-medium text-zinc-200 truncate">
-                  {user?.email || 'Guest'}
-                </p>
-                <p className="text-xs text-zinc-500 truncate">
-                  {user ? 'Online' : 'Sign In'}
-                </p>
-              </div>
-              <ChevronsUpDown className="w-4 h-4 text-zinc-500" />
-            </>
-          )}
-        </div>
+        {user && clerkUser ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={cn(
+                  "flex items-center gap-3 w-full rounded-lg p-2 hover:bg-zinc-900 cursor-pointer transition-colors",
+                  isCollapsed && "justify-center px-0",
+                )}
+              >
+                <Avatar className="h-8 w-8 bg-zinc-800 border border-zinc-700">
+                  {clerkUser.profileImageUrl ? (
+                    <AvatarImage src={clerkUser.profileImageUrl} alt={user.name || "User"} />
+                  ) : null}
+                  <AvatarFallback>
+                    {user?.name ? user.name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                {!isCollapsed && (
+                  <>
+                    <div className="flex-1 overflow-hidden text-left">
+                      <p className="text-sm font-medium text-zinc-200 truncate">
+                        {user?.name || user?.email || 'User'}
+                      </p>
+                      <p className="text-xs text-zinc-500 truncate">
+                        Online
+                      </p>
+                    </div>
+                    <ChevronsUpDown className="w-4 h-4 text-zinc-500" />
+                  </>
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            {!isCollapsed && (
+              <DropdownMenuContent align="end" className="w-56 bg-zinc-900 border-zinc-800">
+                <DropdownMenuItem disabled className="flex flex-col items-start py-2">
+                  <p className="text-sm font-medium text-zinc-200">{user?.name || 'User'}</p>
+                  <p className="text-xs text-zinc-500">{user?.email}</p>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    try {
+                      await signOut()
+                    } catch (error) {
+                      console.error("Sign out error:", error)
+                    }
+                  }}
+                  className="text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 cursor-pointer flex gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            )}
+          </DropdownMenu>
+        ) : (
+          <div
+            className={cn(
+              "flex items-center gap-3 rounded-lg p-2 hover:bg-zinc-900 cursor-pointer transition-colors",
+              isCollapsed && "justify-center px-0",
+            )}
+            onClick={() => {
+              router.push('/auth/sign-in')
+            }}
+          >
+            <Avatar className="h-8 w-8 bg-zinc-800 text-zinc-400 border border-zinc-700">
+              <AvatarFallback>
+                G
+              </AvatarFallback>
+            </Avatar>
+            {!isCollapsed && (
+              <>
+                <div className="flex-1 overflow-hidden text-left">
+                  <p className="text-sm font-medium text-zinc-200 truncate">
+                    Guest
+                  </p>
+                  <p className="text-xs text-zinc-500 truncate">
+                    Sign In
+                  </p>
+                </div>
+                <ChevronsUpDown className="w-4 h-4 text-zinc-500" />
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div >
   )

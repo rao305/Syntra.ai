@@ -9,7 +9,9 @@ from fastapi import HTTPException, status
 from app.models.provider_key import ProviderKey, ProviderType
 from app.security import encryption_service
 from config import get_settings
+import logging
 
+logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
@@ -21,7 +23,8 @@ async def get_api_key_for_org(
     """
     Fetch the decrypted API key for an org/provider pair.
 
-    Falls back to global settings if the org has not configured a key.
+    Falls back to global settings if the org has not configured a key,
+    or if decryption fails due to encryption key mismatch.
     """
     stmt = select(ProviderKey).where(
         ProviderKey.org_id == org_id,
@@ -32,8 +35,14 @@ async def get_api_key_for_org(
     record: Optional[ProviderKey] = result.scalar_one_or_none()
 
     if record:
-        return encryption_service.decrypt(record.encrypted_key)
+        try:
+            return encryption_service.decrypt(record.encrypted_key)
+        except Exception as e:
+            # Decryption failed (likely encryption key mismatch)
+            # Fall back to environment variable API keys
+            logger.warning(f"Failed to decrypt API key for {provider.value} in org {org_id}: {e}. Falling back to environment variables.")
 
+    # Fallback to environment variable API keys
     fallback = _get_fallback_key(provider)
     if fallback:
         return fallback

@@ -1,14 +1,15 @@
 'use client'
 
-import { EnhancedConversationLayout } from '@/components/enhanced-conversation-layout'
-import { useRouter } from 'next/navigation'
-import * as React from 'react'
-// Removed unused auth and conversation hooks
 import { runStep, startWorkflow } from '@/app/actions/workflow'
+import { useAuth } from '@/components/auth/auth-provider'
 import { type CollabPanelState, type CollabStageId } from '@/components/collaborate/CollabPanel'
+import { EnhancedConversationLayout } from '@/components/enhanced-conversation-layout'
 import { SYNTRA_MODELS } from '@/components/syntra-model-selector'
+import { useUserConversations } from '@/hooks/use-user-conversations'
 import { apiFetch } from '@/lib/api'
 import { useWorkflowStore } from '@/store/workflow-store'
+import { useRouter } from 'next/navigation'
+import * as React from 'react'
 import { toast } from 'sonner'
 
 interface ImageFile {
@@ -52,12 +53,10 @@ interface ConversationsLandingProps {
 
 export default function ConversationsLanding({ searchParams }: ConversationsLandingProps) {
   const router = useRouter()
-  // Simplified without authentication
-  const user: { uid: string } | null = null
-  const orgId = 'org_demo'
-  const accessToken = null
-  const loading = false
-  const userConversations: any[] = []
+  // Use actual auth hook for user session
+  const { user, orgId: authOrgId, accessToken, loading } = useAuth()
+  const orgId = authOrgId || 'org_demo'
+  const { conversations: userConversations } = useUserConversations(user?.id || undefined)
 
   const [messages, setMessages] = React.useState<Message[]>([])
   const [history, setHistory] = React.useState<ChatHistoryItem[]>([])
@@ -757,10 +756,10 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         .map((conv) => ({
           id: conv.id,
           firstLine: conv.title || conv.lastMessagePreview || 'Untitled conversation',
-          timestamp: new Date(conv.updatedAt).toLocaleTimeString('en-US', {
+          timestamp: conv.updatedAt ? conv.updatedAt.toDate().toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
-          }),
+          }) : '',
         }))
       setHistory(historyItems)
     }
@@ -916,7 +915,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         }>(`/threads/`, {
           method: 'POST',
           body: JSON.stringify({
-            user_id: (user as { uid: string } | null)?.uid || null,
+            user_id: user?.id || null,
             title: content.trim().substring(0, 50),
             description: '',
           }),
@@ -969,7 +968,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       }
 
       // Add user_id if available
-      const userId = (user as { uid?: string } | null)?.uid
+      const userId = user?.id
       if (userId) {
         chatRequestBody.user_id = userId
       }

@@ -404,28 +404,6 @@ export function EnhancedChatInterface({
                 ) : (
                   <div className="flex justify-start">
                     <div className="max-w-[90%]">
-                      {/* Chain of Thought Toggle */}
-                      {message.chainOfThought && (
-                        <div
-                          className="flex items-center gap-2 text-xs text-zinc-400 ml-1 cursor-pointer hover:text-zinc-300 transition-colors w-fit"
-                          onClick={() => toggleThought(message.id)}
-                        >
-                          <Brain className="w-3.5 h-3.5" />
-                          <span>Chain of Thought</span>
-                          {expandedThoughts.has(message.id) ? (
-                            <ChevronUp className="w-3 h-3" />
-                          ) : (
-                            <ChevronDown className="w-3 h-3" />
-                          )}
-                        </div>
-                      )}
-
-                      {/* Expanded Chain of Thought */}
-                      {message.chainOfThought && expandedThoughts.has(message.id) && (
-                        <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 ml-1 text-sm text-zinc-300 leading-relaxed">
-                          {message.chainOfThought}
-                        </div>
-                      )}
 
                       {/* Message Content */}
                       {message.collaboration ? (
@@ -451,23 +429,42 @@ export function EnhancedChatInterface({
                         </div>
                       )}
 
-                      {/* Message Metadata - Plain Text */}
+                      {/* Message Metadata - Model Info & Performance */}
                       {message.role === 'assistant' && (
-                        <div className="pt-2 text-xs text-zinc-400 flex items-center gap-3 flex-wrap">
-                          {/* Model */}
-                          {message.modelName && message.modelName !== 'DAC' && (
-                            <span>Model: <span className="text-zinc-200 font-medium">{message.modelName}</span></span>
-                          )}
+                        <div className="pt-3 border-t border-zinc-800/50">
+                          <div className="grid grid-cols-2 gap-4 text-xs">
+                            {/* Model Information - only show if modelName is defined and not empty */}
+                            {message.modelName && message.modelName !== 'DAC' && message.modelName !== 'undefined' && (
+                              <div>
+                                <span className="text-zinc-500">Model:</span>
+                                <span className="text-zinc-200 font-medium ml-2">{message.modelName}</span>
+                              </div>
+                            )}
 
-                          {/* Accuracy */}
-                          {message.confidence && (
-                            <span>Accuracy: <span className="text-zinc-200 font-medium">{message.confidence}%</span></span>
-                          )}
+                            {/* Accuracy/Quality */}
+                            {message.confidence && (
+                              <div>
+                                <span className="text-zinc-500">Accuracy:</span>
+                                <span className="text-zinc-200 font-medium ml-2">{message.confidence}%</span>
+                              </div>
+                            )}
 
-                          {/* Speed */}
-                          {message.processingTime && (
-                            <span>Speed: <span className="text-zinc-200 font-medium">{(message.processingTime / 1000).toFixed(2)}s</span></span>
-                          )}
+                            {/* Speed - Total Response Time */}
+                            {message.processingTime && (
+                              <div>
+                                <span className="text-zinc-500">Speed:</span>
+                                <span className="text-zinc-200 font-medium ml-2">{(message.processingTime / 1000).toFixed(2)}s</span>
+                              </div>
+                            )}
+
+                            {/* Time to First Token (TTFS) */}
+                            {message.ttftMs && (
+                              <div>
+                                <span className="text-zinc-500">TTFS:</span>
+                                <span className="text-zinc-200 font-medium ml-2">{(message.ttftMs / 1000).toFixed(2)}s</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
 

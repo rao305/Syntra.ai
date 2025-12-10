@@ -51,3 +51,4 @@ echo ""
 echo "💡 To view a parameter value:"
 echo "   aws ssm get-parameter --name \"/syntra/PARAM_NAME\" --with-decryption --region $AWS_REGION --query 'Parameter.Value' --output text"
 
+

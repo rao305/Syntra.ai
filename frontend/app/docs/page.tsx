@@ -20,12 +20,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import Reveal from '@/components/motion/Reveal'
-import Stagger, { item } from '@/components/motion/Stagger'
-import { MetricsStrip } from '@/components/metrics-strip'
-import { LiveAPISimulation } from '@/components/live-api-simulation'
-import { RoutingVisualizer } from '@/components/routing-visualizer'
-import { ModelSwitchingSim } from '@/components/model-switching-sim'
 
 const docSections = [
   {
@@ -130,7 +124,6 @@ export default function DocsPage() {
         />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Reveal>
             <div className="text-center space-y-6 mb-12">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-100 tracking-tight">
                 Developer Documentation
@@ -139,17 +132,10 @@ export default function DocsPage() {
                 Learn how to use multiple LLMs in one continuous context window.
               </p>
             </div>
-          </Reveal>
-
-          {/* Live API Simulation */}
-          <Reveal delay={0.2}>
-            <LiveAPISimulation />
-          </Reveal>
         </div>
       </section>
 
       {/* Metrics Strip */}
-      <MetricsStrip />
 
       {/* Quickstart Cards */}
       <section className="py-16 md:py-24 border-b border-white/10">

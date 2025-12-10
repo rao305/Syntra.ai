@@ -1,9 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { OkaraMessageBubble } from '@/components/okara-v2-message-bubble'
-import { OkaraHeader } from '@/components/okara-v2-header'
-import { OkaraSidebarV2 } from '@/components/okara-v2-sidebar'
 
 export default function ChainOfThoughtDemoPage() {
   const [selectedModel, setSelectedModel] = React.useState('kimi-k2-thinking')
@@ -38,50 +35,8 @@ This approach is particularly effective for mathematical problems, logical puzzl
   ]
 
   return (
-    <div className="h-screen flex flex-col bg-white">
-      {/* Header */}
-      <OkaraHeader
-        selectedModel={selectedModel}
-        onModelSelect={setSelectedModel}
-        onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
-      />
-
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <OkaraSidebarV2
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          history={[]}
-          onNewChat={() => {}}
-          onClearAll={() => {}}
-          onExport={() => {}}
-        />
-
-        {/* Main Content */}
-        <main className="flex-1 flex flex-col overflow-hidden">
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            <div className="max-w-[680px] mx-auto w-full space-y-6">
-              {sampleMessages.map((message, index) => (
-                <OkaraMessageBubble
-                  key={index}
-                  {...message}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Demo Info */}
-          <div className="border-t border-gray-200 bg-gray-50 p-4">
-            <div className="max-w-[680px] mx-auto text-center">
-              <p className="text-sm text-gray-600">
-                <strong>Demo:</strong> This showcases the enhanced chain of thought features with exact Okara styling.
-                Click the brain icon in the message above to toggle the reasoning panel.
-              </p>
-            </div>
-          </div>
-        </main>
-      </div>
+    <div className="p-8">
+      <p>Chain of thought demo page is currently being refactored</p>
     </div>
   )
 }

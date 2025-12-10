@@ -77,6 +77,10 @@ class Settings(BaseSettings):
     firebase_project_id: Optional[str] = None
     default_org_id: str = "org_demo"
 
+    # Clerk Auth
+    clerk_secret_key: Optional[str] = None
+    clerk_publishable_key: Optional[str] = None
+
     @property
     def is_production(self) -> bool:
         """Check if running in production."""

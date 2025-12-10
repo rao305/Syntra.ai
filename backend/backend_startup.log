@@ -1,0 +1,953 @@
+INFO:     Will watch for changes in these directories: ['/Users/rao305/Documents/Syntra/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [56869] using WatchFiles
+/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+INFO:     Started server process [56872]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-09 22:13:30,047 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-09 22:13:30,047 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-09 22:13:30,051 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-09 22:13:30,051 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-09 22:13:30,053 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-09 22:13:30,053 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-09 22:13:30,054 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:13:30,054 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+INFO:     127.0.0.1:57098 - "OPTIONS /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57100 - "OPTIONS /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+⚠️  Token verification failed (treating as unauthenticated): Invalid or expired token
+⚠️  Token verification failed (treating as unauthenticated): Invalid or expired token
+2025-12-09 22:17:24,951 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:17:24,952 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-09 22:17:24,952 INFO sqlalchemy.engine.Engine [generated in 0.00029s] ()
+2025-12-09 22:17:24,985 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-09 22:17:24,985 INFO sqlalchemy.engine.Engine [generated in 0.00012s] ('org_demo', 50)
+2025-12-09 22:17:25,005 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:17:25,005 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-09 22:17:25,005 INFO sqlalchemy.engine.Engine [cached since 0.05341s ago] ()
+INFO:     127.0.0.1:57100 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+2025-12-09 22:17:25,008 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-09 22:17:25,010 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-09 22:17:25,010 INFO sqlalchemy.engine.Engine [generated in 0.00011s] ('org_demo', 50)
+INFO:     127.0.0.1:57098 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+2025-12-09 22:17:25,015 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:57098 - "OPTIONS /api/auth/clerk HTTP/1.1" 200 OK
+[CLERK] Verifying user_id: user_36SM6Ee1NCgt4PqFQ2FAQMQbEdz
+[CLERK] Clerk API response: 200
+2025-12-09 22:17:25,781 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:17:25,782 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-12-09 22:17:25,782 INFO sqlalchemy.engine.Engine [generated in 0.00008s] ('org_demo',)
+2025-12-09 22:17:25,787 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.email = $1::VARCHAR AND users.org_id = $2::VARCHAR
+2025-12-09 22:17:25,787 INFO sqlalchemy.engine.Engine [generated in 0.00006s] ('rohitrao1205@gmail.com', 'org_demo')
+2025-12-09 22:17:25,804 INFO sqlalchemy.engine.Engine UPDATE users SET updated_at=now(), last_login=$1::TIMESTAMP WITH TIME ZONE WHERE users.id = $2::VARCHAR
+2025-12-09 22:17:25,804 INFO sqlalchemy.engine.Engine [generated in 0.00009s] (datetime.datetime(2025, 12, 10, 3, 17, 25, 803520), 'c9771ab9-c195-49e1-bef7-348300de0305')
+2025-12-09 22:17:25,805 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:57098 - "POST /api/auth/clerk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57269 - "GET /health HTTP/1.1" 200 OK
+[CLERK] Verifying user_id: user_36SM6Ee1NCgt4PqFQ2FAQMQbEdz
+2025-12-09 22:19:04,907 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:19:04,907 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-09 22:19:04,907 INFO sqlalchemy.engine.Engine [cached since 99.95s ago] ()
+2025-12-09 22:19:04,907 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:19:04,908 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-09 22:19:04,908 INFO sqlalchemy.engine.Engine [cached since 99.95s ago] ()
+2025-12-09 22:19:04,910 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-09 22:19:04,910 INFO sqlalchemy.engine.Engine [cached since 99.92s ago] ('org_demo', 50)
+2025-12-09 22:19:04,911 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = true ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-09 22:19:04,911 INFO sqlalchemy.engine.Engine [cached since 99.9s ago] ('org_demo', 50)
+INFO:     127.0.0.1:57586 - "GET /api/threads/?limit=50&archived=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57585 - "GET /api/threads/?limit=50&archived=false HTTP/1.1" 200 OK
+2025-12-09 22:19:04,917 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-09 22:19:04,920 INFO sqlalchemy.engine.Engine ROLLBACK
+[CLERK] Clerk API response: 200
+2025-12-09 22:19:05,210 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:19:05,210 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-12-09 22:19:05,210 INFO sqlalchemy.engine.Engine [cached since 99.43s ago] ('org_demo',)
+2025-12-09 22:19:05,212 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.email = $1::VARCHAR AND users.org_id = $2::VARCHAR
+2025-12-09 22:19:05,212 INFO sqlalchemy.engine.Engine [cached since 99.42s ago] ('rohitrao1205@gmail.com', 'org_demo')
+2025-12-09 22:19:05,214 INFO sqlalchemy.engine.Engine UPDATE users SET updated_at=now(), last_login=$1::TIMESTAMP WITH TIME ZONE WHERE users.id = $2::VARCHAR
+2025-12-09 22:19:05,214 INFO sqlalchemy.engine.Engine [cached since 99.41s ago] (datetime.datetime(2025, 12, 10, 3, 19, 5, 213602), 'c9771ab9-c195-49e1-bef7-348300de0305')
+2025-12-09 22:19:05,215 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:57588 - "POST /api/auth/clerk HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57588 - "OPTIONS /api/threads/ HTTP/1.1" 200 OK
+2025-12-09 22:19:07,692 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:19:07,693 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-09 22:19:07,693 INFO sqlalchemy.engine.Engine [cached since 102.7s ago] ()
+2025-12-09 22:19:07,696 INFO sqlalchemy.engine.Engine INSERT INTO threads (id, org_id, creator_id, title, description, last_message_preview, pinned, archived, archived_at, last_provider, last_model) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::BOOLEAN, $8::BOOLEAN, $9::TIMESTAMP WITH TIME ZONE, $10::VARCHAR, $11::VARCHAR) RETURNING threads.created_at, threads.updated_at
+2025-12-09 22:19:07,696 INFO sqlalchemy.engine.Engine [generated in 0.00033s] ('68b18b17-be88-4005-b95d-1c805c0aca16', 'org_demo', 'user_36SM6Ee1NCgt4PqFQ2FAQMQbEdz', 'Hi there', '', None, False, False, None, None, None)
+2025-12-09 22:19:07,700 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:57588 - "POST /api/threads/ HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 550, in _prepare_and_execute
+    self._rows = deque(await prepared_stmt.fetch(*parameters))
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/asyncpg/prepared_stmt.py", line 177, in fetch
+    data = await self.__bind_execute(args, 0, timeout)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/asyncpg/prepared_stmt.py", line 268, in __bind_execute
+    data, status, _ = await self.__do_execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/asyncpg/prepared_stmt.py", line 257, in __do_execute
+    return await executor(protocol)
+  File "asyncpg/protocol/protocol.pyx", line 205, in bind_execute
+asyncpg.exceptions.ForeignKeyViolationError: insert or update on table "threads" violates foreign key constraint "threads_creator_id_fkey"
+DETAIL:  Key (creator_id)=(user_36SM6Ee1NCgt4PqFQ2FAQMQbEdz) is not present in table "users".
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.IntegrityError: <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table "threads" violates foreign key constraint "threads_creator_id_fkey"
+DETAIL:  Key (creator_id)=(user_36SM6Ee1NCgt4PqFQ2FAQMQbEdz) is not present in table "users".
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/applications.py", line 1139, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 196, in __call__
+    recv_stream.close()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/rao305/Documents/Syntra/backend/app/middleware.py", line 43, in dispatch
+    response: Response = await call_next(request)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 120, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 106, in app
+    response = await f(request)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 430, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 316, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/rao305/Documents/Syntra/backend/app/api/threads.py", line 652, in create_thread
+    await db.commit()
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/ext/asyncio/session.py", line 1000, in commit
+    await greenlet_spawn(self.sync_session.commit)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4331, in flush
+    self._flush(objects)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4467, in _flush
+    transaction.rollback(_capture_exception=True)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4427, in _flush
+    flush_context.execute()
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.IntegrityError: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table "threads" violates foreign key constraint "threads_creator_id_fkey"
+DETAIL:  Key (creator_id)=(user_36SM6Ee1NCgt4PqFQ2FAQMQbEdz) is not present in table "users".
+[SQL: INSERT INTO threads (id, org_id, creator_id, title, description, last_message_preview, pinned, archived, archived_at, last_provider, last_model) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::BOOLEAN, $8::BOOLEAN, $9::TIMESTAMP WITH TIME ZONE, $10::VARCHAR, $11::VARCHAR) RETURNING threads.created_at, threads.updated_at]
+[parameters: ('68b18b17-be88-4005-b95d-1c805c0aca16', 'org_demo', 'user_36SM6Ee1NCgt4PqFQ2FAQMQbEdz', 'Hi there', '', None, False, False, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-12-09 22:20:26,407 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:20:26,407 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-09 22:20:26,407 INFO sqlalchemy.engine.Engine [cached since 181.5s ago] ()
+2025-12-09 22:20:26,409 INFO sqlalchemy.engine.Engine INSERT INTO threads (id, org_id, creator_id, title, description, last_message_preview, pinned, archived, archived_at, last_provider, last_model) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::BOOLEAN, $8::BOOLEAN, $9::TIMESTAMP WITH TIME ZONE, $10::VARCHAR, $11::VARCHAR) RETURNING threads.created_at, threads.updated_at
+2025-12-09 22:20:26,409 INFO sqlalchemy.engine.Engine [cached since 78.71s ago] ('621331fc-06ab-42bf-8313-0ff76ed8887a', 'org_demo', 'test-user', 'Test Thread', None, None, False, False, None, None, None)
+2025-12-09 22:20:26,411 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:58002 - "POST /api/threads/ HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 550, in _prepare_and_execute
+    self._rows = deque(await prepared_stmt.fetch(*parameters))
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/asyncpg/prepared_stmt.py", line 177, in fetch
+    data = await self.__bind_execute(args, 0, timeout)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/asyncpg/prepared_stmt.py", line 268, in __bind_execute
+    data, status, _ = await self.__do_execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/asyncpg/prepared_stmt.py", line 257, in __do_execute
+    return await executor(protocol)
+  File "asyncpg/protocol/protocol.pyx", line 205, in bind_execute
+asyncpg.exceptions.ForeignKeyViolationError: insert or update on table "threads" violates foreign key constraint "threads_creator_id_fkey"
+DETAIL:  Key (creator_id)=(test-user) is not present in table "users".
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.IntegrityError: <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table "threads" violates foreign key constraint "threads_creator_id_fkey"
+DETAIL:  Key (creator_id)=(test-user) is not present in table "users".
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/applications.py", line 1139, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 196, in __call__
+    recv_stream.close()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/rao305/Documents/Syntra/backend/app/middleware.py", line 43, in dispatch
+    response: Response = await call_next(request)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 120, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 106, in app
+    response = await f(request)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 430, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 316, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/rao305/Documents/Syntra/backend/app/api/threads.py", line 652, in create_thread
+    await db.commit()
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/ext/asyncio/session.py", line 1000, in commit
+    await greenlet_spawn(self.sync_session.commit)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4331, in flush
+    self._flush(objects)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4467, in _flush
+    transaction.rollback(_capture_exception=True)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4427, in _flush
+    flush_context.execute()
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.IntegrityError: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table "threads" violates foreign key constraint "threads_creator_id_fkey"
+DETAIL:  Key (creator_id)=(test-user) is not present in table "users".
+[SQL: INSERT INTO threads (id, org_id, creator_id, title, description, last_message_preview, pinned, archived, archived_at, last_provider, last_model) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::BOOLEAN, $8::BOOLEAN, $9::TIMESTAMP WITH TIME ZONE, $10::VARCHAR, $11::VARCHAR) RETURNING threads.created_at, threads.updated_at]
+[parameters: ('621331fc-06ab-42bf-8313-0ff76ed8887a', 'org_demo', 'test-user', 'Test Thread', None, None, False, False, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-12-09 22:20:48,366 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:20:48,366 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-09 22:20:48,366 INFO sqlalchemy.engine.Engine [cached since 203.4s ago] ()
+2025-12-09 22:20:48,367 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.org_id = $1::VARCHAR AND threads.archived = false ORDER BY threads.updated_at DESC NULLS LAST, threads.created_at DESC 
+ LIMIT $2::INTEGER
+2025-12-09 22:20:48,367 INFO sqlalchemy.engine.Engine [cached since 203.4s ago] ('org_demo', 50)
+INFO:     127.0.0.1:58148 - "GET /api/threads/?limit=50 HTTP/1.1" 200 OK
+2025-12-09 22:20:48,369 INFO sqlalchemy.engine.Engine ROLLBACK
+2025-12-09 22:20:53,077 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:20:53,077 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-09 22:20:53,077 INFO sqlalchemy.engine.Engine [cached since 208.1s ago] ()
+2025-12-09 22:20:53,078 INFO sqlalchemy.engine.Engine INSERT INTO threads (id, org_id, creator_id, title, description, last_message_preview, pinned, archived, archived_at, last_provider, last_model) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::BOOLEAN, $8::BOOLEAN, $9::TIMESTAMP WITH TIME ZONE, $10::VARCHAR, $11::VARCHAR) RETURNING threads.created_at, threads.updated_at
+2025-12-09 22:20:53,078 INFO sqlalchemy.engine.Engine [cached since 105.4s ago] ('33b1a7f9-102b-4972-b9c8-0cc3b7373061', 'org_demo', 'test-user', 'Test Thread', None, None, False, False, None, None, None)
+2025-12-09 22:20:53,079 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:58189 - "POST /api/threads/ HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 550, in _prepare_and_execute
+    self._rows = deque(await prepared_stmt.fetch(*parameters))
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/asyncpg/prepared_stmt.py", line 177, in fetch
+    data = await self.__bind_execute(args, 0, timeout)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/asyncpg/prepared_stmt.py", line 268, in __bind_execute
+    data, status, _ = await self.__do_execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/asyncpg/prepared_stmt.py", line 257, in __do_execute
+    return await executor(protocol)
+  File "asyncpg/protocol/protocol.pyx", line 205, in bind_execute
+asyncpg.exceptions.ForeignKeyViolationError: insert or update on table "threads" violates foreign key constraint "threads_creator_id_fkey"
+DETAIL:  Key (creator_id)=(test-user) is not present in table "users".
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.IntegrityError: <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table "threads" violates foreign key constraint "threads_creator_id_fkey"
+DETAIL:  Key (creator_id)=(test-user) is not present in table "users".
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/applications.py", line 1139, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 196, in __call__
+    recv_stream.close()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/rao305/Documents/Syntra/backend/app/middleware.py", line 43, in dispatch
+    response: Response = await call_next(request)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 120, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 106, in app
+    response = await f(request)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 430, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 316, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/rao305/Documents/Syntra/backend/app/api/threads.py", line 652, in create_thread
+    await db.commit()
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/ext/asyncio/session.py", line 1000, in commit
+    await greenlet_spawn(self.sync_session.commit)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4331, in flush
+    self._flush(objects)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4467, in _flush
+    transaction.rollback(_capture_exception=True)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4427, in _flush
+    flush_context.execute()
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.IntegrityError: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table "threads" violates foreign key constraint "threads_creator_id_fkey"
+DETAIL:  Key (creator_id)=(test-user) is not present in table "users".
+[SQL: INSERT INTO threads (id, org_id, creator_id, title, description, last_message_preview, pinned, archived, archived_at, last_provider, last_model) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::BOOLEAN, $8::BOOLEAN, $9::TIMESTAMP WITH TIME ZONE, $10::VARCHAR, $11::VARCHAR) RETURNING threads.created_at, threads.updated_at]
+[parameters: ('33b1a7f9-102b-4972-b9c8-0cc3b7373061', 'org_demo', 'test-user', 'Test Thread', None, None, False, False, None, None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+WARNING:  WatchFiles detected changes in 'app/api/threads.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [56872]
+/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+INFO:     Started server process [61317]
+INFO:     Waiting for application startup.
+Warning: OpenTelemetry not available (install opentelemetry packages)
+2025-12-09 22:22:07,020 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2025-12-09 22:22:07,021 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-09 22:22:07,023 INFO sqlalchemy.engine.Engine select current_schema()
+2025-12-09 22:22:07,023 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-09 22:22:07,024 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2025-12-09 22:22:07,025 INFO sqlalchemy.engine.Engine [raw sql] ()
+2025-12-09 22:22:07,026 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:22:07,026 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.
+2025-12-09 22:22:14,278 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:22:14,278 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-09 22:22:14,279 INFO sqlalchemy.engine.Engine [generated in 0.00007s] ()
+2025-12-09 22:22:14,306 INFO sqlalchemy.engine.Engine SELECT users.id, users.email, users.name, users.org_id, users.role, users.email_verified, users.created_at, users.updated_at, users.last_login 
+FROM users 
+WHERE users.id = $1::VARCHAR AND users.org_id = $2::VARCHAR
+2025-12-09 22:22:14,306 INFO sqlalchemy.engine.Engine [generated in 0.00023s] ('user_36SM6Ee1NCgt4PqFQ2FAQMQbEdz', 'org_demo')
+⚠️ User 'user_36SM6Ee1NCgt4PqFQ2FAQMQbEdz' not found in users table - thread will have no creator
+2025-12-09 22:22:14,325 INFO sqlalchemy.engine.Engine INSERT INTO threads (id, org_id, creator_id, title, description, last_message_preview, pinned, archived, archived_at, last_provider, last_model) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::BOOLEAN, $8::BOOLEAN, $9::TIMESTAMP WITH TIME ZONE, $10::VARCHAR, $11::VARCHAR) RETURNING threads.created_at, threads.updated_at
+2025-12-09 22:22:14,325 INFO sqlalchemy.engine.Engine [generated in 0.00021s] ('a5bff6e5-da08-42f1-aefd-b5ba51a560cc', 'org_demo', None, 'Test Thread', None, None, False, False, None, None, None)
+2025-12-09 22:22:14,329 INFO sqlalchemy.engine.Engine COMMIT
+2025-12-09 22:22:14,333 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:22:14,334 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-12-09 22:22:14,334 INFO sqlalchemy.engine.Engine [generated in 0.00023s] ('a5bff6e5-da08-42f1-aefd-b5ba51a560cc',)
+INFO:     127.0.0.1:58714 - "POST /api/threads/ HTTP/1.1" 200 OK
+2025-12-09 22:22:14,338 INFO sqlalchemy.engine.Engine ROLLBACK
+🔍 DEBUG: add_message called - collaboration_mode=False, content=Hello, this is a test message...
+2025-12-09 22:22:24,368 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:22:24,368 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-09 22:22:24,368 INFO sqlalchemy.engine.Engine [cached since 10.09s ago] ()
+2025-12-09 22:22:24,376 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-09 22:22:24,376 INFO sqlalchemy.engine.Engine [generated in 0.00008s] ('a5bff6e5-da08-42f1-aefd-b5ba51a560cc', 'org_demo')
+2025-12-09 22:22:24,379 INFO sqlalchemy.engine.Engine SELECT orgs.id, orgs.name, orgs.slug, orgs.stripe_customer_id, orgs.stripe_subscription_id, orgs.subscription_status, orgs.seats_licensed, orgs.seats_used, orgs.requests_per_day, orgs.tokens_per_day, orgs.sso_enabled, orgs.saml_metadata_url, orgs.created_at, orgs.updated_at 
+FROM orgs 
+WHERE orgs.id = $1::VARCHAR
+2025-12-09 22:22:24,379 INFO sqlalchemy.engine.Engine [generated in 0.00005s] ('org_demo',)
+2025-12-09 22:22:24,381 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.encrypted_content, messages.encryption_key_id, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-09 22:22:24,381 INFO sqlalchemy.engine.Engine [generated in 0.00005s] ('a5bff6e5-da08-42f1-aefd-b5ba51a560cc', 20)
+[CTX] build_contextual_messages called with thread_id='a5bff6e5-da08-42f1-aefd-b5ba51a560cc', type=str
+[CTX] _load_short_term_history called with thread_id='a5bff6e5-da08-42f1-aefd-b5ba51a560cc', type=str
+[CTX] Attempting to load from in-memory thread storage...
+[THREAD_STORE] get_thread: id='a5bff6e5-da08-42f1-aefd-b5ba51a560cc', exists=False, obj_id=None, turns=0
+[THREAD_STORE] get_history: no thread for id='a5bff6e5-da08-42f1-aefd-b5ba51a560cc'
+[CTX] get_history returned 0 turns for thread_id='a5bff6e5-da08-42f1-aefd-b5ba51a560cc'
+[CTX] No history found for thread_id='a5bff6e5-da08-42f1-aefd-b5ba51a560cc' (thread may not exist or has no turns)
+2025-12-09 22:22:24,391 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.encrypted_content, messages.encryption_key_id, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-09 22:22:24,391 INFO sqlalchemy.engine.Engine [cached since 0.009534s ago] ('a5bff6e5-da08-42f1-aefd-b5ba51a560cc', 20)
+⚠️  No messages found in DB for thread a5bff6e5-da08-42f1-aefd-b5ba51a560cc
+⚠️  No conversation history available for thread a5bff6e5-da08-42f1-aefd-b5ba51a560cc, starting fresh
+📚 Loaded 0 validated history messages
+[CTX] Conversation history turns: 0 (before adding current user message)
+[CTX] Memory retrieval disabled (memory_enabled=False)
+
+================================================================================
+🔧 CONTEXT BUILDER: thread_id=a5bff6e5-da08-42f1-aefd-b5ba51a560cc
+================================================================================
+Short-term history turns: 0
+Memory snippet present: False
+Query rewritten: False
+Is ambiguous: False
+Total messages: 2
+System messages: 1
+Conversation history turns: 1
+
+Messages array preview:
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Original user message:
+Hello, this is a test message
+
+Conversation history summary:
+================================================================================
+
+
+================================================================================
+📤 SENDING TO PROVIDER (non-streaming): perplexity/sonar
+================================================================================
+Using centralized context builder ✓
+Total messages: 2
+Conversation history turns: 0
+Memory snippet present: False
+Query rewritten: False
+
+Messages preview (first 120 chars each):
+  [0] system: You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoni...
+  [1] user: Original user message:
+Hello, this is a test message
+================================================================================
+
+2025-12-09 22:22:24,392 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.provider = $2::provider_type AND provider_keys.is_active = $3::VARCHAR
+2025-12-09 22:22:24,392 INFO sqlalchemy.engine.Engine [generated in 0.00006s] ('org_demo', 'perplexity', 'true')
+Failed to decrypt API key for perplexity in org org_demo: . Falling back to environment variables.
+[NORMAL MODE] provider=perplexity model=sonar finish_reason=None prompt_tokens=1325 completion_tokens=207 total_tokens=1532 content_length=1082
+2025-12-09 22:22:28,380 INFO sqlalchemy.engine.Engine SELECT max(messages.sequence) AS max_1 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR
+2025-12-09 22:22:28,380 INFO sqlalchemy.engine.Engine [generated in 0.00009s] ('a5bff6e5-da08-42f1-aefd-b5ba51a560cc',)
+2025-12-09 22:22:28,383 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, encrypted_content, encryption_key_id, provider, model, provider_message_id, prompt_tokens, completion_tokens, total_tokens, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::BYTEA, $7::VARCHAR, $8::VARCHAR, $9::VARCHAR, $10::VARCHAR, $11::INTEGER, $12::INTEGER, $13::INTEGER, $14::INTEGER) RETURNING messages.created_at
+2025-12-09 22:22:28,383 INFO sqlalchemy.engine.Engine [generated in 0.00026s] ('69d21f66-a515-4383-aad6-8cb86ae369fa', 'a5bff6e5-da08-42f1-aefd-b5ba51a560cc', None, 'user', 'Hello, this is a test message', None, None, None, None, None, None, None, None, 0)
+2025-12-09 22:22:28,386 INFO sqlalchemy.engine.Engine INSERT INTO messages (id, thread_id, user_id, role, content, encrypted_content, encryption_key_id, provider, model, provider_message_id, meta, prompt_tokens, completion_tokens, total_tokens, citations, sequence) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::message_role, $5::VARCHAR, $6::BYTEA, $7::VARCHAR, $8::VARCHAR, $9::VARCHAR, $10::VARCHAR, $11::JSON, $12::INTEGER, $13::INTEGER, $14::INTEGER, $15::JSON, $16::INTEGER) RETURNING messages.created_at
+2025-12-09 22:22:28,386 INFO sqlalchemy.engine.Engine [generated in 0.00024s] ('16e78798-dbfe-4008-bc01-569141aa5368', 'a5bff6e5-da08-42f1-aefd-b5ba51a560cc', None, 'assistant', 'Hello, your test message was received successfully. If you need assistance with testing message delivery, content, or marketing messages, there are v ... (775 characters truncated) ... chnical setup to avoid spam filters or delivery issues. Let me know if you want guidance on any specific type of message testing or sample templates.', None, None, 'perplexity', 'sonar', None, '{"latency_ms": 3978.47, "request_id": null}', 1325, 207, 1532, '["https://learn.microsoft.com/en-us/powershell/module/exchangepowershell/test-message?view=exchange-ps", "https://userpilot.com/blog/message-testing- ... (386 characters truncated) ... -sample", "https://www.salesmessage.com/blog/sample-text-messages-to-customers", "https://www.newtonx.com/article/message-testing-survey-questions/"]', 1)
+2025-12-09 22:22:28,388 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR
+2025-12-09 22:22:28,388 INFO sqlalchemy.engine.Engine [generated in 0.00011s] ('a5bff6e5-da08-42f1-aefd-b5ba51a560cc',)
+2025-12-09 22:22:28,390 INFO sqlalchemy.engine.Engine UPDATE threads SET last_message_preview=$1::VARCHAR, last_provider=$2::VARCHAR, last_model=$3::VARCHAR, updated_at=now() WHERE threads.id = $4::VARCHAR
+2025-12-09 22:22:28,390 INFO sqlalchemy.engine.Engine [generated in 0.00011s] ('Hello, this is a test message', 'perplexity', 'sonar', 'a5bff6e5-da08-42f1-aefd-b5ba51a560cc')
+2025-12-09 22:22:28,393 INFO sqlalchemy.engine.Engine INSERT INTO audit_logs (id, thread_id, message_id, user_id, provider, model, reason, fragments_included, fragments_excluded, scope, package_hash, response_hash, prompt_tokens, completion_tokens, total_tokens) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR, $7::VARCHAR, $8::JSON, $9::JSON, $10::VARCHAR, $11::VARCHAR, $12::VARCHAR, $13::INTEGER, $14::INTEGER, $15::INTEGER) RETURNING audit_logs.created_at
+2025-12-09 22:22:28,393 INFO sqlalchemy.engine.Engine [generated in 0.00015s] ('d16c6bff-9ef6-4f27-8069-8d7e9e4ffea6', 'a5bff6e5-da08-42f1-aefd-b5ba51a560cc', '16e78798-dbfe-4008-bc01-569141aa5368', None, 'perplexity', 'sonar', 'User-specified perplexity with sonar', '[]', '[]', 'private', 'c6754c732cf11431fed6bd43e26c0760c0c17aca0cab0a6fd7cec4925ce22ebd', 'f5655088220a37232e4109f4d2fc662033e97c4b3d20c641f2d9c966b5b8c4c1', 1325, 207, 1532)
+2025-12-09 22:22:28,395 INFO sqlalchemy.engine.Engine COMMIT
+2025-12-09 22:22:28,397 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:22:28,397 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.encrypted_content, messages.encryption_key_id, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-09 22:22:28,397 INFO sqlalchemy.engine.Engine [generated in 0.00006s] ('69d21f66-a515-4383-aad6-8cb86ae369fa',)
+2025-12-09 22:22:28,399 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.encrypted_content, messages.encryption_key_id, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.id = $1::VARCHAR
+2025-12-09 22:22:28,399 INFO sqlalchemy.engine.Engine [cached since 0.001834s ago] ('16e78798-dbfe-4008-bc01-569141aa5368',)
+[THREAD_STORE] get_or_create_thread: NEW id='a5bff6e5-da08-42f1-aefd-b5ba51a560cc', obj_id=4411378416
+[THREAD_STORE] add_turn BEFORE: id='a5bff6e5-da08-42f1-aefd-b5ba51a560cc', obj_id=4411378416, len(turns)=0
+[THREAD_STORE] add_turn AFTER: id='a5bff6e5-da08-42f1-aefd-b5ba51a560cc', obj_id=4411378416, len(turns)=1
+[THREAD_STORE] get_or_create_thread: existing id='a5bff6e5-da08-42f1-aefd-b5ba51a560cc', obj_id=4411378416, turns=1
+[THREAD_STORE] add_turn BEFORE: id='a5bff6e5-da08-42f1-aefd-b5ba51a560cc', obj_id=4411378416, len(turns)=1
+[THREAD_STORE] add_turn AFTER: id='a5bff6e5-da08-42f1-aefd-b5ba51a560cc', obj_id=4411378416, len(turns)=2
+✅ Added turns to in-memory store for thread a5bff6e5-da08-42f1-aefd-b5ba51a560cc
+⚠️  TTFT target missed: 3.98s (target: ≤1.5s)
+INFO:     127.0.0.1:58780 - "POST /api/threads/a5bff6e5-da08-42f1-aefd-b5ba51a560cc/messages HTTP/1.1" 200 OK
+2025-12-09 22:22:28,401 INFO sqlalchemy.engine.Engine ROLLBACK
+🔍 DEBUG: add_message called - collaboration_mode=True, content=Explain what is machine learning in simple terms...
+2025-12-09 22:22:35,797 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2025-12-09 22:22:35,798 INFO sqlalchemy.engine.Engine SET LOCAL app.current_org_id = 'org_demo'
+2025-12-09 22:22:35,798 INFO sqlalchemy.engine.Engine [cached since 21.52s ago] ()
+2025-12-09 22:22:35,799 INFO sqlalchemy.engine.Engine SELECT threads.id, threads.org_id, threads.creator_id, threads.title, threads.description, threads.last_message_preview, threads.pinned, threads.archived, threads.archived_at, threads.settings, threads.last_provider, threads.last_model, threads.created_at, threads.updated_at 
+FROM threads 
+WHERE threads.id = $1::VARCHAR AND threads.org_id = $2::VARCHAR
+2025-12-09 22:22:35,799 INFO sqlalchemy.engine.Engine [cached since 11.42s ago] ('a5bff6e5-da08-42f1-aefd-b5ba51a560cc', 'org_demo')
+2025-12-09 22:22:35,799 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.provider = $2::provider_type AND provider_keys.is_active = $3::VARCHAR
+2025-12-09 22:22:35,799 INFO sqlalchemy.engine.Engine [cached since 11.41s ago] ('org_demo', 'openai', 'true')
+Failed to decrypt API key for openai in org org_demo: . Falling back to environment variables.
+2025-12-09 22:22:35,800 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.provider = $2::provider_type AND provider_keys.is_active = $3::VARCHAR
+2025-12-09 22:22:35,800 INFO sqlalchemy.engine.Engine [cached since 11.41s ago] ('org_demo', 'gemini', 'true')
+Failed to decrypt API key for gemini in org org_demo: . Falling back to environment variables.
+2025-12-09 22:22:35,801 INFO sqlalchemy.engine.Engine SELECT provider_keys.id, provider_keys.org_id, provider_keys.provider, provider_keys.encrypted_key, provider_keys.key_name, provider_keys.last_used, provider_keys.is_active, provider_keys.created_at, provider_keys.updated_at 
+FROM provider_keys 
+WHERE provider_keys.org_id = $1::VARCHAR AND provider_keys.provider = $2::provider_type AND provider_keys.is_active = $3::VARCHAR
+2025-12-09 22:22:35,801 INFO sqlalchemy.engine.Engine [cached since 11.41s ago] ('org_demo', 'perplexity', 'true')
+Failed to decrypt API key for perplexity in org org_demo: . Falling back to environment variables.
+2025-12-09 22:22:35,802 INFO sqlalchemy.engine.Engine SELECT messages.id, messages.thread_id, messages.user_id, messages.role, messages.content, messages.encrypted_content, messages.encryption_key_id, messages.provider, messages.model, messages.provider_message_id, messages.meta, messages.prompt_tokens, messages.completion_tokens, messages.total_tokens, messages.citations, messages.sequence, messages.created_at 
+FROM messages 
+WHERE messages.thread_id = $1::VARCHAR ORDER BY messages.sequence DESC 
+ LIMIT $2::INTEGER
+2025-12-09 22:22:35,802 INFO sqlalchemy.engine.Engine [cached since 11.42s ago] ('a5bff6e5-da08-42f1-aefd-b5ba51a560cc', 20)
+/Users/rao305/Documents/Syntra/backend/app/services/conversation_storage.py:112: RuntimeWarning: coroutine 'AsyncSession.commit' was never awaited
+  self.db.commit()
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+2025-12-09 22:23:03,046 INFO sqlalchemy.engine.Engine INSERT INTO conversation_turns (turn_id, thread_id, user_query, collaboration_mode, final_report, total_time_ms, created_at) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::INTEGER, $7::TIMESTAMP WITHOUT TIME ZONE) RETURNING conversation_turns.id
+2025-12-09 22:23:03,046 INFO sqlalchemy.engine.Engine [generated in 0.00014s] ('90eca576-7393-4ca4-baa7-cc182a73d55c', 'a5bff6e5-da08-42f1-aefd-b5ba51a560cc', 'Explain what is machine learning in simple terms', 'full', 'Machine learning is a way of getting **computers to learn from examples (data) and improve at a task on their own, instead of being given step-by-ste ... (1283 characters truncated) ... , machine learning is like teaching by **showing lots of examples**, letting the computer figure out the rules itself and get better with experience.', 27227, datetime.datetime(2025, 12, 10, 3, 23, 3, 30975))
+2025-12-09 22:23:03,049 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:58853 - "POST /api/threads/a5bff6e5-da08-42f1-aefd-b5ba51a560cc/messages HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 526, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 773, in _prepare
+    prepared_stmt = await self._connection.prepare(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/asyncpg/connection.py", line 638, in prepare
+    return await self._prepare(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/asyncpg/connection.py", line 657, in _prepare
+    stmt = await self._get_statement(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/asyncpg/connection.py", line 443, in _get_statement
+    statement = await self._protocol.prepare(
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedTableError: relation "conversation_turns" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedTableError'>: relation "conversation_turns" does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/applications.py", line 1139, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 196, in __call__
+    recv_stream.close()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 135, in __exit__
+    self.gen.throw(type, value, traceback)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+  File "/Users/rao305/Documents/Syntra/backend/app/middleware.py", line 43, in dispatch
+    response: Response = await call_next(request)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 120, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 106, in app
+    response = await f(request)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 430, in app
+    raw_response = await run_endpoint_function(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/fastapi/routing.py", line 316, in run_endpoint_function
+    return await dependant.call(**values)
+  File "/Users/rao305/Documents/Syntra/backend/app/api/threads.py", line 757, in add_message
+    user_msg, assistant_msg = await _save_turn_to_db(
+  File "/Users/rao305/Documents/Syntra/backend/app/api/threads.py", line 108, in _save_turn_to_db
+    next_sequence = await _get_next_sequence(db, thread_id)
+  File "/Users/rao305/Documents/Syntra/backend/app/api/threads.py", line 2597, in _get_next_sequence
+    result = await db.execute(stmt)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/ext/asyncio/session.py", line 449, in execute
+    result = await greenlet_spawn(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
+    return self._execute_internal(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2228, in _execute_internal
+    ) = compile_state_cls.orm_pre_session_exec(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/context.py", line 577, in orm_pre_session_exec
+    session._autoflush()
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 3051, in _autoflush
+    raise e.with_traceback(sys.exc_info()[2])
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 3040, in _autoflush
+    self.flush()
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4331, in flush
+    self._flush(objects)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4467, in _flush
+    transaction.rollback(_capture_exception=True)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4427, in _flush
+    flush_context.execute()
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/orm/persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 585, in execute
+    self._adapt_connection.await_(
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 563, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 513, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/Users/rao305/Documents/Syntra/backend/venv/lib/python3.9/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 797, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely)
+(sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedTableError'>: relation "conversation_turns" does not exist
+[SQL: INSERT INTO conversation_turns (turn_id, thread_id, user_query, collaboration_mode, final_report, total_time_ms, created_at) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::INTEGER, $7::TIMESTAMP WITHOUT TIME ZONE) RETURNING conversation_turns.id]
+[parameters: ('90eca576-7393-4ca4-baa7-cc182a73d55c', 'a5bff6e5-da08-42f1-aefd-b5ba51a560cc', 'Explain what is machine learning in simple terms', 'full', 'Machine learning is a way of getting **computers to learn from examples (data) and improve at a task on their own, instead of being given step-by-ste ... (1283 characters truncated) ... , machine learning is like teaching by **showing lots of examples**, letting the computer figure out the rules itself and get better with experience.', 27227, datetime.datetime(2025, 12, 10, 3, 23, 3, 30975))]
+(Background on this error at: https://sqlalche.me/e/20/f405)

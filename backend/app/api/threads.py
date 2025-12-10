@@ -139,6 +139,7 @@ async def _save_turn_to_db(
         meta={
             "latency_ms": round(provider_response.latency_ms, 2),
             "request_id": provider_response.request_id,
+            "ttfs_ms": round(provider_response.ttfs_ms, 2) if provider_response.ttfs_ms else None,  # Time to first token
         },
     )
     db.add(assistant_message)
@@ -638,13 +639,33 @@ async def create_thread(
     db: AsyncSession = Depends(get_db)
 ):
     """Create a new thread."""
+    from app.models.user import User
+
     # Set RLS context
     await set_rls_context(db, org_id)
+
+    # Resolve creator_id: if user_id is provided, check if it exists in users table
+    # Otherwise set to None (the foreign key allows NULL)
+    creator_id = None
+    if request.user_id:
+        # First try to find user by ID directly (if internal UUID was passed)
+        result = await db.execute(
+            select(User).where(User.id == request.user_id, User.org_id == org_id)
+        )
+        user = result.scalar_one_or_none()
+
+        if user:
+            creator_id = user.id
+        else:
+            # User not found by ID - this happens when Clerk user ID is passed
+            # The frontend should ideally pass internal user ID, but for now
+            # we'll just leave creator_id as None to avoid FK constraint violation
+            print(f"⚠️ User '{request.user_id}' not found in users table - thread will have no creator")
 
     # Create thread
     new_thread = Thread(
         org_id=org_id,
-        creator_id=request.user_id,
+        creator_id=creator_id,
         title=request.title,
         description=request.description
     )
@@ -708,30 +729,31 @@ async def add_message(
             nextgen_mode="legacy"
         )
         
-        # Store collaboration results if needed
-        if result.get("type") == "collaboration" and result.get("agent_outputs"):
-            storage_service = ConversationStorageService(db)
-            # Convert agent outputs back to AgentOutput objects for storage
-            from app.services.collaboration_engine import AgentOutput, AgentRole
-            agent_outputs = []
-            for output_dict in result["agent_outputs"]:
-                agent_outputs.append(AgentOutput(
-                    role=AgentRole(output_dict["role"]),
-                    provider=output_dict["provider"],
-                    content=output_dict["content"],
-                    timestamp=output_dict["timestamp"],
-                    turn_id=turn_id
-                ))
-            
-            storage_service.store_collaboration_turn(
-                turn_id=turn_id,
-                thread_id=thread_id,
-                user_query=request.content,
-                final_report=result["content"],
-                agent_outputs=agent_outputs,
-                total_time_ms=result.get("total_time_ms", 0),
-                collaboration_mode="full"
-            )
+        # NOTE: ConversationStorageService disabled - it uses a separate Base and
+        # synchronous Session patterns incompatible with our AsyncSession.
+        # The collaboration still works, but detailed agent outputs aren't persisted.
+        # TODO: Refactor conversation_storage.py to use app.database.Base and async patterns
+        # if result.get("type") == "collaboration" and result.get("agent_outputs"):
+        #     storage_service = ConversationStorageService(db)
+        #     from app.services.collaboration_engine import AgentOutput, AgentRole
+        #     agent_outputs = []
+        #     for output_dict in result["agent_outputs"]:
+        #         agent_outputs.append(AgentOutput(
+        #             role=AgentRole(output_dict["role"]),
+        #             provider=output_dict["provider"],
+        #             content=output_dict["content"],
+        #             timestamp=output_dict["timestamp"],
+        #             turn_id=turn_id
+        #         ))
+        #     storage_service.store_collaboration_turn(
+        #         turn_id=turn_id,
+        #         thread_id=thread_id,
+        #         user_query=request.content,
+        #         final_report=result["content"],
+        #         agent_outputs=agent_outputs,
+        #         total_time_ms=result.get("total_time_ms", 0),
+        #         collaboration_mode="full"
+        #     )
         
         # Save messages to regular thread
         user_msg, assistant_msg = await _save_turn_to_db(
@@ -1536,10 +1558,11 @@ async def add_message_streaming(
     from app.services.provider_dispatch import call_provider_adapter_streaming
     
     async def stream_with_background_validation():
+        nonlocal cleanup_task  # Access the cleanup_task variable from outer scope
         # Collect response for memory/observability
         response_content = ""
         usage_data = {}
-        
+
         # CRITICAL: Save user message to in-memory storage IMMEDIATELY
         # This ensures it's available for the next request even if background task is slow
         # This is essential for follow-up questions to have context
@@ -1552,11 +1575,18 @@ async def add_message_streaming(
             print(f"⚠️  Failed to save user message to in-memory storage: {e}")
             import traceback
             print(traceback.format_exc())
-        
+
         # Stream directly from provider (THIS STARTS IMMEDIATELY)
         print(f"⚡ Starting provider stream for {provider_enum.value}/{validated_model}...")
         stream_start = perf_time.perf_counter()
         first_chunk = True
+
+        # Send model info to frontend IMMEDIATELY (before any content)
+        yield {
+            "type": "model_info",
+            "provider": provider_enum.value,
+            "model": validated_model,
+        }
         
         try:
             async for chunk in call_provider_adapter_streaming(
@@ -1769,17 +1799,23 @@ async def add_message_streaming(
                 # Log but don't fail - streaming already completed
                 print(f"Background cleanup error: {e}")
         
-        # Run cleanup in background (don't await)
-        asyncio.create_task(background_cleanup())
-    
+        # Run cleanup but track it so we can ensure it completes
+        # This will be awaited by event_source() after streaming ends
+        cleanup_task = asyncio.create_task(background_cleanup())  # noqa: This uses nonlocal cleanup_task
+        # Store task reference to allow frontend to verify persistence if needed
+        print(f"📝 Background cleanup task created for thread {thread_id}")
+
     # Return streaming response immediately (starts streaming ASAP)
+    cleanup_task = None  # Will be set by stream_with_background_validation
+
     async def event_source():
+        nonlocal cleanup_task
         start = time.perf_counter()
         ttft_emitted = False
-        
+
         # Early heartbeat to open the pipe immediately
         yield "event: ping\ndata: {}\n\n"
-        
+
         # Emit router decision immediately so UI can show provider badge
         # CRITICAL: Include thread_id in router event so frontend can maintain conversation continuity
         router_data = {
@@ -1790,7 +1826,7 @@ async def add_message_streaming(
         }
         yield f"event: router\n"
         yield f"data: {json.dumps(router_data)}\n\n"
-        
+
         try:
             async for chunk in stream_with_background_validation():
                 chunk_type = chunk.get("type", "delta")
@@ -1934,52 +1970,26 @@ async def add_message_streaming(
             print(f"❌ Streaming error: {e}\n{error_trace}")
             yield f"event: error\n"
             yield f"data: {json.dumps({'type': 'error', 'error': str(e)})}\n\n"
-    
+
+        # CRITICAL FIX: Wait for database persistence before stream ends
+        # This prevents chat history from being empty when user navigates away during generation
+        if cleanup_task:
+            try:
+                print(f"⏳ Waiting for database persistence (cleanup task)...")
+                await cleanup_task
+                print(f"✅ Database persistence confirmed for thread {thread_id}")
+                # Emit final "persisted" event so frontend knows messages are safe in database
+                yield "event: persisted\n"
+                yield f"data: {json.dumps({'type': 'persisted', 'thread_id': thread_id})}\n\n"
+            except Exception as e:
+                print(f"⚠️  Cleanup task error: {e}")
+                # Still emit persisted event - cleanup may have partially succeeded
+                yield "event: persisted\n"
+                yield f"data: {json.dumps({'type': 'persisted', 'thread_id': thread_id, 'error': str(e)})}\n\n"
+
     return StreamingResponse(event_source(), media_type="text/event-stream")
 
 
-@router.get("/{thread_id}", response_model=ThreadDetailResponse)
-async def get_thread(
-    thread_id: str,
-    org_id: str = Depends(require_org_id),
-    db: AsyncSession = Depends(get_db)
-):
-    """Get thread details with messages."""
-    # Set RLS context
-    await set_rls_context(db, org_id)
-
-    # Get thread with messages
-    stmt = select(Thread).where(
-        Thread.id == thread_id,
-        Thread.org_id == org_id
-    )
-    result = await db.execute(stmt)
-    thread = result.scalar_one_or_none()
-
-    if not thread:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Thread {thread_id} not found"
-        )
-
-    # Get messages
-    stmt = select(Message).where(Message.thread_id == thread_id).order_by(Message.sequence)
-    result = await db.execute(stmt)
-    messages = result.scalars().all()
-
-    return ThreadDetailResponse(
-        id=thread.id,
-        org_id=thread.org_id,
-        title=thread.title,
-        description=thread.description,
-        last_provider=None,  # Hide provider info
-        last_model=None,  # Hide model info
-        created_at=thread.created_at,
-        messages=[_to_message_response(msg, hide_provider=False) for msg in messages]
-    )
-
-
-@router.get("/{thread_id}/audit", response_model=List[AuditEntry])
 async def get_thread_audit(
     thread_id: str,
     org_id: str = Depends(require_org_id),
@@ -2077,11 +2087,11 @@ def _package_hash(messages: List[Dict[str, str]], request: AddMessageRequest) ->
     payload = {
         "messages": messages,
         "router": {
-            "provider": request.provider.value,
+            "provider": request.provider.value if request.provider else None,
             "model": request.model,
             "reason": request.reason,
         },
-        "scope": request.scope.value,
+        "scope": request.scope.value if request.scope else None,
     }
     serialized = json.dumps(payload, sort_keys=True).encode("utf-8")
     return hashlib.sha256(serialized).hexdigest()
@@ -2473,6 +2483,16 @@ async def get_thread(
     result = await db.execute(stmt)
     messages = result.scalars().all()
 
+    # Debug: Log message retrieval
+    print(f"🔍 DEBUG get_thread: thread_id={thread_id}, org_id={org_id}, messages_retrieved={len(messages)}")
+    if len(messages) == 0:
+        # Try to debug why no messages are found
+        # Check if there are ANY messages in this thread at all
+        count_stmt = select(func.count(Message.id)).where(Message.thread_id == thread_id)
+        count_result = await db.execute(count_stmt)
+        total_count = count_result.scalar() or 0
+        print(f"⚠️  No messages retrieved but total_count in DB: {total_count}")
+
     return ThreadDetailResponse(
         id=thread.id,
         org_id=thread.org_id,
@@ -2583,11 +2603,11 @@ def _package_hash(messages: List[Dict[str, str]], request: AddMessageRequest) ->
     payload = {
         "messages": messages,
         "router": {
-            "provider": request.provider.value,
+            "provider": request.provider.value if request.provider else None,
             "model": request.model,
             "reason": request.reason,
         },
-        "scope": request.scope.value,
+        "scope": request.scope.value if request.scope else None,
     }
     serialized = json.dumps(payload, sort_keys=True).encode("utf-8")
     return hashlib.sha256(serialized).hexdigest()

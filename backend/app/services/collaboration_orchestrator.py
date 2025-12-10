@@ -509,7 +509,7 @@ class CollaborationOrchestrator:
             messages=messages,
             api_key=api_key,
             temperature=0.5,
-            max_tokens=16000  # Allow for comprehensive final answer (doubled from default 8192)
+            max_tokens=4096  # Model-compatible token limit
         )
 
         if not response:

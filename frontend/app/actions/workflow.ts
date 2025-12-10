@@ -80,7 +80,8 @@ function getProviderAvailability(): Record<WorkflowModel, boolean> {
         gpt: isGptAvailable() || IS_MOCK_MODE,
         gemini: isGeminiAvailable() || IS_MOCK_MODE,
         perplexity: isPerplexityAvailable() || IS_MOCK_MODE,
-        kimi: isKimiAvailable() || IS_MOCK_MODE
+        kimi: isKimiAvailable() || IS_MOCK_MODE,
+        multi: true
     }
 }
 
