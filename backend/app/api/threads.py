@@ -1299,6 +1299,7 @@ async def add_message_streaming(
     thread_id: str,
     request: AddMessageRequest,
     org_id: str = Depends(require_org_id),
+    current_user: Optional[CurrentUser] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """Add a message to a thread with streaming response (fan-out to multiple clients)."""
@@ -1818,23 +1819,27 @@ async def add_message_streaming(
 
                     if not existing_user_msg:
                         # Save user message to database
+                        # CRITICAL: Use authenticated user's ID from JWT, fallback to request.user_id
+                        message_user_id = current_user.id if current_user else request.user_id
                         user_sequence = await _get_next_sequence(db, thread_id)
                         user_msg = Message(
                             thread_id=thread_id,
-                            user_id=request.user_id,
+                            user_id=message_user_id,
                             role=MessageRole.USER,
                             content=user_content,
                             sequence=user_sequence,
                         )
                         db.add(user_msg)
-                        print(f"💾 Saved user message to database (sequence: {user_sequence})")
+                        print(f"💾 Saved user message to database (sequence: {user_sequence}, user_id: {message_user_id})")
 
                     # Save assistant message to database if we have content
                     if response_content:
+                        # CRITICAL: Use authenticated user's ID from JWT, fallback to request.user_id
+                        message_user_id = current_user.id if current_user else request.user_id
                         assistant_sequence = await _get_next_sequence(db, thread_id)
                         assistant_msg = Message(
                             thread_id=thread_id,
-                            user_id=request.user_id,
+                            user_id=message_user_id,
                             role=MessageRole.ASSISTANT,
                             content=response_content,
                             sequence=assistant_sequence,
@@ -1849,7 +1854,7 @@ async def add_message_streaming(
                             }
                         )
                         db.add(assistant_msg)
-                        print(f"💾 Saved assistant message to database (sequence: {assistant_sequence})")
+                        print(f"💾 Saved assistant message to database (sequence: {assistant_sequence}, user_id: {message_user_id})")
 
                     # Commit both messages to database
                     await db.commit()

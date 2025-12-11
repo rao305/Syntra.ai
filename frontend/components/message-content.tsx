@@ -1,9 +1,9 @@
 'use client'
 
-import * as React from 'react'
-import { InlineMath, BlockMath } from 'react-katex'
-import 'katex/dist/katex.min.css'
 import { cn } from '@/lib/utils'
+import 'katex/dist/katex.min.css'
+import * as React from 'react'
+import { BlockMath, InlineMath } from 'react-katex'
 
 interface MessageContentProps {
   content: string
@@ -181,6 +181,14 @@ export function MessageContent({ content, className }: MessageContentProps) {
     // Match inline math: $...$ (but not $$...$$) and \(...\)
     // Simple approach: match $...$ that's not preceded or followed by another $
     const inlineMathRegex = /\$(?![$])([^$\n]+?)\$(?![$])|\\\(([\s\S]*?)\\\)/g
+    // Match parentheses math/arithmetic: (LaTeX expression OR arithmetic expression)
+    // Matches:
+    // - LaTeX commands: \mathbf, \frac, \partial, \nabla, etc.
+    // - Arithmetic expressions: numbers, variables, operators (+, -, *, /, =, <, >, ≤, ≥, ^, %)
+    // - Functions: sin, cos, tan, log, ln, exp, sqrt, etc.
+    // - Mathematical notation: subscripts (x_1), superscripts (x^2), fractions
+    // - Simple arithmetic: (2+3), (x=y), (a*b), etc.
+    const parenMathRegex = /\([^)]*(?:\\[a-zA-Z]+|[\d\w]+\s*[+\-*/=<>≤≥^%]\s*[\d\w]+|[\d\w]+\s*[+\-*/=<>≤≥^%]|sin|cos|tan|log|ln|exp|sqrt|[\d\w]+\^[\d\w]+|[\d\w]+_[\d\w]+|[\d.]+[+\-*/=<>≤≥^%][\d.]+)[^)]*\)/g
 
     const allMatches: Array<{ start: number; end: number; type: 'math-inline' | 'math-display'; content: string }> = []
 
@@ -195,15 +203,38 @@ export function MessageContent({ content, className }: MessageContentProps) {
       })
     }
 
-    // Find all inline math matches (both $ and \() - but exclude those inside display math
-    displayMathRegex.lastIndex = 0 // Reset regex
-    while ((match = inlineMathRegex.exec(text)) !== null) {
-      // Check if this match is inside a display math block
+    // Find all parentheses math/arithmetic matches - exclude those inside display math
+    const parenMatches: Array<{ start: number; end: number; content: string }> = []
+    parenMathRegex.lastIndex = 0
+    while ((match = parenMathRegex.exec(text)) !== null) {
       const isInsideDisplay = allMatches.some(
         (dm) => match.index >= dm.start && match.index < dm.end
       )
+      const content = match[0]
+      // Check if it contains LaTeX commands OR arithmetic expressions
+      const hasLatexCommand = /\\[a-zA-Z]+/.test(content)
+      const hasArithmetic = /[\d\w]+\s*[+\-*/=<>≤≥^%]\s*[\d\w]+|[\d.]+[+\-*/=<>≤≥^%][\d.]+|sin|cos|tan|log|ln|exp|sqrt|[\d\w]+\^[\d\w]+|[\d\w]+_[\d\w]+/.test(content)
+      if (!isInsideDisplay && (hasLatexCommand || hasArithmetic)) {
+        parenMatches.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          content: match[0]
+        })
+      }
+    }
 
-      if (!isInsideDisplay) {
+    // Find all inline math matches (both $ and \() - but exclude those inside display math or paren math
+    displayMathRegex.lastIndex = 0 // Reset regex
+    while ((match = inlineMathRegex.exec(text)) !== null) {
+      // Check if this match is inside a display math block or paren math
+      const isInsideDisplay = allMatches.some(
+        (dm) => match.index >= dm.start && match.index < dm.end
+      )
+      const isInsideParen = parenMatches.some(
+        (pm) => match.index >= pm.start && match.index < pm.end
+      )
+
+      if (!isInsideDisplay && !isInsideParen) {
         allMatches.push({
           start: match.index,
           end: match.index + match[0].length,
@@ -212,10 +243,20 @@ export function MessageContent({ content, className }: MessageContentProps) {
         })
       }
     }
-    
-    // Sort matches by position
+
+    // Add paren matches to allMatches
+    for (const pm of parenMatches) {
+      allMatches.push({
+        start: pm.start,
+        end: pm.end,
+        type: 'math-inline',
+        content: pm.content.slice(1, -1).trim() // Remove parentheses
+      })
+    }
+
+    // Sort matches by position (after adding all matches)
     allMatches.sort((a, b) => a.start - b.start)
-    
+
     // Build parts array
     let lastIndex = 0
     for (const mathMatch of allMatches) {
@@ -226,13 +267,13 @@ export function MessageContent({ content, className }: MessageContentProps) {
           parts.push({ type: 'text', content: textContent })
         }
       }
-      
+
       // Add math expression
       parts.push({ type: mathMatch.type, content: mathMatch.content })
-      
+
       lastIndex = mathMatch.end
     }
-    
+
     // Add remaining text
     if (lastIndex < text.length) {
       const textContent = text.substring(lastIndex)
@@ -240,12 +281,12 @@ export function MessageContent({ content, className }: MessageContentProps) {
         parts.push({ type: 'text', content: textContent })
       }
     }
-    
+
     // If no math found, return entire text as single part
     if (parts.length === 0) {
       parts.push({ type: 'text', content: text })
     }
-    
+
     return parts
   }
 

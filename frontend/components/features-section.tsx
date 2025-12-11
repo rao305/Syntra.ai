@@ -1,22 +1,48 @@
-import type React from "react"
-import { ArrowRight, Sparkles, Lock, Brain, Zap } from "lucide-react"
+"use client"
+
+import { ArrowRight, Brain, Lock, Sparkles, Zap } from "lucide-react"
 import Image from "next/image"
+import type React from "react"
+import { useEffect, useRef, useState } from "react"
 
 export function FeaturesSection() {
+  const [isVisible, setIsVisible] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <section className="py-20 px-6">
+    <section ref={sectionRef} className="py-20 px-6">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground text-center mb-4">
+        <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold text-foreground text-center mb-4 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}>
           Your Old AI Stack vs Syntra
         </h2>
-        <p className="text-muted-foreground text-center max-w-3xl mx-auto mb-16">
+        <p className={`text-muted-foreground text-center max-w-3xl mx-auto mb-16 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}>
           Before: multiple tools, multiple subscriptions, scattered context. After: one private workspace that
           orchestrates them all.
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
           {/* Left Column - Before: Your AI tool stack */}
-          <div className="bg-card rounded-xl border border-border p-6">
+          <div className={`bg-card rounded-xl border border-border p-6 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
+            }`}>
             <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-2">
               <span className="text-muted-foreground">Before:</span> Your AI tool stack
             </h3>
@@ -43,8 +69,9 @@ export function FeaturesSection() {
           </div>
 
           {/* Right Column - After: Syntra AI */}
-          <div className="relative bg-gradient-to-br from-card to-card rounded-xl border-2 border-primary/50 p-6 shadow-lg shadow-primary/10">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-xl pointer-events-none" />
+          <div className={`relative bg-gradient-to-br from-card to-card rounded-xl border-2 border-primary/50 p-6 shadow-lg shadow-primary/10 transition-all duration-1000 delay-500 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/20 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
+            }`}>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-xl pointer-events-none animate-pulse" style={{ animationDuration: '3s' }} />
 
             <div className="relative">
               <h3 className="text-xl font-semibold text-foreground mb-2 flex items-center gap-2">
@@ -83,11 +110,12 @@ export function FeaturesSection() {
           </div>
         </div>
 
-        <div className="hidden lg:flex justify-center -mt-[280px] mb-[200px] pointer-events-none">
+        <div className={`hidden lg:flex justify-center -mt-[280px] mb-[200px] pointer-events-none transition-all duration-1000 delay-700 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+          }`}>
           <div className="flex items-center gap-2 text-muted-foreground">
-            <div className="w-8 h-0.5 bg-border" />
-            <ArrowRight className="w-6 h-6 text-primary" />
-            <div className="w-8 h-0.5 bg-border" />
+            <div className="w-8 h-0.5 bg-border animate-pulse" />
+            <ArrowRight className="w-6 h-6 text-primary animate-bounce" style={{ animationDuration: '2s' }} />
+            <div className="w-8 h-0.5 bg-border animate-pulse" />
           </div>
         </div>
       </div>
@@ -102,12 +130,12 @@ function StackRow({
   iconInvert = false,
 }: { role: string; model: string; iconSrc: string; iconInvert?: boolean }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-2 px-3 bg-muted/30 rounded-lg">
+    <div className="flex items-center justify-between gap-4 py-2 px-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-all duration-300 hover:scale-[1.02] group">
       <span className="text-sm text-foreground font-medium">{role}</span>
       <div className="flex items-center gap-2">
-        <span className="text-muted-foreground">→</span>
-        <div className="flex items-center gap-2 bg-muted/50 px-3 py-1 rounded-full">
-          <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center bg-white">
+        <span className="text-muted-foreground group-hover:text-primary transition-colors">→</span>
+        <div className="flex items-center gap-2 bg-muted/50 px-3 py-1 rounded-full group-hover:bg-muted/70 transition-all">
+          <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center bg-white group-hover:scale-110 transition-transform">
             <Image
               src={iconSrc || "/placeholder.svg"}
               alt={model}
@@ -125,11 +153,11 @@ function StackRow({
 
 function BenefitRow({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
-    <div className="flex items-start gap-3">
-      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary flex-shrink-0 mt-0.5">
+    <div className="flex items-start gap-3 hover:translate-x-1 transition-transform duration-300 group">
+      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary flex-shrink-0 mt-0.5 group-hover:bg-primary/30 group-hover:scale-110 transition-all duration-300">
         {icon}
       </div>
-      <span className="text-sm text-foreground">{text}</span>
+      <span className="text-sm text-foreground group-hover:text-primary transition-colors">{text}</span>
     </div>
   )
 }

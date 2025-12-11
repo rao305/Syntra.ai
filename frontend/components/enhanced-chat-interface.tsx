@@ -541,13 +541,18 @@ export function EnhancedChatInterface({
                         </div>
                       )}
 
-                      {/* Model Information - Show which model was used for routing (only supported models) */}
+                      {/* Model Information - Minimal text display */}
                       {message.role === 'assistant' && (() => {
                         const displayName = getSupportedModelDisplayName(message.modelName)
                         return displayName ? (
-                          <div className="pt-2 text-xs text-zinc-400">
-                            <span className="text-zinc-500">Model:</span>
-                            <span className="text-zinc-300 font-medium ml-2">{displayName}</span>
+                          <div className="pt-2 text-xs text-zinc-500 space-y-0.5">
+                            <div>
+                              <span>Model: </span>
+                              <span className="text-zinc-400 font-medium">{displayName}</span>
+                              {message.processingTime && (
+                                <span className="ml-3 text-zinc-600">• {message.processingTime}ms</span>
+                              )}
+                            </div>
                           </div>
                         ) : null
                       })()}
@@ -619,7 +624,13 @@ export function EnhancedChatInterface({
                   })()
                 ) : (
                   <SimpleLoadingIndicator
-                    modelName={selectedModel || "Processing"}
+                    modelName={
+                      autoRoutedModel
+                        ? autoRoutedModel
+                        : selectedModel !== 'auto'
+                        ? (SYNTRA_MODELS.find(m => m.id === selectedModel)?.name || selectedModel)
+                        : "Auto-selecting best model..."
+                    }
                     stageName="Processing your request…"
                     modelOutput=""
                     isVisible={true}

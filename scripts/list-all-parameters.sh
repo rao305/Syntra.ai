@@ -54,3 +54,4 @@ echo "   aws ssm get-parameter --name \"/syntra/PARAM_NAME\" --with-decryption -
 
 
 
+

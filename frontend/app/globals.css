@@ -121,19 +121,35 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
   }
+
+  /* Fix Next.js portal positioning issues */
+  nextjs-portal {
+    left: 0 !important;
+    top: 0 !important;
+  }
 }
 
 @layer utilities {
+
   /* Typing indicator animation - sequential dot bounce */
   @keyframes typing {
-    0%, 60%, 100% {
+
+    0%,
+    60%,
+    100% {
       transform: translateY(0);
       opacity: 0.4;
     }
+
     30% {
       transform: translateY(-8px);
       opacity: 1;
@@ -146,6 +162,7 @@
       transform: translateY(20px);
       opacity: 0;
     }
+
     to {
       transform: translateY(0);
       opacity: 1;
@@ -160,15 +177,15 @@
   .katex {
     color: inherit;
   }
-  
+
   .dark .katex {
     color: var(--color-foreground);
   }
-  
+
   .dark .katex .accent-body {
     color: var(--color-foreground) !important;
   }
-  
+
   .dark .katex .mord,
   .dark .katex .mop,
   .dark .katex .mrel,
@@ -179,13 +196,13 @@
   .dark .katex .minner {
     color: var(--color-foreground) !important;
   }
-  
+
   /* Ensure math expressions are centered in display mode */
   .katex-display {
     text-align: center;
     margin: 1em 0;
   }
-  
+
   /* Improve readability of fractions and complex expressions */
   .katex .frac-line {
     border-bottom-color: currentColor;

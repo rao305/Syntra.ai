@@ -1,7 +1,7 @@
 'use client'
 
+import { ArrowUp } from "lucide-react"
 import { FormEvent, useState } from "react"
-import { Paperclip, Settings2, ChevronDown, ArrowUp, Lock, Circle, Trash2 } from "lucide-react"
 
 const DEFAULT_CONVERSATIONS_URL = "/conversations"
 
@@ -28,6 +28,7 @@ function buildDestination(message: string) {
 export function HeroSection() {
   const [prompt, setPrompt] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -40,44 +41,74 @@ export function HeroSection() {
     window.location.href = destination
   }
 
+  const showCursor = !isFocused
+
   return (
-    <section className="flex items-center justify-center pt-8 pb-0 px-6 min-h-[calc(100vh-200px)]">
+    <section className="flex items-center justify-center pt-8 pb-0 px-6 min-h-[calc(100vh-200px)] relative overflow-hidden">
+      {/* Animated background gradient */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }}></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }}></div>
+      </div>
+
       <div className="max-w-3xl mx-auto text-center w-full">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6 text-balance leading-tight">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6 text-balance leading-tight animate-in fade-in slide-in-from-bottom-4 duration-1000">
           Multi-Model AI Chat for Original Thinkers
         </h1>
-        <p className="text-base md:text-lg text-muted-foreground mb-12 leading-relaxed">
+        <p className="text-base md:text-lg text-muted-foreground mb-12 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
           The only private workspace that lets you use every model in the same conversation—with shared memory,
           encryption, and no training on your data.
         </p>
 
-        <div className="max-w-xl mx-auto mb-12">
+        <div className="max-w-xl mx-auto mb-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
           <form
-            className="bg-card rounded-lg border border-border p-5"
+            className="bg-card rounded-lg border border-border p-5 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
             onSubmit={handleSubmit}
           >
             <div className="flex gap-3 items-center">
-              <input
-                id="hero-chat-input"
-                type="text"
-                autoComplete="off"
-                value={prompt}
-                onChange={(event) => setPrompt(event.target.value)}
-                placeholder="How can I help you today?"
-                className="flex-1 bg-background rounded-md px-5 py-3 text-base text-foreground focus-visible:outline-none"
-              />
+              <div className="flex-1 relative bg-background rounded-md">
+                <div className={`absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center text-base text-muted-foreground z-0 transition-opacity ${prompt || isFocused ? 'opacity-40' : 'opacity-100'}`}>
+                  <span>How can I help you today?</span>
+                  {!prompt && !isFocused && <span className="ml-1 w-0.5 h-5 bg-foreground animate-blink inline-block"></span>}
+                </div>
+                <input
+                  id="hero-chat-input"
+                  type="text"
+                  autoComplete="off"
+                  value={prompt}
+                  onChange={(event) => setPrompt(event.target.value)}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  placeholder=""
+                  className="w-full bg-transparent rounded-md px-5 py-3 text-base text-foreground focus-visible:outline-none focus:ring-2 focus:ring-primary/50 transition-all duration-300 relative z-10"
+                />
+              </div>
               <button
                 type="submit"
-                className="p-2.5 bg-white rounded-full disabled:opacity-60 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors flex-shrink-0"
+                className="p-2.5 bg-white rounded-full disabled:opacity-60 disabled:cursor-not-allowed hover:bg-gray-100 hover:scale-110 active:scale-95 transition-all duration-200 flex-shrink-0 shadow-md hover:shadow-lg"
                 aria-label="Send message"
                 disabled={!prompt.trim() || isSubmitting}
               >
-                <ArrowUp className="w-5 h-5 text-black" />
+                <ArrowUp className={`w-5 h-5 text-black transition-transform ${isSubmitting ? 'animate-bounce' : ''}`} />
               </button>
             </div>
           </form>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes blink {
+          0%, 50% {
+            opacity: 1;
+          }
+          51%, 100% {
+            opacity: 0;
+          }
+        }
+        .animate-blink {
+          animation: blink 1s step-end infinite;
+        }
+      `}</style>
     </section>
   )
 }

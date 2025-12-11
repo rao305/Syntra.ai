@@ -187,15 +187,33 @@ export function ImageInputArea({
   )
 
   return (
-    <div className="relative group">
-      {/* Main Input Container */}
-      <div
-        className={`bg-zinc-900 border-2 rounded-xl p-3 focus-within:ring-1 focus-within:ring-zinc-700 transition-all shadow-lg shadow-black/20 ${isDragOver ? 'border-blue-400 bg-blue-950/20' : 'border-zinc-800'
-          }`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
+    <div className="relative group w-full">
+      {/* Suggestion Chips - Above Input */}
+      <div className="flex flex-wrap gap-3 mb-6 justify-center items-center">
+        <button className="px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all text-sm text-zinc-300 hover:text-zinc-100 font-medium">
+          💡 Analyze Data
+        </button>
+        <button className="px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all text-sm text-zinc-300 hover:text-zinc-100 font-medium">
+          💻 Write Code
+        </button>
+        <button className="px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all text-sm text-zinc-300 hover:text-zinc-100 font-medium">
+          ✨ Brainstorm Ideas
+        </button>
+      </div>
+
+      {/* Main Input Container with Glow */}
+      <div className="relative">
+        {/* Glow Effect Background */}
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-purple-500/0 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+        {/* Main Input Container */}
+        <div
+          className={`relative bg-gradient-to-b from-zinc-800/50 to-zinc-900/50 border rounded-2xl p-4 backdrop-blur-sm transition-all duration-200 shadow-2xl shadow-blue-500/0 group-hover:shadow-blue-500/10 ${isDragOver ? 'border-blue-400/50 bg-blue-950/30' : 'border-zinc-700/50'
+            }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
         {/* Image Preview Area */}
         {images.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
@@ -232,17 +250,18 @@ export function ImageInputArea({
           value={inputValue}
           onChange={handleTextareaChange}
           onKeyDown={handleKeyDown}
-          className="w-full bg-transparent text-zinc-200 placeholder:text-zinc-500 resize-none outline-none min-h-[60px] text-base px-1"
+          className="w-full bg-transparent text-white placeholder:text-zinc-500 resize-none outline-none min-h-[56px] text-base px-2 py-1 font-medium"
           placeholder={images.length > 0 ? "Ask me about these images..." : "How can I help you today? You can paste or drag images here!"}
           disabled={isLoading}
         />
 
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center gap-1">
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-700/30">
+          <div className="flex items-center gap-2">
             {/* File Upload Button */}
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="p-2 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-lg transition-colors"
+              className="p-2 text-zinc-500 hover:text-zinc-300 hover:bg-white/5 rounded-lg transition-colors"
+              title="Attach file"
             >
               <Paperclip className="w-4 h-4" />
             </button>
@@ -250,15 +269,10 @@ export function ImageInputArea({
             {/* Image Upload Button */}
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="p-2 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-lg transition-colors"
+              className="p-2 text-zinc-500 hover:text-zinc-300 hover:bg-white/5 rounded-lg transition-colors"
+              title="Upload image"
             >
               <ImageIcon className="w-4 h-4" />
-            </button>
-
-            <button className="flex items-center gap-1 p-2 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-lg transition-colors relative">
-              <Search className="w-4 h-4" />
-              <ChevronDown className="w-3 h-3" />
-              <span className="absolute top-2 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-zinc-900"></span>
             </button>
 
             <div className="h-6 w-px bg-zinc-800 mx-1" />
@@ -368,18 +382,18 @@ export function ImageInputArea({
 
               <button
                 onClick={() => setIsModelOpen(!isModelOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs text-zinc-300 transition-colors relative"
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-zinc-300 hover:text-zinc-100 transition-all backdrop-blur-sm relative"
               >
-                <span>{selectedModel === 'auto' && autoRoutedModel ? `Auto - ${autoRoutedModel}` : selectedModelData.name}</span>
+                <span className="font-medium">{selectedModel === 'auto' && autoRoutedModel ? `Auto - ${autoRoutedModel}` : selectedModelData.name}</span>
                 <ChevronDown className="w-3 h-3" />
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border-2 border-zinc-900"></span>
               </button>
             </div>
 
             <button
               onClick={handleSend}
               disabled={(!inputValue.trim() && images.length === 0) || isLoading}
-              className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2.5 bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all shadow-lg hover:shadow-blue-500/50 disabled:shadow-none"
+              title="Send message (Enter)"
             >
               <ArrowUp className="w-4 h-4" />
             </button>
@@ -388,10 +402,11 @@ export function ImageInputArea({
 
         {/* Image Count Indicator */}
         {images.length > 0 && (
-          <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+          <div className="absolute top-3 right-3 bg-blue-500 text-white text-xs px-2.5 py-1 rounded-full font-medium">
             {images.length} image{images.length > 1 ? 's' : ''}
           </div>
         )}
+        </div>
       </div>
     </div>
   )

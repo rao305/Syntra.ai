@@ -65,7 +65,7 @@ export function EnhancedConversationLayout({
   const user = null
 
   return (
-    <div className="flex h-screen w-full bg-zinc-900 text-zinc-50 overflow-hidden font-sans">
+    <div className="flex h-screen w-full bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-zinc-50 overflow-hidden font-sans">
       <EnhancedSidebar
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
@@ -78,7 +78,7 @@ export function EnhancedConversationLayout({
         currentThreadId={currentThreadId}
         useNewThreadsSystem={useNewThreadsSystem}
       />
-      <main className="flex-1 flex flex-col h-full relative transition-all duration-300 ease-in-out">
+      <main className="flex-1 flex flex-col h-full relative transition-all duration-300 ease-in-out bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
         <EnhancedChatInterface
           messages={messages}
           onSendMessage={onSendMessage}

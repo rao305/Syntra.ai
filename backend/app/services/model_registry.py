@@ -26,8 +26,9 @@ MODEL_REGISTRY: Dict[ProviderType, List[str]] = {
     ],
     ProviderType.GEMINI: [
         # Google Gemini models (2025) - Updated to available models
-        "gemini-2.5-flash",         # DEFAULT: Fastest, newest flash model
+        "gemini-1.5-flash",         # STABLE: Most reliable, widely available
         "gemini-2.0-flash",         # Fast, production-ready alternative
+        "gemini-2.5-flash",         # Fastest, newest flash model (may have availability issues)
         "gemini-2.5-pro",           # Most capable, larger context
         "gemini-2.0-flash-exp",     # Experimental, testing only
     ],

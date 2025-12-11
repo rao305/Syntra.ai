@@ -211,12 +211,22 @@ const processLatexInText = (text: string): React.ReactNode[] => {
   // 1. Block math: $$...$$ and \[...\]
   // 2. Inline math: $...$ and \(...\)
   // 3. Bracket notation: [mathematical expressions with LaTeX commands]
+  // 4. Parentheses math: (LaTeX expressions with commands like \mathbf, \frac, \partial, etc.)
+  // 5. Arithmetic expressions: (any arithmetic expression with operators, variables, numbers)
   const blockMathRegex = /(\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\])/g
   const inlineMathRegex = /(\$(?![$])[^$\n]*?\$(?![$])|\\\([\s\S]*?\\\))/g
   // Bracket math: [expression with LaTeX commands or mathematical notation] - detect mathematical expressions in brackets
   const bracketMathRegex = /\[\s*\\?[^[\]]*?(?:\\[a-zA-Z]+|[(){}=+\-*/^_'x]|u\(|v\(|dx|dy|dt|[a-zA-Z]'?\([a-zA-Z]\))[^[\]]*?\s*\]/g
+  // Parentheses math/arithmetic: (LaTeX expression OR arithmetic expression)
+  // Matches:
+  // - LaTeX commands: \mathbf, \frac, \partial, \nabla, etc.
+  // - Arithmetic expressions: numbers, variables, operators (+, -, *, /, =, <, >, ≤, ≥, ^, %)
+  // - Functions: sin, cos, tan, log, ln, exp, sqrt, etc.
+  // - Mathematical notation: subscripts (x_1), superscripts (x^2), fractions
+  // - Simple arithmetic: (2+3), (x=y), (a*b), etc.
+  const parenMathRegex = /\([^)]*(?:\\[a-zA-Z]+|[\d\w]+\s*[+\-*/=<>≤≥^%]\s*[\d\w]+|[\d\w]+\s*[+\-*/=<>≤≥^%]|sin|cos|tan|log|ln|exp|sqrt|[\d\w]+\^[\d\w]+|[\d\w]+_[\d\w]+|[\d.]+[+\-*/=<>≤≥^%][\d.]+)[^)]*\)/g
 
-  const parts: Array<{ type: 'text' | 'block-math' | 'inline-math' | 'bracket-math'; content: string; start: number; end: number }> = []
+  const parts: Array<{ type: 'text' | 'block-math' | 'inline-math' | 'bracket-math' | 'paren-math'; content: string; start: number; end: number }> = []
 
   // First, find all block math matches
   let match
@@ -246,7 +256,30 @@ const processLatexInText = (text: string): React.ReactNode[] => {
     }
   }
 
-  // Then find inline math matches that don't overlap with block math or bracket math
+  // Find parentheses math/arithmetic matches that don't overlap with block math or bracket math
+  const parenMatches: Array<{ start: number; end: number; content: string }> = []
+  parenMathRegex.lastIndex = 0
+  while ((match = parenMathRegex.exec(text)) !== null) {
+    const isInsideBlock = blockMatches.some(
+      (bm) => match.index >= bm.start && match.index < bm.end
+    )
+    const isInsideBracket = bracketMatches.some(
+      (bm) => match.index >= bm.start && match.index < bm.end
+    )
+    const content = match[0]
+    // Check if it contains LaTeX commands OR arithmetic expressions
+    const hasLatexCommand = /\\[a-zA-Z]+/.test(content)
+    const hasArithmetic = /[\d\w]+\s*[+\-*/=<>≤≥^%]\s*[\d\w]+|[\d.]+[+\-*/=<>≤≥^%][\d.]+|sin|cos|tan|log|ln|exp|sqrt|[\d\w]+\^[\d\w]+|[\d\w]+_[\d\w]+/.test(content)
+    if (!isInsideBlock && !isInsideBracket && (hasLatexCommand || hasArithmetic)) {
+      parenMatches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        content: match[0]
+      })
+    }
+  }
+
+  // Then find inline math matches that don't overlap with block math, bracket math, or paren math
   const inlineMatches: Array<{ start: number; end: number; content: string }> = []
   inlineMathRegex.lastIndex = 0
   while ((match = inlineMathRegex.exec(text)) !== null) {
@@ -256,7 +289,10 @@ const processLatexInText = (text: string): React.ReactNode[] => {
     const isInsideBracket = bracketMatches.some(
       (bm) => match.index >= bm.start && match.index < bm.end
     )
-    if (!isInsideBlock && !isInsideBracket) {
+    const isInsideParen = parenMatches.some(
+      (pm) => match.index >= pm.start && match.index < pm.end
+    )
+    if (!isInsideBlock && !isInsideBracket && !isInsideParen) {
       inlineMatches.push({
         start: match.index,
         end: match.index + match[0].length,
@@ -269,6 +305,7 @@ const processLatexInText = (text: string): React.ReactNode[] => {
   const allMatches = [
     ...blockMatches.map(m => ({ ...m, type: 'block-math' as const })),
     ...bracketMatches.map(m => ({ ...m, type: 'bracket-math' as const })),
+    ...parenMatches.map(m => ({ ...m, type: 'paren-math' as const })),
     ...inlineMatches.map(m => ({ ...m, type: 'inline-math' as const }))
   ].sort((a, b) => a.start - b.start)
 
@@ -331,6 +368,10 @@ const processLatexInText = (text: string): React.ReactNode[] => {
       // Handle [LaTeX expression] - treat as display math
       const mathContent = part.content.slice(1, -1).trim()
       return <MathComponent key={index} display={true}>{mathContent}</MathComponent>
+    } else if (part.type === 'paren-math') {
+      // Handle (LaTeX expression) - treat as inline math
+      const mathContent = part.content.slice(1, -1).trim()
+      return <MathComponent key={index} display={false}>{mathContent}</MathComponent>
     } else {
       return <span key={index}>{part.content}</span>
     }

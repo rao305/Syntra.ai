@@ -47,7 +47,7 @@ async def analyze_image_and_route(
         logger.warning("No Gemini API key available for image analysis, using default routing")
         return {
             "provider": ProviderType.GEMINI,
-            "model": "gemini-2.5-flash",
+            "model": "gemini-1.5-flash",  # More stable than 2.5-flash
             "reason": "Image analysis - defaulting to Gemini (no API key for analysis)",
             "image_type": "unknown",
             "analysis": "Unable to analyze image - no API key"
@@ -93,10 +93,10 @@ Respond ONLY with valid JSON, no other text."""
             }
         ]
         
-        # Call Gemini Flash for fast analysis
+        # Call Gemini Flash for fast analysis - use stable model
         response = await call_provider_adapter(
             provider=ProviderType.GEMINI,
-            model="gemini-2.5-flash",
+            model="gemini-1.5-flash",  # More stable than 2.5-flash
             messages=messages,
             api_key=gemini_key,
             temperature=0.1,  # Low temperature for consistent analysis
@@ -106,7 +106,10 @@ Respond ONLY with valid JSON, no other text."""
         if not response or not hasattr(response, 'content'):
             raise ValueError("No response from image analysis")
         
-        analysis_text = response.content.strip()
+        analysis_text = response.content.strip() if response.content else ""
+        
+        if not analysis_text:
+            raise ValueError("Empty response from image analysis")
         
         # Parse JSON from response (handle markdown code blocks if present)
         import json
@@ -116,8 +119,16 @@ Respond ONLY with valid JSON, no other text."""
         json_match = re.search(r'\{[^}]+\}', analysis_text, re.DOTALL)
         if json_match:
             analysis_text = json_match.group(0)
+        else:
+            # If no JSON found, log the actual response for debugging
+            logger.warning(f"Image analysis response doesn't contain JSON. Response: {analysis_text[:200]}")
+            raise ValueError(f"Invalid JSON response from image analysis: {analysis_text[:200]}")
         
-        analysis_data = json.loads(analysis_text)
+        try:
+            analysis_data = json.loads(analysis_text)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse JSON from image analysis. Response: {analysis_text[:200]}, Error: {e}")
+            raise ValueError(f"Failed to parse JSON from image analysis: {str(e)}")
         
         image_type = analysis_data.get("image_type", "other")
         best_model_type = analysis_data.get("best_model_type", "vision")
@@ -143,10 +154,10 @@ Respond ONLY with valid JSON, no other text."""
         
     except Exception as e:
         logger.error(f"Image analysis failed: {e}", exc_info=True)
-        # Fallback to Gemini Flash for vision
+        # Fallback to Gemini Flash for vision - use stable model
         return {
             "provider": ProviderType.GEMINI,
-            "model": "gemini-2.5-flash",
+            "model": "gemini-1.5-flash",  # More stable than 2.5-flash
             "reason": f"Image analysis failed, defaulting to Gemini Flash: {str(e)}",
             "image_type": "unknown",
             "analysis": f"Analysis error: {str(e)}"
@@ -185,11 +196,11 @@ def _route_based_on_analysis(
             f"UI screenshot detected - using GPT-4o for UI analysis"
         )
     
-    # Diagrams and charts → Gemini Pro (good at analysis)
+    # Diagrams and charts → Gemini Flash (good at analysis)
     if image_type in ["diagram", "chart"] or "analysis" in best_model_type.lower():
         return (
             ProviderType.GEMINI,
-            "gemini-2.5-flash",
+            "gemini-1.5-flash",  # More stable than 2.5-flash
             f"{image_type.title()} detected - using Gemini for analysis"
         )
     
@@ -212,21 +223,22 @@ def _route_based_on_analysis(
         elif any(word in query_lower for word in ["analyze", "explain", "what", "describe"]):
             return (
                 ProviderType.GEMINI,
-                "gemini-2.5-flash",
+                "gemini-1.5-flash",  # More stable than 2.5-flash
                 "Photo analysis query - using Gemini Flash"
             )
         else:
             # Default for photos
             return (
                 ProviderType.GEMINI,
-                "gemini-2.5-flash",
+                "gemini-1.5-flash",  # More stable than 2.5-flash
                 "Photo detected - using Gemini Flash for vision"
             )
     
     # Default: Gemini Flash (fast and good at vision)
     return (
         ProviderType.GEMINI,
-        "gemini-2.5-flash",
+        "gemini-1.5-flash-002",  # More stable than 2.5-flash
         f"Image detected ({image_type}) - using Gemini Flash for vision analysis"
     )
+
 
