@@ -35,7 +35,8 @@ class CollaborationOrchestrator:
         thread_id: str,
         user_message: str,
         api_keys: Dict[str, str],
-        mode: str = "auto"
+        mode: str = "auto",
+        chat_history: Optional[List[Dict[str, str]]] = None
     ) -> AsyncGenerator[Dict[str, Any], None]:
         """
         Run collaboration with real LLM calls and stream events.
@@ -148,7 +149,7 @@ class CollaborationOrchestrator:
             
             director_start = time.perf_counter()
             final_answer = await self._run_director_synthesis(
-                user_message, stage_outputs, external_reviews, api_keys
+                user_message, stage_outputs, external_reviews, api_keys, self._chat_history
             )
             
             if self.db and persist_to_db:
@@ -171,7 +172,62 @@ class CollaborationOrchestrator:
             # Update run status (skipped - no DB persistence during streaming)
             total_time = (time.perf_counter() - start_time) * 1000
             
-            # Yield final completion with metadata
+            # Build pipeline stages data for frontend transparency
+            pipeline_stages = []
+            for stage_id in self.stages[:-2]:  # Skip reviews and director
+                if stage_id in stage_outputs:
+                    stage_model = COLLAB_MODELS.get(stage_id, {})
+                    pipeline_stages.append({
+                        "id": stage_id,
+                        "role": stage_id,
+                        "label": stage_id.title(),
+                        "model": stage_model.get("model", "unknown"),
+                        "modelName": stage_model.get("model", "unknown"),
+                        "output": stage_outputs[stage_id],
+                        "status": "done"
+                    })
+            
+            # Build reviews data for frontend transparency
+            reviews_data = []
+            for idx, review in enumerate(external_reviews):
+                if isinstance(review, dict):
+                    reviews_data.append({
+                        "id": f"review_{idx}",
+                        "source": review.get("source", "unknown"),
+                        "model": review.get("model", "unknown"),
+                        "modelName": review.get("model", "unknown"),
+                        "stance": review.get("stance", "unknown"),
+                        "feedback": review.get("feedback", review.get("critique", "")),
+                        "content": review.get("critique", review.get("feedback", ""))
+                    })
+            
+            # Build reviews data for frontend transparency
+            reviews_data = []
+            for idx, review in enumerate(external_reviews):
+                if isinstance(review, dict):
+                    # Extract stance from review content if not present
+                    stance = review.get("stance", "unknown")
+                    if stance == "unknown":
+                        # Try to infer stance from content
+                        content_lower = (review.get("content", "") or review.get("critique", "")).lower()
+                        if any(word in content_lower for word in ["incorrect", "wrong", "error", "disagree", "missing"]):
+                            stance = "disagree"
+                        elif any(word in content_lower for word in ["correct", "accurate", "agree", "good", "solid"]):
+                            stance = "agree"
+                        elif any(word in content_lower for word in ["however", "but", "although", "partially"]):
+                            stance = "mixed"
+                    
+                    reviews_data.append({
+                        "id": f"review_{idx}",
+                        "source": review.get("source", "unknown"),
+                        "model": review.get("model", review.get("source", "unknown")),
+                        "modelName": review.get("model", review.get("source", "unknown")),
+                        "stance": stance,
+                        "feedback": review.get("content", review.get("critique", "")),
+                        "content": review.get("content", review.get("critique", ""))
+                    })
+            
+            # Yield final completion with metadata and pipeline data
             yield {
                 "type": "done",
                 "result": {
@@ -180,6 +236,10 @@ class CollaborationOrchestrator:
                     "stages_completed": len(self.stages),
                     "external_reviews_count": len(external_reviews),
                     "mode": mode
+                },
+                "pipeline_data": {
+                    "stages": pipeline_stages,
+                    "reviews": reviews_data
                 }
             }
             
@@ -209,7 +269,17 @@ class CollaborationOrchestrator:
             raise ValueError(f"No API key available for {provider.value}")
         
         # Build context for this stage
-        context_parts = [f"USER QUESTION: {user_message}"]
+        context_parts = []
+        
+        # Add chat history if available (for context continuity)
+        if hasattr(self, '_chat_history') and self._chat_history:
+            context_parts.append("CONVERSATION HISTORY:")
+            for msg in self._chat_history[-10:]:  # Last 10 messages for context
+                role_label = "USER" if msg.get("role") == "user" else "ASSISTANT"
+                context_parts.append(f"{role_label}: {msg.get('content', '')}")
+            context_parts.append("")  # Empty line separator
+        
+        context_parts.append(f"USER QUESTION: {user_message}")
         
         # Add relevant previous outputs
         if stage_id == "researcher" and "analyst" in previous_outputs:
@@ -467,7 +537,8 @@ class CollaborationOrchestrator:
         user_message: str,
         stage_outputs: Dict[str, str],
         external_reviews: List[Dict[str, Any]],
-        api_keys: Dict[str, str]
+        api_keys: Dict[str, str],
+        chat_history: Optional[List[Dict[str, str]]] = None
     ) -> str:
         """Run final director synthesis"""
         
@@ -492,11 +563,23 @@ class CollaborationOrchestrator:
         # Use creator output as internal report
         internal_report = stage_outputs.get("creator", "No creator output available.")
         
+        # Build chat history block if available
+        history_block = ""
+        if chat_history:
+            history_block = "\n\nCONVERSATION HISTORY:\n"
+            for msg in chat_history[-10:]:  # Last 10 messages
+                role_label = "USER" if msg.get("role") == "user" else "ASSISTANT"
+                history_block += f"{role_label}: {msg.get('content', '')}\n"
+        
         director_prompt = DIRECTOR_USER_TEMPLATE.format(
             question=user_message,
             internal_report=internal_report,
             reviews_block=reviews_block
         )
+        
+        # Prepend chat history if available
+        if history_block:
+            director_prompt = history_block + "\n" + director_prompt
         
         messages = [
             {"role": "system", "content": system_prompt},
@@ -661,6 +744,47 @@ class CollaborationOrchestrator:
             # Complete the run (DB persistence skipped during streaming)
             total_time = (time.perf_counter() - start_time) * 1000
             
+            # Build pipeline stages data for frontend transparency
+            pipeline_stages = []
+            for stage_id in self.stages[:-2]:  # Skip reviews and director
+                if stage_id in stage_outputs:
+                    stage_model = COLLAB_MODELS.get(stage_id, {})
+                    pipeline_stages.append({
+                        "id": stage_id,
+                        "role": stage_id,
+                        "label": stage_id.title(),
+                        "model": stage_model.get("model", "unknown"),
+                        "modelName": stage_model.get("model", "unknown"),
+                        "output": stage_outputs[stage_id],
+                        "status": "done"
+                    })
+            
+            # Build reviews data for frontend transparency
+            reviews_data = []
+            for idx, review in enumerate(external_reviews):
+                if isinstance(review, dict):
+                    # Extract stance from review content if not present
+                    stance = review.get("stance", "unknown")
+                    if stance == "unknown":
+                        # Try to infer stance from content
+                        content_lower = (review.get("content", "") or review.get("critique", "")).lower()
+                        if any(word in content_lower for word in ["incorrect", "wrong", "error", "disagree", "missing"]):
+                            stance = "disagree"
+                        elif any(word in content_lower for word in ["correct", "accurate", "agree", "good", "solid"]):
+                            stance = "agree"
+                        elif any(word in content_lower for word in ["however", "but", "although", "partially"]):
+                            stance = "mixed"
+                    
+                    reviews_data.append({
+                        "id": f"review_{idx}",
+                        "source": review.get("source", "unknown"),
+                        "model": review.get("model", review.get("source", "unknown")),
+                        "modelName": review.get("model", review.get("source", "unknown")),
+                        "stance": stance,
+                        "feedback": review.get("content", review.get("critique", "")),
+                        "content": review.get("content", review.get("critique", ""))
+                    })
+            
             yield {
                 "type": "done",
                 "result": {
@@ -669,6 +793,10 @@ class CollaborationOrchestrator:
                     "stages_completed": len(self.stages),
                     "external_reviews_count": len(external_reviews),
                     "mode": "manual"
+                },
+                "pipeline_data": {
+                    "stages": pipeline_stages,
+                    "reviews": reviews_data
                 }
             }
             

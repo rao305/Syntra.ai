@@ -2,6 +2,7 @@
 
 import { CodePanel } from "@/components/code-panel"
 import { CollabPanel, type CollabPanelState } from "@/components/collaborate/CollabPanel"
+import { CollaborationPipelineDetails } from "@/components/collaborate/CollaborationPipelineDetails"
 import { EnhancedMessageContent } from "@/components/enhanced-message-content"
 import { ImageInputArea } from "@/components/image-input-area"
 import { SimpleLoadingIndicator } from "@/components/simple-loading-indicator"
@@ -9,9 +10,84 @@ import { ThinkingStream } from "@/components/thinking-stream"
 import type { StageId, StageState, StageStatus } from "@/lib/collabStages"
 import { cn } from "@/lib/utils"
 import { useWorkflowStore } from "@/store/workflow-store"
-import { Bookmark, Brain, Bug, ChevronDown, ChevronUp, Copy, RefreshCw, Share2 } from "lucide-react"
+import { Bookmark, Brain, Bug, Copy, RefreshCw, Share2 } from "lucide-react"
+import Image from "next/image"
 import * as React from "react"
 import { useState } from "react"
+
+/**
+ * Mapping of supported backend model IDs to display names
+ * Only models that are actually supported and configured should be shown
+ */
+const SUPPORTED_MODELS: Record<string, string> = {
+  // OpenAI models
+  'gpt-4o': 'GPT-4o',
+  'gpt-4o-mini': 'GPT-4o Mini',
+  'gpt-4': 'GPT-4',
+  'gpt-3.5-turbo': 'GPT-3.5 Turbo',
+
+  // Google/Gemini models
+  'gemini-2.5-flash': 'Gemini 2.5 Flash',
+  'gemini-2.5-pro': 'Gemini 2.5 Pro',
+  'gemini-2.0-flash': 'Gemini 2.0 Flash',
+  'gemini-pro': 'Gemini Pro',
+  'gemini-flash': 'Gemini Flash',
+
+  // Perplexity models
+  'perplexity-sonar': 'Perplexity Sonar',
+  'perplexity-sonar-pro': 'Perplexity Sonar Pro',
+  'sonar': 'Perplexity Sonar',
+  'sonar-pro': 'Perplexity Sonar Pro',
+
+  // Kimi/Moonshot models
+  'kimi-k2-turbo': 'Kimi K2 Turbo',
+  'kimi-k2-turbo-preview': 'Kimi K2 Turbo',
+  'moonshot-v1-8k': 'Moonshot v1 8K',
+  'moonshot-v1-32k': 'Moonshot v1 32K',
+  'moonshot-v1-128k': 'Moonshot v1 128K',
+
+  // OpenRouter models
+  'openrouter-default': 'OpenRouter Mix',
+  'google/gemini-flash-1.5-8b:free': 'Gemini Flash 8B',
+
+  // Legacy/fallback names
+  'gpt': 'GPT-4',
+  'gemini': 'Gemini',
+  'perplexity': 'Perplexity',
+  'kimi': 'Kimi',
+}
+
+/**
+ * Get display name for a model, only if it's supported
+ */
+function getSupportedModelDisplayName(modelName: string | undefined | null): string | null {
+  if (!modelName || modelName === 'undefined' || modelName === 'null' || modelName === 'DAC' || modelName === 'auto') {
+    return null
+  }
+
+  // Check exact match first
+  if (SUPPORTED_MODELS[modelName]) {
+    return SUPPORTED_MODELS[modelName]
+  }
+
+  // Check case-insensitive match
+  const lowerModelName = modelName.toLowerCase()
+  for (const [key, displayName] of Object.entries(SUPPORTED_MODELS)) {
+    if (key.toLowerCase() === lowerModelName) {
+      return displayName
+    }
+  }
+
+  // Check if it contains a supported model identifier
+  for (const [key, displayName] of Object.entries(SUPPORTED_MODELS)) {
+    if (lowerModelName.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerModelName)) {
+      return displayName
+    }
+  }
+
+  // If not found in supported models, return null (don't display)
+  return null
+}
 
 interface ImageFile {
   file?: File
@@ -25,10 +101,37 @@ interface CollaborationStage {
   status: "pending" | "active" | "done"
 }
 
+interface PipelineStage {
+  id: string
+  role: string
+  label: string
+  model?: string
+  modelName?: string
+  output?: string
+  status: "pending" | "active" | "done" | "failed"
+  latency_ms?: number
+  tokens?: { input?: number; output?: number }
+}
+
+interface Review {
+  id: string
+  source: string
+  model?: string
+  modelName?: string
+  stance: "agree" | "disagree" | "mixed" | "unknown"
+  feedback?: string
+  issues?: string[]
+  suggestions?: string[]
+  content?: string
+}
+
 interface CollaborationState {
   mode: "thinking" | "streaming_final" | "complete"
   stages: CollaborationStage[]
   currentStageId?: string
+  // Detailed pipeline data for transparency
+  pipelineStages?: PipelineStage[]
+  reviews?: Review[]
 }
 
 interface Message {
@@ -372,10 +475,17 @@ export function EnhancedChatInterface({
         <div className="max-w-4xl mx-auto pt-8 pb-40 space-y-6">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
-              <h2 className="text-2xl font-semibold bg-gradient-to-r from-green-400 to-zinc-400 bg-clip-text text-transparent">
+              <Image
+                src="/syntralogo.png"
+                alt="Syntra Logo"
+                width={120}
+                height={120}
+                className="mb-4"
+              />
+              <h2 className="text-2xl font-semibold text-white">
                 Your Multi-Agent Workspace Starts Here.
               </h2>
-              <p className="bg-gradient-to-r from-green-400 to-zinc-400 bg-clip-text text-transparent max-w-lg">
+              <p className="text-white/80 max-w-lg">
                 I'm powered by a network of specialized models. Ask anything — I'll gather the right experts and reason step-by-step.
               </p>
             </div>
@@ -406,7 +516,8 @@ export function EnhancedChatInterface({
                     <div className="max-w-[90%]">
 
                       {/* Message Content */}
-                      {message.collaboration ? (
+                      {message.collaboration && message.collaboration.mode !== "complete" ? (
+                        // Show thinking/streaming UI only while collaboration is in progress
                         <div className="px-1">
                           <ThinkingStream
                             stages={message.collaboration.stages}
@@ -419,6 +530,7 @@ export function EnhancedChatInterface({
                           />
                         </div>
                       ) : (
+                        // Render final content like normal mode - no boxes or special formatting
                         <div className="text-zinc-100 leading-relaxed px-1 py-2">
                           <EnhancedMessageContent
                             content={message.content}
@@ -429,43 +541,23 @@ export function EnhancedChatInterface({
                         </div>
                       )}
 
-                      {/* Message Metadata - Model Info & Performance */}
-                      {message.role === 'assistant' && (
-                        <div className="pt-3 border-t border-zinc-800/50">
-                          <div className="grid grid-cols-2 gap-4 text-xs">
-                            {/* Model Information - only show if modelName is defined and not empty */}
-                            {message.modelName && message.modelName !== 'DAC' && message.modelName !== 'undefined' && (
-                              <div>
-                                <span className="text-zinc-500">Model:</span>
-                                <span className="text-zinc-200 font-medium ml-2">{message.modelName}</span>
-                              </div>
-                            )}
-
-                            {/* Accuracy/Quality */}
-                            {message.confidence && (
-                              <div>
-                                <span className="text-zinc-500">Accuracy:</span>
-                                <span className="text-zinc-200 font-medium ml-2">{message.confidence}%</span>
-                              </div>
-                            )}
-
-                            {/* Speed - Total Response Time */}
-                            {message.processingTime && (
-                              <div>
-                                <span className="text-zinc-500">Speed:</span>
-                                <span className="text-zinc-200 font-medium ml-2">{(message.processingTime / 1000).toFixed(2)}s</span>
-                              </div>
-                            )}
-
-                            {/* Time to First Token (TTFS) */}
-                            {message.ttftMs && (
-                              <div>
-                                <span className="text-zinc-500">TTFS:</span>
-                                <span className="text-zinc-200 font-medium ml-2">{(message.ttftMs / 1000).toFixed(2)}s</span>
-                              </div>
-                            )}
+                      {/* Model Information - Show which model was used for routing (only supported models) */}
+                      {message.role === 'assistant' && (() => {
+                        const displayName = getSupportedModelDisplayName(message.modelName)
+                        return displayName ? (
+                          <div className="pt-2 text-xs text-zinc-400">
+                            <span className="text-zinc-500">Model:</span>
+                            <span className="text-zinc-300 font-medium ml-2">{displayName}</span>
                           </div>
-                        </div>
+                        ) : null
+                      })()}
+
+                      {/* Collaboration Pipeline Details - Collapsible */}
+                      {message.collaboration && message.collaboration.mode === "complete" && (
+                        <CollaborationPipelineDetails
+                          stages={message.collaboration.pipelineStages}
+                          reviews={message.collaboration.reviews}
+                        />
                       )}
 
                       {/* Message Actions */}

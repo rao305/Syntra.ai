@@ -1,5 +1,6 @@
 """Image generation service supporting multiple LLM and image providers."""
 import logging
+import asyncio
 from typing import List, Optional
 import aiohttp
 import json
@@ -96,40 +97,66 @@ class ImageGenerationService:
         return None
 
     async def _generate_gemini(self, spec: ImageSpec, api_key: str) -> Optional[str]:
-        """Generate image using Google Imagen API (Nano Banana Pro / Imagen 3).
+        """Generate image using Google Gemini API with image generation capabilities.
         
-        Note: Google Imagen requires Vertex AI setup. This implementation attempts
-        to use the Generative AI API, but may fall back to OpenAI if not configured.
+        Note: Gemini 2.5 Flash Image and Imagen 3 require specific API setup.
+        This implementation attempts to use the Gemini API for image generation.
         """
         try:
-            import aiohttp
+            import google.generativeai as genai
             import base64
+            import io
             
-            logger.info(f"Attempting Gemini/Imagen image generation for prompt: {spec.prompt[:100]}...")
+            logger.info(f"Attempting Gemini image generation for prompt: {spec.prompt[:100]}...")
             
-            # Try using Vertex AI Imagen REST API
-            # Note: This requires Vertex AI project configuration
-            # For now, we'll attempt the API call but it may require additional setup
+            # Configure Gemini API
+            genai.configure(api_key=api_key)
             
-            async with aiohttp.ClientSession() as session:
-                # Try Vertex AI Imagen endpoint
-                # This requires project ID - for now we'll try without it
-                # In production, you'd need: projects/{project}/locations/{location}/publishers/google/models/imagen-3.0-generate-001:predict
+            # Try using Gemini 2.5 Flash Image model
+            # Note: Image generation via Gemini API may require specific model access
+            try:
+                # Attempt to use image generation model
+                # The exact model name may vary based on API availability
+                model = genai.GenerativeModel('gemini-2.5-flash-image')
                 
-                # Alternative: Try using Gemini's image generation capabilities
-                # Some Gemini models can generate images, but this is experimental
-                logger.warning("Gemini/Imagen image generation requires Vertex AI project setup")
-                logger.warning("Falling back to OpenAI DALL-E if available")
+                # Generate image from prompt
+                # Note: The API structure may differ - this is a placeholder implementation
+                response = await asyncio.to_thread(
+                    model.generate_content,
+                    spec.prompt,
+                    generation_config={
+                        "temperature": 0.7,
+                    }
+                )
                 
-                # Return None to trigger fallback to OpenAI
+                # Check if response contains image data
+                if hasattr(response, 'images') and response.images:
+                    # Return first image URL or data
+                    image = response.images[0]
+                    if hasattr(image, 'url'):
+                        return image.url
+                    elif hasattr(image, 'data'):
+                        # Convert to data URI
+                        b64_str = base64.b64encode(image.data).decode('utf-8')
+                        return f"data:image/png;base64,{b64_str}"
+                
+                logger.warning("Gemini API response did not contain image data")
                 return None
                 
+            except Exception as model_error:
+                logger.warning(f"Gemini image model not available: {str(model_error)}")
+                logger.info("Note: Gemini image generation requires specific model access (gemini-2.5-flash-image or imagen-3)")
+                logger.info("Falling back to OpenAI DALL-E if available")
+                return None
+                
+        except ImportError:
+            logger.warning("google.generativeai not installed. Install with: pip install google-generativeai")
+            return None
         except Exception as e:
             logger.error(f"Gemini/Imagen image generation failed: {str(e)}")
             import traceback
             logger.error(traceback.format_exc())
-
-        return None
+            return None
 
     async def _generate_replicate(
         self,

@@ -261,7 +261,10 @@ export function useCollaborationStream({
 
       case 'done':
         if (event.message) {
-          // Update to final completed state
+          // Extract pipeline data if available
+          const pipelineData = (event as any).pipeline_data
+
+          // Update to final completed state with pipeline data
           onUpdateMessage(messageId, {
             id: event.message.id,
             content: event.message.content,
@@ -273,7 +276,10 @@ export function useCollaborationStream({
                 stages: prevMessage.collaboration.stages.map(stage => ({
                   ...stage,
                   status: "done" as const
-                }))
+                })),
+                // Add pipeline stages and reviews for transparency
+                pipelineStages: pipelineData?.stages,
+                reviews: pipelineData?.reviews
               }
             },
             provider: event.message.provider,

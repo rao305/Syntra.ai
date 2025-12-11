@@ -1,12 +1,12 @@
 "use client"
 
-import { ChevronDown, LogOut } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import Image from "next/image"
 import { useAuth } from "@/components/auth/auth-provider"
-import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
 import { useUser } from "@clerk/nextjs"
-import { useState, useRef, useEffect } from "react"
+import { ChevronDown, LogOut } from "lucide-react"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
 
 export function Header() {
   const { user, loading, signOut } = useAuth()
@@ -39,7 +39,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-10">
           <a href="/" className="flex items-center gap-2">
-            <Image src="/syntra-logo.png" alt="Syntra" width={32} height={32} className="rounded-sm" />
+            <Image src="/syntralogo.png" alt="SYNTRA AI" width={32} height={32} className="rounded-sm" />
             <span className="text-xl font-semibold text-foreground">Syntra</span>
           </a>
 

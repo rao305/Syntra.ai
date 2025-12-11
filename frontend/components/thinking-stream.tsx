@@ -1,8 +1,7 @@
 "use client"
 
-import { motion, AnimatePresence } from "framer-motion"
-import { Brain } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { AnimatePresence, motion } from "framer-motion"
 
 interface ThinkingStage {
   id: string
@@ -25,21 +24,10 @@ export function ThinkingStream({
 }: ThinkingStreamProps) {
 
   if (mode === "complete") {
+    // Render final content like normal mode - no boxes, borders, or special formatting
     return (
-      <div className="rounded-2xl bg-background px-3 py-2 border text-sm">
-        <p className="whitespace-pre-wrap">{finalContent}</p>
-        <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
-          <span>Created by multi-model collaborate engine.</span>
-          {onViewProcess && (
-            <button
-              type="button"
-              className="underline underline-offset-2 hover:text-foreground transition-colors"
-              onClick={onViewProcess}
-            >
-              View how this was generated
-            </button>
-          )}
-        </div>
+      <div className="whitespace-pre-wrap">
+        {finalContent}
       </div>
     )
   }

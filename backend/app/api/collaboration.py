@@ -711,6 +711,46 @@ async def thread_collaborate_stream(
                 # Use thread_id as conversation_id for testing
                 pass
             
+            # Save user message to database first to maintain context
+            from app.models.message import Message, MessageRole
+            from sqlalchemy import select, func
+            
+            # Get next sequence number
+            sequence_stmt = select(func.max(Message.sequence)).where(Message.thread_id == thread_id)
+            sequence_result = await db.execute(sequence_stmt)
+            max_sequence = sequence_result.scalar()
+            next_sequence = (max_sequence or -1) + 1
+            
+            # Create and save user message
+            user_message = Message(
+                thread_id=thread_id,
+                role=MessageRole.USER,
+                content=request.message,
+                sequence=next_sequence,
+            )
+            db.add(user_message)
+            await db.flush()
+            await db.refresh(user_message)
+            
+            # Load thread history for context (including the user message we just saved)
+            MAX_CONTEXT_MESSAGES = 20
+            history_stmt = (
+                select(Message)
+                .where(Message.thread_id == thread_id)
+                .order_by(Message.sequence.desc())
+                .limit(MAX_CONTEXT_MESSAGES)
+            )
+            history_result = await db.execute(history_stmt)
+            prior_messages = list(history_result.scalars().all())
+            prior_messages.reverse()  # Reverse to get chronological order
+            chat_history = [
+                {"role": msg.role.value, "content": msg.content}
+                for msg in prior_messages
+            ]
+            
+            # Commit user message before starting collaboration
+            await db.commit()
+            
             # Initialize the real collaboration orchestrator
             from app.services.collaboration_orchestrator import CollaborationOrchestrator
             orchestrator = CollaborationOrchestrator(db)
@@ -718,20 +758,23 @@ async def thread_collaborate_stream(
             # Track the final answer for message creation
             final_answer_parts = []
             enhanced_result = None
+            pipeline_data = None
             
-            # Stream real collaboration events
+            # Stream real collaboration events with chat history
             async for event in orchestrator.run_collaboration_stream(
                 thread_id=thread_id,
                 user_message=request.message,
                 api_keys=api_keys,
-                mode=request.mode
+                mode=request.mode,
+                chat_history=chat_history
             ):
                 if event["type"] == "final_chunk":
                     # Collect chunks for final message
                     final_answer_parts.append(event["text"])
                 elif event["type"] == "done":
-                    # Store the final result metadata
-                    enhanced_result = event["result"]
+                    # Store the final result metadata and pipeline data
+                    enhanced_result = event.get("result")
+                    pipeline_data = event.get("pipeline_data")
                 
                 # Forward all events to client
                 yield sse_event(event)
@@ -741,6 +784,12 @@ async def thread_collaborate_stream(
             
             # Send completion event with full message data
             from app.models.message import Message, MessageRole
+            
+            # Get next sequence number for assistant message (user message already saved)
+            sequence_stmt = select(func.max(Message.sequence)).where(Message.thread_id == thread_id)
+            sequence_result = await db.execute(sequence_stmt)
+            max_sequence = sequence_result.scalar()
+            assistant_sequence = (max_sequence or -1) + 1
             
             # Create and save the final message
             final_message = Message(
@@ -759,7 +808,7 @@ async def thread_collaborate_stream(
                         "duration_ms": enhanced_result.get("duration_ms", 0) if enhanced_result else 0
                     }
                 },
-                sequence=1  # Will be updated by actual sequence logic
+                sequence=assistant_sequence
             )
             
             # Save the collaboration message to database with proper meta
@@ -772,6 +821,11 @@ async def thread_collaborate_stream(
                 print(f"❌ Failed to save collaboration message: {e}")
                 await db.rollback()
             
+            # Include pipeline data from the done event if available
+            pipeline_data = None
+            if enhanced_result and "pipeline_data" in enhanced_result:
+                pipeline_data = enhanced_result["pipeline_data"]
+            
             yield sse_event({
                 "type": "done",
                 "message": {
@@ -783,7 +837,8 @@ async def thread_collaborate_stream(
                     "provider": final_message.provider,
                     "model": final_message.model,
                     "meta": final_message.meta
-                }
+                },
+                "pipeline_data": pipeline_data
             })
             
         except Exception as e:

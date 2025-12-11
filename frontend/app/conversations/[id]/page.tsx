@@ -302,12 +302,29 @@ export default function ConversationPage() {
 
       // Add image attachments if provided
       if (images && images.length > 0) {
-        requestBody.attachments = images.map(image => ({
-          type: 'image',
-          name: image.file?.name || 'image',
-          data: image.url.split(',')[1], // Extract base64 data part
-          mimeType: image.file?.type || 'image/png'
-        }))
+        requestBody.attachments = images.map(image => {
+          // Extract base64 data - handle both data:image/... and plain base64
+          let base64Data = image.url
+          if (image.url.includes(',')) {
+            base64Data = image.url.split(',')[1]
+          } else if (image.url.startsWith('data:')) {
+            // Already a data URL, extract the data part
+            base64Data = image.url.split(',')[1] || image.url
+          }
+
+          // Check image size (base64 is ~33% larger than binary)
+          const sizeInMB = (base64Data.length * 3 / 4) / (1024 * 1024)
+          if (sizeInMB > 10) {
+            console.warn(`Image ${image.id} is ${sizeInMB.toFixed(2)}MB, may cause issues`)
+          }
+
+          return {
+            type: 'image',
+            name: image.file?.name || `image-${image.id}.png`,
+            data: base64Data,
+            mimeType: image.file?.type || 'image/png'
+          }
+        })
       }
 
       // Only add provider if not using auto mode
@@ -331,206 +348,272 @@ export default function ConversationPage() {
       // We'll create the message object but won't add it to messages array until we get content
 
       // Use streaming endpoint to handle long responses properly
-      const streamResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api'}/threads/${actualThreadId}/messages/stream`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-org-id': orgId,
-          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-        },
-        body: JSON.stringify(requestBody),
-      })
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api'
 
-      if (!streamResponse.ok) {
-        const errorText = await streamResponse.text()
-        throw new Error(`API error: ${streamResponse.status} - ${errorText}`)
-      }
+      try {
+        const streamResponse = await fetch(`${apiUrl}/threads/${actualThreadId}/messages/stream`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-org-id': orgId,
+            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+          },
+          body: JSON.stringify(requestBody),
+        })
 
-      // Read the streaming response
-      const reader = streamResponse.body?.getReader()
-      const decoder = new TextDecoder()
-      let assistantContent = ''
-      let processingTime = 0
-      let ttftMs: number | undefined = undefined
-      let actualProvider = selectedModelData?.provider || 'unknown'
-      let actualModel = selectedModel
-      let messageAdded = false
+        if (!streamResponse.ok) {
+          const errorText = await streamResponse.text()
+          let errorMessage = `API error: ${streamResponse.status} - ${errorText}`
+          try {
+            const errorJson = JSON.parse(errorText)
+            errorMessage = errorJson.detail || errorJson.message || errorMessage
+          } catch {
+            // Use default error message
+          }
+          throw new Error(errorMessage)
+        }
 
-      if (reader) {
-        try {
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
+        // Read the streaming response
+        const reader = streamResponse.body?.getReader()
+        const decoder = new TextDecoder()
+        let assistantContent = ''
+        let processingTime = 0
+        let ttftMs: number | undefined = undefined
+        let actualProvider = selectedModelData?.provider || 'unknown'
+        let actualModel = selectedModel
+        let messageAdded = false
 
-            const chunk = decoder.decode(value, { stream: true })
-            const lines = chunk.split('\n')
+        if (reader) {
+          try {
+            while (true) {
+              const { done, value } = await reader.read()
+              if (done) break
 
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                try {
-                  const data = JSON.parse(line.substring(6))
+              const chunk = decoder.decode(value, { stream: true })
+              const lines = chunk.split('\n')
 
-                  if (data.type === 'model_info') {
-                    // Update with actual model used by backend
-                    actualProvider = data.provider
-                    actualModel = data.model
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  try {
+                    const data = JSON.parse(line.substring(6))
 
-                    // Add message if not already added
-                    if (!messageAdded) {
-                      const initialMessage: Message = {
-                        id: assistantId,
-                        role: 'assistant',
-                        content: '',
-                        timestamp: new Date().toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        }),
-                        modelId: actualModel,
-                        modelName: actualModel,
-                      }
-                      setMessages((prev) => [...prev, initialMessage])
-                      messageAdded = true
-                    } else {
-                      // Update model info if message already exists
-                      setMessages((prev) =>
-                        prev.map((m) =>
-                          m.id === assistantId
-                            ? {
-                              ...m,
-                              provider: actualProvider,
-                              modelName: actualModel,
-                              modelId: actualModel,
-                            }
-                            : m
+                    if (data.type === 'model_info') {
+                      // Update with actual model used by backend
+                      actualProvider = data.provider
+                      actualModel = data.model
+
+                      // Add message if not already added
+                      if (!messageAdded) {
+                        const initialMessage: Message = {
+                          id: assistantId,
+                          role: 'assistant',
+                          content: '',
+                          timestamp: new Date().toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          }),
+                          modelId: actualModel,
+                          modelName: actualModel,
+                        }
+                        setMessages((prev) => [...prev, initialMessage])
+                        messageAdded = true
+                      } else {
+                        // Update model info if message already exists
+                        setMessages((prev) =>
+                          prev.map((m) =>
+                            m.id === assistantId
+                              ? {
+                                ...m,
+                                provider: actualProvider,
+                                modelName: actualModel,
+                                modelId: actualModel,
+                              }
+                              : m
+                          )
                         )
-                      )
-                    }
-                  } else if (data.type === 'delta' && data.delta) {
-                    assistantContent += data.delta
-
-                    // Add message on first delta if not already added
-                    if (!messageAdded) {
-                      const initialMessage: Message = {
-                        id: assistantId,
-                        role: 'assistant',
-                        content: assistantContent,
-                        timestamp: new Date().toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        }),
-                        modelId: selectedModel,
-                        modelName: actualModel || undefined,
                       }
-                      setMessages((prev) => [...prev, initialMessage])
-                      messageAdded = true
-                    } else {
-                      // Update the message as we receive chunks
-                      setMessages((prev) =>
-                        prev.map((m) =>
-                          m.id === assistantId
-                            ? { ...m, content: assistantContent }
-                            : m
+                    } else if (data.type === 'delta' && data.delta) {
+                      assistantContent += data.delta
+
+                      // Add message on first delta if not already added
+                      if (!messageAdded) {
+                        const initialMessage: Message = {
+                          id: assistantId,
+                          role: 'assistant',
+                          content: assistantContent,
+                          timestamp: new Date().toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          }),
+                          // Use actualModel if it's been set (from model_info), otherwise use selectedModel if not 'auto'
+                          modelId: actualModel && actualModel !== 'auto' ? actualModel : (selectedModel !== 'auto' ? selectedModel : undefined),
+                          modelName: actualModel && actualModel !== 'auto' ? actualModel : (selectedModel !== 'auto' ? selectedModel : undefined),
+                          provider: actualProvider && actualProvider !== 'unknown' ? actualProvider : undefined,
+                        }
+                        setMessages((prev) => [...prev, initialMessage])
+                        messageAdded = true
+                      } else {
+                        // Update the message as we receive chunks
+                        // Always update modelName/modelId if actualModel has been set from backend
+                        setMessages((prev) =>
+                          prev.map((m) =>
+                            m.id === assistantId
+                              ? {
+                                ...m,
+                                content: assistantContent,
+                                // Update modelName if actualModel has been set and is valid (from backend model_info)
+                                modelName: actualModel && actualModel !== 'auto'
+                                  ? actualModel
+                                  : (m.modelName || (selectedModel !== 'auto' ? selectedModel : undefined)),
+                                modelId: actualModel && actualModel !== 'auto'
+                                  ? actualModel
+                                  : (m.modelId || (selectedModel !== 'auto' ? selectedModel : undefined)),
+                                provider: actualProvider !== 'unknown' ? actualProvider : m.provider,
+                              }
+                              : m
+                          )
                         )
-                      )
+                      }
+                    } else if (data.type === 'meta' && data.ttft_ms !== undefined) {
+                      // Store TTFT metrics
+                      ttftMs = data.ttft_ms
+                    } else if (data.type === 'done') {
+                      // Final metadata - store for later
+                      if (data.latency_ms) {
+                        processingTime = data.latency_ms
+                      }
+                      // Also check if model info is in done event
+                      if (data.model && !actualModel || actualModel === 'auto' || actualModel === selectedModel) {
+                        actualModel = data.model
+                        actualProvider = data.provider || actualProvider
+                      }
                     }
-                  } else if (data.type === 'meta' && data.ttft_ms !== undefined) {
-                    // Store TTFT metrics
-                    ttftMs = data.ttft_ms
-                  } else if (data.type === 'done') {
-                    // Final metadata - store for later
-                    if (data.latency_ms) {
-                      processingTime = data.latency_ms
-                    }
+                  } catch (e) {
+                    // Skip JSON parse errors
                   }
-                } catch (e) {
-                  // Skip JSON parse errors
                 }
               }
             }
+          } finally {
+            reader.releaseLock()
           }
-        } finally {
-          reader.releaseLock()
+
+          // Update metrics AFTER streaming completes (don't show stats until response is done)
+          // Ensure modelName is always set from actualModel (which comes from backend)
+          // Priority: actualModel (from backend) > message.modelName > selectedModel (if not 'auto')
+          setMessages((prev) =>
+            prev.map((m) => {
+              if (m.id === assistantId) {
+                // Determine the final model name - prioritize actualModel from backend
+                let finalModelName: string | undefined = undefined
+
+                if (actualModel && actualModel !== 'auto') {
+                  // Backend sent a specific model - use it
+                  finalModelName = actualModel
+                } else if (m.modelName && m.modelName !== 'auto') {
+                  // Use what's already in the message
+                  finalModelName = m.modelName
+                } else if (selectedModel && selectedModel !== 'auto') {
+                  // Fallback to selectedModel if it's not 'auto'
+                  finalModelName = selectedModel
+                }
+
+                return {
+                  ...m,
+                  modelName: finalModelName,
+                  modelId: finalModelName || m.modelId,
+                  provider: actualProvider && actualProvider !== 'unknown' ? actualProvider : m.provider,
+                  ttftMs: ttftMs,
+                  processingTime: processingTime || Math.floor(800 + Math.random() * 1200),
+                }
+              }
+              return m
+            })
+          )
         }
 
-        // Update metrics AFTER streaming completes (don't show stats until response is done)
+        // Create response object for consistency with the rest of the function
+        const response = {
+          user_message: { id: userMessage.id, content: content.trim() },
+          assistant_message: {
+            id: assistantId,
+            content: assistantContent,
+            provider: actualProvider,
+            model: actualModel,
+          }
+        }
+
+        // Determine reasoning type based on content
+        const determineReasoningType = (content: string, query: string): 'coding' | 'analysis' | 'creative' | 'research' | 'conversation' => {
+          const lowerContent = content.toLowerCase()
+          const lowerQuery = query.toLowerCase()
+
+          if (lowerContent.includes('```') || lowerQuery.includes('code') || lowerQuery.includes('function')) {
+            return 'coding'
+          }
+          if (lowerQuery.includes('analyze') || lowerQuery.includes('explain') || lowerQuery.includes('why')) {
+            return 'analysis'
+          }
+          if (lowerQuery.includes('create') || lowerQuery.includes('write') || lowerQuery.includes('story')) {
+            return 'creative'
+          }
+          if (lowerQuery.includes('what') || lowerQuery.includes('research') || lowerQuery.includes('find')) {
+            return 'research'
+          }
+          return 'conversation'
+        }
+
+        // Update the placeholder message with final properties
+        const reasoningType = determineReasoningType(response.assistant_message.content, content)
+        const modelDisplayName = selectedModelData?.name || actualModel
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantId
               ? {
                 ...m,
-                ttftMs: ttftMs,
-                processingTime: processingTime || Math.floor(800 + Math.random() * 1200),
+                content: response.assistant_message.content,
+                reasoningType,
+                chainOfThought: `I analyzed your request using ${modelDisplayName}. This model was selected to best handle your query. I applied systematic reasoning to understand your needs, gathered relevant context, synthesized the information, and formulated a comprehensive response. The reasoning process included: pattern recognition, logical inference, and knowledge integration to provide you with the most accurate and helpful answer.`,
+                processingTime: processingTime || Math.floor(800 + Math.random() * 1200), // Use actual processing time if available
+                confidence: Math.floor(85 + Math.random() * 15), // 85-100% confidence range
               }
               : m
           )
         )
+
+        // Update conversation metadata
+        if (user?.uid && actualThreadId !== 'new') {
+          await updateConversationMetadata(user.uid, actualThreadId, {
+            title:
+              messages.length === 1 // Only the user message at this point
+                ? content.substring(0, 50)
+                : undefined,
+            lastMessagePreview: response.assistant_message.content.substring(0, 100),
+          })
+        }
+      } catch (error: any) {
+        console.error('Error sending message:', error)
+        let errorMessage = 'Failed to send message. Please try again.'
+
+        if (error?.message) {
+          if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            errorMessage = 'Cannot connect to server. Please check if the backend is running at http://127.0.0.1:8000'
+          } else if (error.message.includes('PayloadTooLargeError') || error.message.includes('413')) {
+            errorMessage = 'Image is too large. Please use a smaller image or compress it.'
+          } else {
+            errorMessage = error.message
+          }
+        }
+
+        toast.error(errorMessage)
+        // Remove both user and assistant placeholder messages on error
+        setMessages((prev) => prev.filter((m) => m.id !== userMessage.id && m.id !== assistantId))
+      } finally {
+        setIsLoading(false)
       }
-
-      // Create response object for consistency with the rest of the function
-      const response = {
-        user_message: { id: userMessage.id, content: content.trim() },
-        assistant_message: {
-          id: assistantId,
-          content: assistantContent,
-          provider: actualProvider,
-          model: actualModel,
-        }
-      }
-
-      // Determine reasoning type based on content
-      const determineReasoningType = (content: string, query: string): 'coding' | 'analysis' | 'creative' | 'research' | 'conversation' => {
-        const lowerContent = content.toLowerCase()
-        const lowerQuery = query.toLowerCase()
-
-        if (lowerContent.includes('```') || lowerQuery.includes('code') || lowerQuery.includes('function')) {
-          return 'coding'
-        }
-        if (lowerQuery.includes('analyze') || lowerQuery.includes('explain') || lowerQuery.includes('why')) {
-          return 'analysis'
-        }
-        if (lowerQuery.includes('create') || lowerQuery.includes('write') || lowerQuery.includes('story')) {
-          return 'creative'
-        }
-        if (lowerQuery.includes('what') || lowerQuery.includes('research') || lowerQuery.includes('find')) {
-          return 'research'
-        }
-        return 'conversation'
-      }
-
-      // Update the placeholder message with final properties
-      const reasoningType = determineReasoningType(response.assistant_message.content, content)
-      const modelDisplayName = selectedModelData?.name || actualModel
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === assistantId
-            ? {
-              ...m,
-              content: response.assistant_message.content,
-              reasoningType,
-              chainOfThought: `I analyzed your request using ${modelDisplayName}. This model was selected to best handle your query. I applied systematic reasoning to understand your needs, gathered relevant context, synthesized the information, and formulated a comprehensive response. The reasoning process included: pattern recognition, logical inference, and knowledge integration to provide you with the most accurate and helpful answer.`,
-              processingTime: processingTime || Math.floor(800 + Math.random() * 1200), // Use actual processing time if available
-              confidence: Math.floor(85 + Math.random() * 15), // 85-100% confidence range
-            }
-            : m
-        )
-      )
-
-      // Update conversation metadata
-      if (user?.uid && actualThreadId !== 'new') {
-        await updateConversationMetadata(user.uid, actualThreadId, {
-          title:
-            messages.length === 1 // Only the user message at this point
-              ? content.substring(0, 50)
-              : undefined,
-          lastMessagePreview: response.assistant_message.content.substring(0, 100),
-        })
-      }
-    } catch (error) {
-      console.error('Error sending message:', error)
+    } catch (error: any) {
+      console.error('Error in handleSendMessage:', error)
       toast.error('Failed to send message. Please try again.')
-      // Remove both user and assistant placeholder messages on error
-      setMessages((prev) => prev.filter((m) => m.id !== userMessage.id && m.id !== assistantId))
-    } finally {
       setIsLoading(false)
     }
   }

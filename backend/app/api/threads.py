@@ -803,11 +803,60 @@ async def add_message(
     )
 
     if has_image_attachments:
-        # Force a multimodal-capable provider for image uploads
-        request.provider = ProviderType.GEMINI
-        request.model = "gemini-2.5-flash"
-        if not request.reason:
-            request.reason = "Vision/image understanding (Gemini 2.5 Flash - multimodal)"
+        # Analyze image and route to best AI model
+        from app.services.image_analyzer import analyze_image_and_route
+        
+        # Get first image attachment for analysis
+        image_attachment = next((a for a in request.attachments if (getattr(a, "type", "") or "").lower() == "image"), None)
+        
+        if image_attachment:
+            # Extract image data (base64)
+            image_data = getattr(image_attachment, "data", None) or getattr(image_attachment, "url", None)
+            
+            if image_data:
+                # Get API keys for analysis
+                api_keys_dict = {}
+                for provider_type in [ProviderType.GEMINI, ProviderType.OPENAI]:
+                    try:
+                        key = await get_api_key_for_org(db, org_id, provider_type)
+                        if key:
+                            api_keys_dict[provider_type.value] = key
+                    except Exception:
+                        continue
+                
+                # Analyze image and get routing decision
+                try:
+                    routing_result = await analyze_image_and_route(
+                        image_data=image_data,
+                        user_query=request.content,
+                        api_keys=api_keys_dict
+                    )
+                    
+                    request.provider = routing_result["provider"]
+                    request.model = routing_result["model"]
+                    if not request.reason:
+                        request.reason = routing_result["reason"]
+                    
+                    logger.info(f"🖼️ Image analyzed: {routing_result.get('image_type', 'unknown')} → {routing_result['provider'].value}/{routing_result['model']}")
+                except Exception as e:
+                    logger.error(f"Image analysis failed, defaulting to Gemini: {e}")
+                    # Fallback to Gemini
+                    request.provider = ProviderType.GEMINI
+                    request.model = "gemini-2.5-flash"
+                    if not request.reason:
+                        request.reason = "Vision/image understanding (Gemini 2.5 Flash - multimodal)"
+            else:
+                # No image data, default to Gemini
+                request.provider = ProviderType.GEMINI
+                request.model = "gemini-2.5-flash"
+                if not request.reason:
+                    request.reason = "Vision/image understanding (Gemini 2.5 Flash - multimodal)"
+        else:
+            # No image attachment found, default to Gemini
+            request.provider = ProviderType.GEMINI
+            request.model = "gemini-2.5-flash"
+            if not request.reason:
+                request.reason = "Vision/image understanding (Gemini 2.5 Flash - multimodal)"
     elif not request.provider or not request.model:
         routing_decision = await intelligent_router.route(
             db=db,
@@ -1377,11 +1426,64 @@ async def add_message_streaming(
     await rls_task  # Need RLS for router to query available providers
     
     if has_image_attachments:
-        provider_enum = ProviderType.GEMINI
-        model = "gemini-2.5-flash"
-        reason = forced_reason
-        validated_model = validate_and_get_model(provider_enum, model)
-        router_decision = None  # No router decision for forced routing
+        # Analyze image and route to best AI model
+        from app.services.image_analyzer import analyze_image_and_route
+        
+        # Get first image attachment for analysis
+        image_attachment = next((a for a in request.attachments if (getattr(a, "type", "") or "").lower() == "image"), None)
+        
+        if image_attachment:
+            # Extract image data (base64)
+            image_data = getattr(image_attachment, "data", None) or getattr(image_attachment, "url", None)
+            
+            if image_data:
+                # Get API keys for analysis
+                api_keys_dict = {}
+                for provider_type in [ProviderType.GEMINI, ProviderType.OPENAI]:
+                    try:
+                        key = await get_api_key_for_org(db, org_id, provider_type)
+                        if key:
+                            api_keys_dict[provider_type.value] = key
+                    except Exception:
+                        continue
+                
+                # Analyze image and get routing decision
+                try:
+                    routing_result = await analyze_image_and_route(
+                        image_data=image_data,
+                        user_query=rewritten_content or user_content,
+                        api_keys=api_keys_dict
+                    )
+                    
+                    provider_enum = routing_result["provider"]
+                    model = routing_result["model"]
+                    reason = routing_result["reason"]
+                    validated_model = validate_and_get_model(provider_enum, model)
+                    router_decision = None
+                    
+                    logger.info(f"🖼️ Image analyzed: {routing_result.get('image_type', 'unknown')} → {provider_enum.value}/{model}")
+                except Exception as e:
+                    logger.error(f"Image analysis failed, defaulting to Gemini: {e}")
+                    # Fallback to Gemini
+                    provider_enum = ProviderType.GEMINI
+                    model = "gemini-2.5-flash"
+                    reason = forced_reason
+                    validated_model = validate_and_get_model(provider_enum, model)
+                    router_decision = None
+            else:
+                # No image data, default to Gemini
+                provider_enum = ProviderType.GEMINI
+                model = "gemini-2.5-flash"
+                reason = forced_reason
+                validated_model = validate_and_get_model(provider_enum, model)
+                router_decision = None
+        else:
+            # No image attachment found, default to Gemini
+            provider_enum = ProviderType.GEMINI
+            model = "gemini-2.5-flash"
+            reason = forced_reason
+            validated_model = validate_and_get_model(provider_enum, model)
+            router_decision = None
     else:
         # PERFORMANCE OPTIMIZATION: Use fast keyword-based routing (10-30ms, no LLM blocking)
         # This unblocks streaming while still routing to the correct specialist model
