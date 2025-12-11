@@ -96,31 +96,115 @@ Syntra is a unified AI assistant platform that intelligently routes queries acro
 - **Qdrant** (via Docker)
 - **Redis** (via Docker)
 
-### Quick Reference
+### Quick Reference - Complete Setup Guide
+
+Follow these steps to set up your development environment (for both new setup and fresh pulls):
+
+#### Step 1: Clone & Pull Latest Changes
+```bash
+# First time only
+git clone https://github.com/rao305/Syntra.ai.git
+cd Syntra
+
+# Or if already cloned, pull latest changes
+git pull origin main
+```
+
+#### Step 2: Remove Old Python Environment (Fresh Setup)
+```bash
+# Remove any old/broken virtual environment
+rm -rf backend/venv
+```
+
+#### Step 3: Create Fresh Python Environment
+```bash
+cd backend
+python3.9 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+#### Step 4: Install Pinned Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+#### Step 5: Setup Environment Variables
+
+**Option A: Using AWS Credentials (Recommended for Team)**
 
 ```bash
-# 1. Clone and setup environment
-git clone https://github.com/your-org/syntra.git
-cd syntra
-./setup-env.sh  # Creates .env files from templates
+# Configure AWS credentials
+aws configure
+# Enter credentials from developer-credentials.txt:
+# - AWS Access Key ID: [your access key]
+# - AWS Secret Access Key: [your secret key]
+# - Default region: us-east-1
+# - Default output format: json
 
-# 2. Start infrastructure
+# Go back to root directory
+cd ..
+
+# Fetch all secrets from AWS Parameter Store
+./scripts/fetch-secrets.sh
+# This creates:
+# - backend/.env.local (with all backend variables)
+# - frontend/.env.local (with all frontend variables)
+
+# Verify everything loaded correctly
+./scripts/verify-all-secrets.sh
+```
+
+**Option B: Manual Setup (Local Development)**
+
+```bash
+cd ..
+./setup-env.sh
+# Interactively configure environment variables
+# Then edit backend/.env and frontend/.env.local manually
+```
+
+#### Step 6: Start Infrastructure Services
+```bash
+# Start Docker services (PostgreSQL, Qdrant, Redis)
 docker compose up -d
 
-# 3. Backend setup
-cd backend
-python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-alembic upgrade head
-python main.py
+# Verify services are running
+docker compose ps
+```
 
-# 4. Frontend setup (in new terminal)
+#### Step 7: Run Database Migrations
+```bash
+cd backend
+alembic upgrade head
+```
+
+#### Step 8: Start Backend Server
+```bash
+python main.py
+# OR use uvicorn for development
+uvicorn main:app --reload --port 8000
+```
+
+#### Step 9: Start Frontend (in new terminal)
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-**📝 Don't forget:** Edit `backend/.env` and `frontend/.env.local` after running `setup-env.sh`!
+#### Step 10: Access the Application
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+- **Qdrant Dashboard**: http://localhost:6333/dashboard
+
+---
+
+**📝 Important Notes:**
+- Always use `python3.9` or higher for virtual environment
+- Each developer should have their own fresh venv (don't share venv directory)
+- Environment files (.env, .env.local) are gitignored - never commit them
+- AWS credentials should come from `developer-credentials.txt`
 
 ### 1. Clone Repository
 
@@ -735,27 +819,178 @@ Comprehensive documentation is available:
 
 ---
 
-## 👥 Getting AWS Credentials
+## 👥 AWS Credentials & Secrets Management
 
-**For Team Members:**
-1. Ask your team lead for AWS access
-2. You'll receive credentials in `developer-credentials.txt`
-3. Run: `aws configure`
-4. Enter your credentials when prompted
-5. Run: `./scripts/fetch-secrets.sh`
-   - This fetches all secrets and creates:
-     - `backend/.env.local` (backend variables)
-     - `frontend/.env.local` (frontend variables)
-6. Verify: `./scripts/verify-all-secrets.sh` (optional but recommended)
+### For Team Members: Getting Started with AWS
 
-**For Team Leads:**
-1. Create AWS IAM users and policies (see `scripts/setup-iam-policy.json`)
-2. Generate access keys for each developer
-3. Share credentials in `developer-credentials.txt`
-4. Upload secrets to Parameter Store: `./scripts/setup-parameter-store.sh`
-   - Reads from both `backend/.env` and `frontend/.env.local`
-   - Uploads all 47 parameters with correct names and real values
-5. Verify upload: `./scripts/verify-all-secrets.sh`
+#### Prerequisites
+- You need AWS credentials from your team lead
+- You should have `developer-credentials.txt` with your access keys
+- AWS CLI installed: `brew install awscli` (macOS) or see [AWS CLI docs](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+
+#### Step-by-Step Setup
+
+**Step 1: Configure AWS Credentials**
+
+```bash
+aws configure
+```
+
+When prompted, enter:
+```
+AWS Access Key ID: [from developer-credentials.txt]
+AWS Secret Access Key: [from developer-credentials.txt]
+Default region: us-east-1
+Default output format: json
+```
+
+This creates `~/.aws/credentials` and `~/.aws/config` on your machine.
+
+**Step 2: Verify AWS Configuration**
+
+```bash
+# Check that AWS is configured correctly
+aws sts get-caller-identity
+# Output should show your AWS account info
+```
+
+**Step 3: Fetch Secrets from Parameter Store**
+
+```bash
+# From project root directory
+./scripts/fetch-secrets.sh
+
+# This fetches all 47+ parameters from AWS Parameter Store and creates:
+# - backend/.env.local (backend environment variables)
+# - frontend/.env.local (frontend environment variables)
+```
+
+**Step 4: Verify All Secrets Loaded**
+
+```bash
+# Verify that all required secrets are present
+./scripts/verify-all-secrets.sh
+
+# List all parameters in Parameter Store
+./scripts/list-all-parameters.sh
+```
+
+**Step 5: Continue with Setup**
+
+Your environment files are now ready! Continue with the rest of the setup:
+- Step 6 onwards from the **Quick Reference** section above
+
+#### Common AWS Issues
+
+| Issue | Solution |
+|-------|----------|
+| "Unable to locate credentials" | Run `aws configure` and ensure credentials are in `~/.aws/credentials` |
+| "UnauthorizedOperation" | Check that your IAM user has `ssm:GetParameter` permissions |
+| "Parameter not found" | Ensure your region is `us-east-1` where parameters are stored |
+| "Access Denied" | Verify credentials with `aws sts get-caller-identity` |
+
+---
+
+### For Team Leads: Setting Up AWS for the Team
+
+#### Prerequisites
+- AWS Account with administrator access
+- AWS CLI installed and configured
+- At least one IAM user created for secrets management
+
+#### Step-by-Step Setup
+
+**Step 1: Create IAM Policy for Developers**
+
+```bash
+# Create IAM policy from template (see scripts/setup-iam-policy.json)
+# This policy allows developers to read parameters from Parameter Store
+aws iam create-policy \
+  --policy-name SyntraParameterStoreAccess \
+  --policy-document file://scripts/setup-iam-policy.json
+```
+
+**Step 2: Create IAM Users for Each Developer**
+
+```bash
+# Create IAM user
+aws iam create-user --user-name developer-1
+
+# Attach policy to user
+aws iam attach-user-policy \
+  --user-name developer-1 \
+  --policy-arn arn:aws:iam::YOUR_ACCOUNT_ID:policy/SyntraParameterStoreAccess
+
+# Create access keys
+aws iam create-access-key --user-name developer-1
+```
+
+**Step 3: Share Credentials with Developers**
+
+Create a secure `developer-credentials.txt` file with the format:
+```
+DEVELOPER CREDENTIALS FOR SYNTRA
+
+Access Key ID: AKIA...
+Secret Access Key: wJ+...
+
+AWS Region: us-east-1
+
+DO NOT SHARE OR COMMIT THIS FILE!
+Each developer needs their own credentials.
+```
+
+Send to developers through secure channel (not email/Slack).
+
+**Step 4: Upload Secrets to Parameter Store**
+
+```bash
+# First, ensure your backend/.env and frontend/.env.local have the latest values
+# Then run:
+./scripts/setup-parameter-store.sh
+
+# This uploads all parameters with names:
+# - /syntra/backend/DATABASE_URL
+# - /syntra/backend/QDRANT_URL
+# - /syntra/frontend/NEXT_PUBLIC_API_URL
+# ... (and 44+ more parameters)
+
+# Verify upload
+./scripts/verify-all-secrets.sh
+```
+
+**Step 5: Update All Parameters**
+
+If you need to update a parameter later:
+
+```bash
+# Update single parameter
+aws ssm put-parameter \
+  --name /syntra/backend/DATABASE_URL \
+  --value "postgresql+asyncpg://..." \
+  --overwrite
+
+# Or update multiple from script
+./scripts/setup-parameter-store.sh  # Re-run to update all
+```
+
+#### Managing Credentials Securely
+
+**Best Practices:**
+1. ✅ Rotate developer credentials every 90 days
+2. ✅ Never commit credentials to git
+3. ✅ Use AWS Secrets Manager for production secrets
+4. ✅ Use individual IAM users per developer (not shared credentials)
+5. ✅ Enable CloudTrail to audit Parameter Store access
+6. ✅ Use separate AWS accounts for prod/staging/dev
+
+**Security Checklist:**
+- [ ] All parameters use `/syntra/` prefix for organization
+- [ ] Parameters are stored in `us-east-1` region
+- [ ] IAM policies follow least-privilege principle
+- [ ] Developer credentials are rotated regularly
+- [ ] Access logs are monitored
+- [ ] Sensitive values are not logged anywhere
 
 ---
 
