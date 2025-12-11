@@ -597,7 +597,7 @@ export default function ConversationPage() {
 
         if (error?.message) {
           if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            errorMessage = 'Cannot connect to server. Please check if the backend is running at http://127.0.0.1:8000'
+            errorMessage = `Cannot connect to server. Please check if the backend is running at ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}`
           } else if (error.message.includes('PayloadTooLargeError') || error.message.includes('413')) {
             errorMessage = 'Image is too large. Please use a smaller image or compress it.'
           } else {
