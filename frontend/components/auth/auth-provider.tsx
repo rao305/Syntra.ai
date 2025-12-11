@@ -1,9 +1,9 @@
 "use client";
 
 import { API_BASE_URL } from "@/lib/api";
-import { clearSession, saveSession, getStoredSession } from "@/lib/session";
+import { clearSession, getStoredSession, saveSession } from "@/lib/session";
 import { useAuth as useClerkAuth, useUser } from "@clerk/nextjs";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextType {
@@ -35,6 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         // First, try to load from stored session (for faster initialization)
         const storedSession = getStoredSession();
+
         if (storedSession) {
           setOrgId(storedSession.orgId);
           setAccessToken(storedSession.accessToken);

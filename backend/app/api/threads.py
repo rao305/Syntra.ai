@@ -19,7 +19,7 @@ from app.models.provider_key import ProviderType
 from app.models.audit import AuditLog
 from app.models.org import Org
 from app.security import set_rls_context
-from app.api.deps import require_org_id
+from app.api.deps import require_org_id, get_current_user_optional, CurrentUser
 from app.adapters.base import ProviderAdapterError
 from app.services.provider_keys import get_api_key_for_org
 from app.services.provider_dispatch import call_provider_adapter, call_provider_adapter_streaming
@@ -330,6 +330,7 @@ async def list_threads(
     limit: int = 50,
     archived: Optional[bool] = None,  # None = exclude archived, True = only archived, False = only non-archived
     org_id: str = Depends(require_org_id),
+    current_user: Optional[CurrentUser] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """List all threads for the organization, sorted by most recent first.
@@ -340,10 +341,34 @@ async def list_threads(
                  True = only archived, False = only non-archived
     """
     # Set RLS context
-    await set_rls_context(db, org_id)
+    user_id = current_user.id if current_user else None
+    await set_rls_context(db, org_id, user_id)
 
-    # Build query
+    # Build query - filter by org_id and creator_id if user is authenticated
     query = select(Thread).where(Thread.org_id == org_id)
+    
+    # CRITICAL FIX: Filter threads by creator_id to prevent cross-user data leaks
+    # Also handle legacy threads with creator_id: null - show them only if user has messages in that thread
+    if user_id:
+        from sqlalchemy import or_, exists, and_
+        # Show threads where:
+        # 1. creator_id matches the user (new threads), OR
+        # 2. creator_id is null AND user has messages in that thread (legacy threads)
+        subquery = exists().where(
+            and_(
+                Message.thread_id == Thread.id,
+                Message.user_id == user_id
+            )
+        )
+        query = query.where(
+            or_(
+                Thread.creator_id == user_id,
+                and_(
+                    Thread.creator_id.is_(None),
+                    subquery
+                )
+            )
+        )
     
     # Filter archived threads (default: exclude archived)
     if archived is None:
@@ -385,6 +410,7 @@ async def search_threads(
     limit: int = 50,
     archived: Optional[bool] = None,
     org_id: str = Depends(require_org_id),
+    current_user: Optional[CurrentUser] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """Search threads by title or message preview using full-text search.
@@ -395,7 +421,8 @@ async def search_threads(
         archived: Filter by archived status. None = exclude archived (default),
                  True = only archived, False = only non-archived
     """
-    await set_rls_context(db, org_id)
+    user_id = current_user.id if current_user else None
+    await set_rls_context(db, org_id, user_id)
 
     if not q or not q.strip():
         raise HTTPException(status_code=400, detail="Search query cannot be empty")
@@ -411,6 +438,10 @@ async def search_threads(
             Thread.last_message_preview.ilike(search_term)
         )
     )
+    
+    # CRITICAL FIX: Filter threads by creator_id to prevent cross-user data leaks
+    if user_id:
+        query = query.where(Thread.creator_id == user_id)
     
     # Filter archived threads (default: exclude archived)
     if archived is None:
@@ -452,15 +483,19 @@ async def archive_thread(
     thread_id: str,
     archived: bool = Query(..., description="True to archive, False to unarchive"),
     org_id: str = Depends(require_org_id),
+    current_user: Optional[CurrentUser] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """Archive or unarchive a thread."""
-    await set_rls_context(db, org_id)
+    user_id = current_user.id if current_user else None
+    await set_rls_context(db, org_id, user_id)
 
-    # Get thread
-    result = await db.execute(
-        select(Thread).where(Thread.id == thread_id, Thread.org_id == org_id)
-    )
+    # Get thread - filter by creator_id if user is authenticated
+    query = select(Thread).where(Thread.id == thread_id, Thread.org_id == org_id)
+    if user_id:
+        query = query.where(Thread.creator_id == user_id)
+    
+    result = await db.execute(query)
     thread = result.scalar_one_or_none()
 
     if not thread:
@@ -490,10 +525,12 @@ async def update_thread(
     thread_id: str,
     request: UpdateThreadRequest,
     org_id: str = Depends(require_org_id),
+    current_user: Optional[CurrentUser] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """Update thread title."""
-    await set_rls_context(db, org_id)
+    user_id = current_user.id if current_user else None
+    await set_rls_context(db, org_id, user_id)
 
     # Get thread
     result = await db.execute(
@@ -519,15 +556,19 @@ async def update_thread_settings(
     thread_id: str,
     request: UpdateThreadSettingsRequest,
     org_id: str = Depends(require_org_id),
+    current_user: Optional[CurrentUser] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """Update thread settings (mode, models, temperature, etc.)."""
-    await set_rls_context(db, org_id)
+    user_id = current_user.id if current_user else None
+    await set_rls_context(db, org_id, user_id)
 
-    # Get thread
-    result = await db.execute(
-        select(Thread).where(Thread.id == thread_id, Thread.org_id == org_id)
-    )
+    # Get thread - filter by creator_id if user is authenticated
+    query = select(Thread).where(Thread.id == thread_id, Thread.org_id == org_id)
+    if user_id:
+        query = query.where(Thread.creator_id == user_id)
+    
+    result = await db.execute(query)
     thread = result.scalar_one_or_none()
 
     if not thread:
@@ -636,30 +677,31 @@ async def delete_all_threads(
 async def create_thread(
     request: CreateThreadRequest,
     org_id: str = Depends(require_org_id),
+    current_user: Optional[CurrentUser] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """Create a new thread."""
     from app.models.user import User
 
     # Set RLS context
-    await set_rls_context(db, org_id)
+    user_id = current_user.id if current_user else None
+    await set_rls_context(db, org_id, user_id)
 
-    # Resolve creator_id: if user_id is provided, check if it exists in users table
-    # Otherwise set to None (the foreign key allows NULL)
+    # CRITICAL FIX: Use authenticated user's ID from JWT token, not request.user_id
+    # This ensures threads are properly associated with the correct user
     creator_id = None
-    if request.user_id:
-        # First try to find user by ID directly (if internal UUID was passed)
+    if current_user:
+        # Use the authenticated user's ID from the JWT token
+        creator_id = current_user.id
+    elif request.user_id:
+        # Fallback: if no authenticated user but user_id provided, try to find user
         result = await db.execute(
             select(User).where(User.id == request.user_id, User.org_id == org_id)
         )
         user = result.scalar_one_or_none()
-
         if user:
             creator_id = user.id
         else:
-            # User not found by ID - this happens when Clerk user ID is passed
-            # The frontend should ideally pass internal user ID, but for now
-            # we'll just leave creator_id as None to avoid FK constraint violation
             print(f"⚠️ User '{request.user_id}' not found in users table - thread will have no creator")
 
     # Create thread
@@ -684,14 +726,16 @@ async def add_message(
     thread_id: str,
     request: AddMessageRequest,
     org_id: str = Depends(require_org_id),
+    current_user: Optional[CurrentUser] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """Add a message to a thread with optional multi-agent collaboration."""
     print(f"🔍 DEBUG: add_message called - collaboration_mode={request.collaboration_mode}, content={request.content[:50]}...")
-    await set_rls_context(db, org_id)
+    user_id = current_user.id if current_user else None
+    await set_rls_context(db, org_id, user_id)
     await memory_guard.ensure_health()
 
-    thread = await _get_thread(db, thread_id, org_id)
+    thread = await _get_thread(db, thread_id, org_id, user_id)
 
     # Check if collaboration mode is enabled
     if request.collaboration_mode:
@@ -1753,7 +1797,8 @@ async def add_message_streaming(
         async def background_cleanup():
             try:
                 # Now do DB validation (non-blocking for streaming)
-                thread = await _get_thread(db, thread_id, org_id)
+                # Note: user_id not available in background task, but thread access already validated
+                thread = await _get_thread(db, thread_id, org_id, None)
                 org = await _get_org(db, org_id)
                 request_limit = org.requests_per_day or settings.default_requests_per_day
                 token_limit = org.tokens_per_day or settings.default_tokens_per_day
@@ -2095,11 +2140,13 @@ async def add_message_streaming(
 async def get_thread_audit(
     thread_id: str,
     org_id: str = Depends(require_org_id),
+    current_user: Optional[CurrentUser] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """Return the latest audit entries for a thread."""
-    await set_rls_context(db, org_id)
-    await _get_thread(db, thread_id, org_id)
+    user_id = current_user.id if current_user else None
+    await set_rls_context(db, org_id, user_id)
+    await _get_thread(db, thread_id, org_id, user_id)
 
     stmt = (
         select(AuditLog)
@@ -2138,11 +2185,15 @@ async def cancel_request(request_id: str, org_id: str = Depends(require_org_id))
         return {"status": "not_found", "request_id": request_id, "message": "Request not found or already completed"}
 
 
-async def _get_thread(db: AsyncSession, thread_id: str, org_id: str) -> Thread:
+async def _get_thread(db: AsyncSession, thread_id: str, org_id: str, user_id: Optional[str] = None) -> Thread:
     stmt = select(Thread).where(
         Thread.id == thread_id,
         Thread.org_id == org_id,
     )
+    # CRITICAL FIX: Filter by creator_id to prevent cross-user data access
+    if user_id:
+        stmt = stmt.where(Thread.creator_id == user_id)
+    
     result = await db.execute(stmt)
     thread = result.scalar_one_or_none()
     if not thread:
@@ -2560,17 +2611,21 @@ async def collaborate_thread(
 async def get_thread(
     thread_id: str,
     org_id: str = Depends(require_org_id),
+    current_user: Optional[CurrentUser] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """Get thread details with messages."""
-    # Set RLS context
-    await set_rls_context(db, org_id)
+    user_id = current_user.id if current_user else None
+    await set_rls_context(db, org_id, user_id)
 
-    # Get thread with messages
+    # Get thread with messages - filter by creator_id if user is authenticated
     stmt = select(Thread).where(
         Thread.id == thread_id,
         Thread.org_id == org_id
     )
+    if user_id:
+        stmt = stmt.where(Thread.creator_id == user_id)
+    
     result = await db.execute(stmt)
     thread = result.scalar_one_or_none()
 
@@ -2611,11 +2666,13 @@ async def get_thread(
 async def get_thread_audit(
     thread_id: str,
     org_id: str = Depends(require_org_id),
+    current_user: Optional[CurrentUser] = Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db)
 ):
     """Return the latest audit entries for a thread."""
-    await set_rls_context(db, org_id)
-    await _get_thread(db, thread_id, org_id)
+    user_id = current_user.id if current_user else None
+    await set_rls_context(db, org_id, user_id)
+    await _get_thread(db, thread_id, org_id, user_id)
 
     stmt = (
         select(AuditLog)
@@ -2654,11 +2711,15 @@ async def cancel_request(request_id: str, org_id: str = Depends(require_org_id))
         return {"status": "not_found", "request_id": request_id, "message": "Request not found or already completed"}
 
 
-async def _get_thread(db: AsyncSession, thread_id: str, org_id: str) -> Thread:
+async def _get_thread(db: AsyncSession, thread_id: str, org_id: str, user_id: Optional[str] = None) -> Thread:
     stmt = select(Thread).where(
         Thread.id == thread_id,
         Thread.org_id == org_id,
     )
+    # CRITICAL FIX: Filter by creator_id to prevent cross-user data access
+    if user_id:
+        stmt = stmt.where(Thread.creator_id == user_id)
+    
     result = await db.execute(stmt)
     thread = result.scalar_one_or_none()
     if not thread:

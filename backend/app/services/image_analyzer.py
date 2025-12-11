@@ -229,3 +229,4 @@ def _route_based_on_analysis(
         "gemini-2.5-flash",
         f"Image detected ({image_type}) - using Gemini Flash for vision analysis"
     )
+

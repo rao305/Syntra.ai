@@ -127,7 +127,7 @@ async def exchange_clerk_token(
                 org_id=default_org.id,
                 name=clerk_user.get("name") or clerk_user.get("given_name", ""),
                 email_verified=datetime.utcnow() if clerk_user.get("email_verified") else None,
-                role=UserRole.MEMBER,
+                role=UserRole.member,
             )
             db.add(user)
             await db.flush()

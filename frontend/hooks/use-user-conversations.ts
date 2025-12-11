@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   ConversationMetadata,
   subscribeToUserConversations,
 } from "@/lib/firestore-conversations";
+import { useEffect, useState } from "react";
 
 export function useUserConversations(userId?: string | null) {
   const [conversations, setConversations] = useState<ConversationMetadata[]>([]);
@@ -22,7 +22,9 @@ export function useUserConversations(userId?: string | null) {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+    };
   }, [userId]);
 
   return { conversations, loading };

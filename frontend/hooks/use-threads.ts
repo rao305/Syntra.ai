@@ -43,11 +43,13 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [previousUserId, setPreviousUserId] = useState<string | undefined>(undefined);
 
   const fetchThreads = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
+
       // Fetch both active and archived threads so we can toggle between views
       const [activeData, archivedData] = await Promise.all([
         apiFetch<Thread[]>("/threads/?limit=50&archived=false", orgId),
@@ -65,7 +67,23 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [orgId]);
+  }, [orgId, user?.id]); // CRITICAL FIX: Add user?.id dependency to refetch when user changes
+
+  // CRITICAL FIX: Clear threads only when user actually changes (not on initial load)
+  useEffect(() => {
+    const currentUserId = user?.id;
+
+    // Only clear if we had a previous user and it's different from current user
+    // This prevents clearing on initial load when user?.id goes from undefined to a value
+    if (previousUserId !== undefined && previousUserId !== currentUserId) {
+      setThreads([]); // Clear threads immediately when user changes
+    }
+
+    // Update previousUserId for next comparison
+    setPreviousUserId(currentUserId);
+    // Note: fetchThreads will be called automatically by the existing useEffect below
+    // since fetchThreads now depends on user?.id
+  }, [user?.id, previousUserId]);
 
   const createThread = useCallback(
     async (params?: {
