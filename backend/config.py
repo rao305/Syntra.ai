@@ -19,11 +19,11 @@ class Settings(BaseSettings):
 
     # Qdrant
     qdrant_url: str
-    qdrant_api_key: str
+    qdrant_api_key: Optional[str] = None
 
     # Upstash Redis
     upstash_redis_url: str
-    upstash_redis_token: str
+    upstash_redis_token: Optional[str] = None
 
     # Security
     secret_key: str
@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     encryption_key: str  # Fernet key for provider API keys
 
     # Email
-    email_from: str
+    email_from: Optional[str] = None
     smtp_host: Optional[str] = None
     smtp_port: int = 587
     smtp_user: Optional[str] = None
@@ -40,10 +40,10 @@ class Settings(BaseSettings):
     resend_api_key: Optional[str] = None
 
     # Stripe
-    stripe_secret_key: str
-    stripe_publishable_key: str
-    stripe_webhook_secret: str
-    stripe_price_id: str
+    stripe_secret_key: Optional[str] = None
+    stripe_publishable_key: Optional[str] = None
+    stripe_webhook_secret: Optional[str] = None
+    stripe_price_id: Optional[str] = None
 
     # Frontend
     frontend_url: str = "http://localhost:3000"

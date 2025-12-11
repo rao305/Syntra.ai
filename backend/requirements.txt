@@ -1,44 +1,44 @@
 # FastAPI & Server
-fastapi
-uvicorn[standard]
-python-multipart
-firebase-admin
+fastapi==0.124.0
+uvicorn[standard]==0.38.0
+python-multipart==0.0.7
+firebase-admin==7.1.0
 
 # Database
-asyncpg
-sqlalchemy[asyncio]
-alembic
+asyncpg==0.31.0
+sqlalchemy[asyncio]==2.1.1
+alembic==1.16.5
 
 # Vector DB
-qdrant-client
+qdrant-client==1.16.1
 
 # Redis
-upstash-redis
+upstash-redis==1.5.0
 
 # Auth & Security
-python-jose[cryptography]
-passlib[bcrypt]
-python-dotenv
-cryptography
+python-jose[cryptography]==3.5.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.2.1
+cryptography==46.0.3
 
 # LLM Providers
-openai
-google-generativeai
-httpx[http2]
+openai==2.9.0
+google-generativeai==0.8.5
+httpx[http2]==0.28.1
 
 # Utilities
-pydantic
-pydantic-settings
+pydantic==2.12.5
+pydantic-settings==2.11.0
 
 # Media Generation
-matplotlib
-numpy
+matplotlib==3.9.4
+numpy==2.0.2
 
 # Stripe
-stripe
+stripe==14.0.1
 
 # Development
-pytest
-pytest-asyncio
-black
-ruff
+pytest==8.4.2
+pytest-asyncio==1.2.0
+black==25.11.0
+ruff==0.14.8

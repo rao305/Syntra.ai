@@ -7,6 +7,9 @@ node_modules/
 __pycache__/
 *.pyc
 .venv/
+venv/
+backend/venv/
+env/
 
 # Env & local
 .env
