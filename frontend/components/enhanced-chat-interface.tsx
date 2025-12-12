@@ -506,9 +506,11 @@ export function EnhancedChatInterface({
               )}>
                 {message.role === 'user' ? (
                   <div className="flex justify-end">
-                    <div className="max-w-[80%] text-zinc-100 leading-relaxed text-right">
-                      <div className="text-xs text-zinc-400 mb-1">You</div>
-                      {message.content}
+                    <div className="flex flex-col items-end gap-2 max-w-[55%]">
+                      <div className="text-xs text-zinc-400 px-1">You</div>
+                      <div className="text-white text-[15px] leading-relaxed px-1 break-words">
+                        {message.content}
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -541,20 +543,23 @@ export function EnhancedChatInterface({
                         </div>
                       )}
 
-                      {/* Model Information - Minimal text display */}
+                      {/* Model Information - Always show for assistant messages */}
                       {message.role === 'assistant' && (() => {
                         const displayName = getSupportedModelDisplayName(message.modelName)
-                        return displayName ? (
+                        // Always show model name - use supported name if available, otherwise use raw modelName
+                        const modelToDisplay = displayName || message.modelName || 'Unknown Model'
+
+                        return (
                           <div className="pt-2 text-xs text-zinc-500 space-y-0.5">
                             <div>
                               <span>Model: </span>
-                              <span className="text-zinc-400 font-medium">{displayName}</span>
+                              <span className="text-zinc-400 font-medium">{modelToDisplay}</span>
                               {message.processingTime && (
                                 <span className="ml-3 text-zinc-600">• {message.processingTime}ms</span>
                               )}
                             </div>
                           </div>
-                        ) : null
+                        )
                       })()}
 
                       {/* Collaboration Pipeline Details - Collapsible */}
@@ -645,13 +650,14 @@ export function EnhancedChatInterface({
 
       {/* Enhanced Input Area */}
       <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent pt-8 pb-4 border-t border-zinc-800/50">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-2xl mx-auto">
           <ImageInputArea
             onSendMessage={onSendMessage}
             selectedModel={selectedModel}
             onModelSelect={onModelSelect}
             isLoading={isLoading}
             autoRoutedModel={autoRoutedModel}
+            showActionButtons={messages.length === 0}
           />
           <div className="flex justify-end mt-2">
             <button className="p-2 text-zinc-500 hover:text-zinc-400 transition-colors rounded-full hover:bg-zinc-900">

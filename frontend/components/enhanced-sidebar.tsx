@@ -87,16 +87,31 @@ export function EnhancedSidebar({
     mutate: refreshThreads,
   } = useThreads()
 
-  // Refresh threads when navigating to a thread page (to show newly created threads)
+  // Refresh threads ONLY when creating a new thread (after redirect from new conversation)
+  // Don't refresh on every thread navigation to avoid jitter when switching between chats
   useEffect(() => {
-    if (pathname?.startsWith('/conversations/') && pathname !== '/conversations') {
-      // Small delay to ensure backend has processed the thread creation
-      const timer = setTimeout(() => {
-        refreshThreads()
-      }, 500)
-      return () => clearTimeout(timer)
+    if (pathname === '/conversations/new') {
+      // We're on the new conversation page - don't refresh yet
+      return
     }
-  }, [pathname, refreshThreads])
+
+    // Only refresh if we came from the new page to show the newly created thread
+    // This happens when user creates a new chat and is redirected to the new thread
+    // We check if there's a new thread ID that's not in our list yet
+    if (pathname?.startsWith('/conversations/') && pathname !== '/conversations') {
+      const threadIdFromPath = pathname.split('/conversations/')[1]
+      // Check if this thread ID exists in our current threads list
+      const threadExists = threads.some(t => t.id === threadIdFromPath)
+
+      // Only refresh if the thread doesn't exist yet (meaning it was just created)
+      if (!threadExists && threadIdFromPath && threadIdFromPath !== 'new') {
+        const timer = setTimeout(() => {
+          refreshThreads()
+        }, 300) // Reduced delay for faster refresh
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [pathname, refreshThreads, threads])
 
   const handleSearch = useCallback(
     async (query: string) => {

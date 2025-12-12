@@ -100,7 +100,7 @@ export default function ConversationPage() {
   // Load thread messages on mount or when threadId changes
   React.useEffect(() => {
     if (!threadId || threadId === 'new') {
-      // For new conversations, clear messages
+      // For new conversations, clear messages immediately
       setMessages([])
       setIsLoadingHistory(false)
       return
@@ -109,8 +109,8 @@ export default function ConversationPage() {
     const loadMessages = async () => {
       try {
         setIsLoadingHistory(true)
-        // Clear previous messages while loading new ones
-        setMessages([])
+        // Don't clear messages immediately - keep old messages visible for smooth transition
+        // Instead, we'll replace them once new ones load
 
         const response = await apiFetch<{ messages: any[] }>(
           `/threads/${threadId}`,
@@ -151,13 +151,15 @@ export default function ConversationPage() {
                 ttftMs: ttfsMs,  // Time to first token in ms
               }
             })
+          // Replace messages with new ones (smooth transition)
           setMessages(formattedMessages)
         } else {
-          // No messages found or invalid response
+          // No messages found or invalid response - clear after failing to load
           setMessages([])
         }
       } catch (error) {
         console.error('Error loading messages:', error)
+        // Only clear on error, not on initial load
         setMessages([])
       } finally {
         setIsLoadingHistory(false)
@@ -380,7 +382,7 @@ export default function ConversationPage() {
         let processingTime = 0
         let ttftMs: number | undefined = undefined
         let actualProvider = selectedModelData?.provider || 'unknown'
-        let actualModel = selectedModel
+        let actualModel = selectedModel !== 'auto' ? selectedModel : undefined
         let messageAdded = false
 
         if (reader) {
@@ -437,6 +439,8 @@ export default function ConversationPage() {
 
                       // Add message on first delta if not already added
                       if (!messageAdded) {
+                        // Ensure we have a modelName - use actualModel, then selectedModel (if not 'auto'), then 'Processing'
+                        const messageModelName = actualModel || (selectedModel !== 'auto' ? selectedModel : 'Processing')
                         const initialMessage: Message = {
                           id: assistantId,
                           role: 'assistant',
@@ -445,29 +449,24 @@ export default function ConversationPage() {
                             hour: '2-digit',
                             minute: '2-digit',
                           }),
-                          // Use actualModel if it's been set (from model_info), otherwise use selectedModel if not 'auto'
-                          modelId: actualModel && actualModel !== 'auto' ? actualModel : (selectedModel !== 'auto' ? selectedModel : undefined),
-                          modelName: actualModel && actualModel !== 'auto' ? actualModel : (selectedModel !== 'auto' ? selectedModel : undefined),
+                          modelId: messageModelName,
+                          modelName: messageModelName,
                           provider: actualProvider && actualProvider !== 'unknown' ? actualProvider : undefined,
                         }
                         setMessages((prev) => [...prev, initialMessage])
                         messageAdded = true
                       } else {
                         // Update the message as we receive chunks
-                        // Always update modelName/modelId if actualModel has been set from backend
+                        // Always ensure modelName is set and consistent
                         setMessages((prev) =>
                           prev.map((m) =>
                             m.id === assistantId
                               ? {
                                 ...m,
                                 content: assistantContent,
-                                // Update modelName if actualModel has been set and is valid (from backend model_info)
-                                modelName: actualModel && actualModel !== 'auto'
-                                  ? actualModel
-                                  : (m.modelName || (selectedModel !== 'auto' ? selectedModel : undefined)),
-                                modelId: actualModel && actualModel !== 'auto'
-                                  ? actualModel
-                                  : (m.modelId || (selectedModel !== 'auto' ? selectedModel : undefined)),
+                                // Always have a modelName: use actualModel, fall back to existing modelName, then selectedModel, then 'Processing'
+                                modelName: actualModel || m.modelName || (selectedModel !== 'auto' ? selectedModel : 'Processing'),
+                                modelId: actualModel || m.modelId || (selectedModel !== 'auto' ? selectedModel : 'Processing'),
                                 provider: actualProvider !== 'unknown' ? actualProvider : m.provider,
                               }
                               : m
@@ -499,29 +498,18 @@ export default function ConversationPage() {
           }
 
           // Update metrics AFTER streaming completes (don't show stats until response is done)
-          // Ensure modelName is always set from actualModel (which comes from backend)
-          // Priority: actualModel (from backend) > message.modelName > selectedModel (if not 'auto')
+          // Ensure modelName is ALWAYS set and never undefined
+          // Priority: actualModel (from backend) > message.modelName > selectedModel (if not 'auto') > 'Unknown Model'
           setMessages((prev) =>
             prev.map((m) => {
               if (m.id === assistantId) {
-                // Determine the final model name - prioritize actualModel from backend
-                let finalModelName: string | undefined = undefined
-
-                if (actualModel && actualModel !== 'auto') {
-                  // Backend sent a specific model - use it
-                  finalModelName = actualModel
-                } else if (m.modelName && m.modelName !== 'auto') {
-                  // Use what's already in the message
-                  finalModelName = m.modelName
-                } else if (selectedModel && selectedModel !== 'auto') {
-                  // Fallback to selectedModel if it's not 'auto'
-                  finalModelName = selectedModel
-                }
+                // Determine the final model name - always ensure we have a value
+                let finalModelName = actualModel || m.modelName || (selectedModel !== 'auto' ? selectedModel : 'Unknown Model')
 
                 return {
                   ...m,
                   modelName: finalModelName,
-                  modelId: finalModelName || m.modelId,
+                  modelId: finalModelName,
                   provider: actualProvider && actualProvider !== 'unknown' ? actualProvider : m.provider,
                   ttftMs: ttftMs,
                   processingTime: processingTime || Math.floor(800 + Math.random() * 1200),

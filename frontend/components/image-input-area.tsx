@@ -31,6 +31,7 @@ interface ImageInputAreaProps {
   onModelSelect: (modelId: string) => void
   isLoading?: boolean
   autoRoutedModel?: string | null
+  showActionButtons?: boolean
 }
 
 export function ImageInputArea({
@@ -38,7 +39,8 @@ export function ImageInputArea({
   selectedModel,
   onModelSelect,
   isLoading = false,
-  autoRoutedModel
+  autoRoutedModel,
+  showActionButtons = true
 }: ImageInputAreaProps) {
   const [isModelOpen, setIsModelOpen] = useState(false)
   const [inputValue, setInputValue] = useState('')
@@ -188,18 +190,20 @@ export function ImageInputArea({
 
   return (
     <div className="relative group w-full">
-      {/* Suggestion Chips - Above Input */}
-      <div className="flex flex-wrap gap-3 mb-6 justify-center items-center">
-        <button className="px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all text-sm text-zinc-300 hover:text-zinc-100 font-medium">
-          💡 Analyze Data
-        </button>
-        <button className="px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all text-sm text-zinc-300 hover:text-zinc-100 font-medium">
-          💻 Write Code
-        </button>
-        <button className="px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all text-sm text-zinc-300 hover:text-zinc-100 font-medium">
-          ✨ Brainstorm Ideas
-        </button>
-      </div>
+      {/* Suggestion Chips - Above Input (only show on first message) */}
+      {showActionButtons && (
+        <div className="flex flex-wrap gap-3 mb-6 justify-center items-center">
+          <button className="px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all text-sm text-zinc-300 hover:text-zinc-100 font-medium">
+            💡 Analyze Data
+          </button>
+          <button className="px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all text-sm text-zinc-300 hover:text-zinc-100 font-medium">
+            💻 Write Code
+          </button>
+          <button className="px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all text-sm text-zinc-300 hover:text-zinc-100 font-medium">
+            ✨ Brainstorm Ideas
+          </button>
+        </div>
+      )}
 
       {/* Main Input Container with Glow */}
       <div className="relative">
@@ -208,7 +212,7 @@ export function ImageInputArea({
 
         {/* Main Input Container */}
         <div
-          className={`relative bg-gradient-to-b from-zinc-800/50 to-zinc-900/50 border rounded-2xl p-4 backdrop-blur-sm transition-all duration-200 shadow-2xl shadow-blue-500/0 group-hover:shadow-blue-500/10 ${isDragOver ? 'border-blue-400/50 bg-blue-950/30' : 'border-zinc-700/50'
+          className={`relative bg-gradient-to-b from-zinc-800/50 to-zinc-900/50 border rounded-2xl p-3 backdrop-blur-sm transition-all duration-200 shadow-2xl shadow-blue-500/0 group-hover:shadow-blue-500/10 ${isDragOver ? 'border-blue-400/50 bg-blue-950/30' : 'border-zinc-700/50'
             }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -250,12 +254,12 @@ export function ImageInputArea({
           value={inputValue}
           onChange={handleTextareaChange}
           onKeyDown={handleKeyDown}
-          className="w-full bg-transparent text-white placeholder:text-zinc-500 resize-none outline-none min-h-[56px] text-base px-2 py-1 font-medium"
+          className="w-full bg-transparent text-white placeholder:text-zinc-500 resize-none outline-none min-h-[44px] text-base px-2 py-1 font-medium"
           placeholder={images.length > 0 ? "Ask me about these images..." : "How can I help you today? You can paste or drag images here!"}
           disabled={isLoading}
         />
 
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-700/30">
+        <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-700/30">
           <div className="flex items-center gap-2">
             {/* File Upload Button */}
             <button

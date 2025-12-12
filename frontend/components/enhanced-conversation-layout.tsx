@@ -78,18 +78,20 @@ export function EnhancedConversationLayout({
         currentThreadId={currentThreadId}
         useNewThreadsSystem={useNewThreadsSystem}
       />
-      <main className="flex-1 flex flex-col h-full relative transition-all duration-300 ease-in-out bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
-        <EnhancedChatInterface
-          messages={messages}
-          onSendMessage={onSendMessage}
-          onUpdateMessage={onUpdateMessage}
-          isLoading={isLoading}
-          selectedModel={selectedModel}
-          onModelSelect={onModelSelect}
-          onContinueWorkflow={onContinueWorkflow}
-          autoRoutedModel={autoRoutedModel}
-          collabPanel={collabPanel}
-        />
+      <main className="flex-1 flex flex-col h-full relative bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
+          <EnhancedChatInterface
+            messages={messages}
+            onSendMessage={onSendMessage}
+            onUpdateMessage={onUpdateMessage}
+            isLoading={isLoading}
+            selectedModel={selectedModel}
+            onModelSelect={onModelSelect}
+            onContinueWorkflow={onContinueWorkflow}
+            autoRoutedModel={autoRoutedModel}
+            collabPanel={collabPanel}
+          />
+        </div>
       </main>
     </div>
   )
