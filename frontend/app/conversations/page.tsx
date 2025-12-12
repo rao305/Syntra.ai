@@ -59,16 +59,22 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
   const { conversations: userConversations } = useUserConversations(user?.id || undefined)
 
   const [messages, setMessages] = React.useState<Message[]>([])
+  const messagesRef = React.useRef<Message[]>([]) // Ref to track latest messages for sessionStorage
   const [history, setHistory] = React.useState<ChatHistoryItem[]>([])
   const [selectedModel, setSelectedModel] = React.useState('auto')
   const [autoRoutedModel, setAutoRoutedModel] = React.useState<string | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const [currentThreadId, setCurrentThreadId] = React.useState<string | null>(null)
+  
+  // Keep ref in sync with state
+  React.useEffect(() => {
+    messagesRef.current = messages
+  }, [messages])
 
   // Update message helper function
   const updateMessage = React.useCallback((messageId: string, updates: any) => {
-    setMessages((prev) =>
-      prev.map((msg) => {
+    setMessages((prev) => {
+      const updated = prev.map((msg) => {
         if (msg.id === messageId) {
           const updateData = typeof updates === 'function' ? updates(msg) : updates
           const merged: any = { ...msg }
@@ -89,7 +95,10 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         }
         return msg
       })
-    )
+      // Update ref synchronously
+      messagesRef.current = updated
+      return updated
+    })
   }, [])
 
   // Collaboration panel state - 6 stages with dynamic model selection
@@ -799,6 +808,133 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
     toast.success(`Switched to ${modelName}`)
   }
 
+  const handleCollaborationComplete = (output: string) => {
+    // Mark the orchestration message as completed and update with final answer
+    // This prevents the OrchestrationMessage from trying to reconnect
+    setMessages((prev) => {
+      // Find and update the orchestration message
+      const updatedMessages = prev.map((msg) => {
+        if ((msg as any).sessionId && !(msg as any).isCompleted) {
+          return {
+            ...msg,
+            isCompleted: true,
+            finalAnswer: output,
+            content: output, // Update content with final answer
+          }
+        }
+        return msg
+      })
+      
+      return updatedMessages
+    })
+  }
+
+  const handleCollaborate = async (query: string, orgIdParam: string) => {
+    // Add user message first
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: query,
+      timestamp: new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    }
+    setMessages((prev) => [...prev, userMessage])
+
+    // Create thread if this is a new conversation
+    let actualThreadId = currentThreadId
+    if (!currentThreadId) {
+      try {
+        const newThread = await apiFetch<{ thread_id: string; created_at: string }>('/threads/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-org-id': orgIdParam,
+          },
+          body: JSON.stringify({
+            user_id: user?.id || null,
+            title: query.substring(0, 50),
+            description: '',
+          }),
+        })
+        actualThreadId = newThread.thread_id
+        // Update URL to new thread
+        router.push(`/conversations/${actualThreadId}`)
+      } catch (error) {
+        console.error('Failed to create thread:', error)
+        const errorMessage: Message = {
+          id: `error-${Date.now()}`,
+          role: 'assistant',
+          content: 'Failed to create conversation. Please try again.',
+          timestamp: new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        }
+        setMessages((prev) => [...prev, errorMessage])
+        return
+      }
+    }
+
+    // Start orchestration and get session ID
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api'
+      const response = await fetch(`${apiUrl}/council/orchestrate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-org-id': orgIdParam,
+        },
+        body: JSON.stringify({
+          query,
+          output_mode: 'deliverable-ownership',
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to start orchestration')
+      }
+
+      const data = await response.json()
+      const sessionId = data.session_id
+
+      // Add orchestration message with session ID
+      const orchestrationMessage: Message = {
+        id: `council-${Date.now()}`,
+        role: 'assistant',
+        content: 'Council Orchestration in progress...',
+        timestamp: new Date().toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        modelName: 'Council Orchestration',
+        modelId: 'council-orchestration',
+        collaboration: {
+          mode: 'thinking',
+          stages: [],
+          currentStageId: undefined,
+        },
+        // Store session ID as custom property
+        sessionId: sessionId,
+        orchestrationQuery: query,
+      }
+      setMessages((prev) => [...prev, orchestrationMessage])
+    } catch (error) {
+      console.error('Failed to start orchestration:', error)
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: 'Failed to start Council Orchestration. Please try again.',
+        timestamp: new Date().toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      }
+      setMessages((prev) => [...prev, errorMessage])
+    }
+  }
+
   const handleSendMessage = async (content: string, images?: ImageFile[]) => {
     console.log('🚀 handleSendMessage called with content:', content, 'images:', images)
 
@@ -889,6 +1025,11 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
     setMessages((prev) => {
       const newMessages = [...prev, userMessage]
       console.log('📝 New messages state:', newMessages)
+      // Update ref synchronously
+      messagesRef.current = newMessages
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:889',message:'User message added to state',data:{messageId:userMessage.id,contentLength:userMessage.content.length,prevCount:prev.length,newCount:newMessages.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+      // #endregion
       return newMessages
     })
     setIsLoading(true)
@@ -902,6 +1043,10 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       let threadId: string
       const wasNewThread = !currentThreadId // Track before we create/set thread
 
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:903',message:'handleSendMessage: thread check',data:{wasNewThread,currentThreadId,contentLength:content.trim().length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+
       if (currentThreadId) {
         // Use existing thread for follow-up messages
         console.log('🔄 Using existing thread:', currentThreadId)
@@ -909,6 +1054,9 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       } else {
         // Create new thread for first message
         console.log('🧵 Creating new thread...')
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:911',message:'Creating new thread',data:{content:content.trim().substring(0,50)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         const threadResponse = await apiFetch<{
           thread_id: string
           created_at: string
@@ -923,7 +1071,9 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
 
         console.log('✅ Thread created:', threadResponse)
         threadId = threadResponse.thread_id
-        setCurrentThreadId(threadId)
+        // DON'T set currentThreadId yet - this might cause a re-render/navigation issue
+        // We'll set it at the end after everything completes
+        console.log('📌 Thread ID stored (not setting state yet):', threadId)
       }
 
       // Prepare request body
@@ -974,6 +1124,9 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       }
 
       console.log('📡 Starting streaming request to:', `/api/chat`)
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:976',message:'Before API call',data:{threadId,contentLength:content.trim().length,hasUserId:!!userId,messagesCount:messages.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
 
       let streamResponse: Response
       try {
@@ -982,6 +1135,9 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
           headers: streamHeaders,
           body: JSON.stringify(chatRequestBody),
         })
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:980',message:'API call completed',data:{status:streamResponse.status,ok:streamResponse.ok,threadId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
       } catch (error) {
         console.error('🚨 Network error during fetch:', error)
         console.error('🚨 Attempted URL:', `/api/chat`)
@@ -1037,7 +1193,11 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       }
 
       // Add placeholder message immediately
-      setMessages((prev) => [...prev, assistantMessage])
+      setMessages((prev) => {
+        const updated = [...prev, assistantMessage]
+        messagesRef.current = updated
+        return updated
+      })
 
       // Read SSE stream
       const reader = streamResponse.body?.getReader()
@@ -1114,6 +1274,9 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
               } else if (eventType === 'done') {
                 // Stream complete
                 console.log('✅ Stream complete')
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:1139',message:'Stream done event received',data:{threadId,wasNewThread,assistantMessageId,messagesRefCount:messagesRef.current.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+                // #endregion
                 // Update final message with any metadata
                 if (provider || model) {
                   updateMessage(assistantMessageId, {
@@ -1179,9 +1342,26 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         setAutoRoutedModel(assistantMessage.modelName)
       }
 
-      // If we just created a new thread, navigate to its page so it shows in sidebar
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:1208',message:'After stream complete, checking navigation',data:{wasNewThread,threadId,hasThreadId:!!threadId,messagesRefCount:messagesRef.current.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+      // #endregion
+
+      // If we just created a new thread, NOW set the currentThreadId (after streaming is complete)
+      // This ensures the messages are already in state before any potential re-renders
       if (wasNewThread && threadId) {
-        router.push(`/conversations/${threadId}`)
+        console.log(`✅ Stream complete for new thread: ${threadId}. Now setting currentThreadId.`)
+        console.log(`📋 Current messages in state: ${messagesRef.current.length}`)
+        
+        // Now it's safe to set the thread ID - messages are already displayed
+        setCurrentThreadId(threadId)
+        
+        // Update URL without triggering navigation (keeps component mounted, preserves state)
+        window.history.replaceState(
+          { ...window.history.state, threadId },
+          '',
+          `/conversations/${threadId}`
+        )
+        console.log(`✅ URL updated to /conversations/${threadId}`)
       }
 
     } catch (error: any) {
@@ -1238,6 +1418,9 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       collabPanel={collabPanel}
       currentThreadId={currentThreadId}
       useNewThreadsSystem={true}
+      orgId={orgId}
+      onCollaborate={handleCollaborate}
+      onCollaborationComplete={handleCollaborationComplete}
     />
   )
 }

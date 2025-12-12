@@ -681,7 +681,12 @@ async def thread_collaborate_stream(
                     key = await get_api_key_for_org(db, org_id, provider_type)
                     if key:
                         api_keys[provider_type.value] = key
-                except Exception:
+                except Exception as e:
+                    # Rollback transaction on DB error to prevent InFailedSQLTransactionError
+                    try:
+                        await db.rollback()
+                    except Exception:
+                        pass
                     continue
             
             if not api_keys:
@@ -708,6 +713,12 @@ async def thread_collaborate_stream(
                     conversation_id = str(conversation.id)
             except Exception as e:
                 logger.warning(f"Skipping conversation lookup for testing: {e}")
+                # CRITICAL: Rollback the aborted transaction before continuing
+                # Without this, all subsequent DB queries fail with InFailedSQLTransactionError
+                try:
+                    await db.rollback()
+                except Exception:
+                    pass
                 # Use thread_id as conversation_id for testing
                 pass
             
@@ -815,7 +826,13 @@ async def thread_collaborate_stream(
                 return
             
             # Reconstruct final answer from chunks
-            final_answer = "".join(final_answer_parts) if final_answer_parts else enhanced_result.get("final_answer", "")
+            if final_answer_parts:
+                final_answer = "".join(final_answer_parts)
+            elif enhanced_result:
+                final_answer = enhanced_result.get("final_answer", "")
+            else:
+                # Stream failed before producing any output
+                final_answer = ""
 
             # Send completion event with full message data
             from app.models.message import Message, MessageRole
@@ -950,7 +967,12 @@ async def resume_collaboration_stream(
                     key = await get_api_key_for_org(db, org_id, provider_type)
                     if key:
                         api_keys[provider_type.value] = key
-                except Exception:
+                except Exception as e:
+                    # Rollback transaction on DB error to prevent InFailedSQLTransactionError
+                    try:
+                        await db.rollback()
+                    except Exception:
+                        pass
                     continue
             
             if not api_keys:
@@ -990,7 +1012,13 @@ async def resume_collaboration_stream(
                 return
             
             # Reconstruct final answer from chunks
-            final_answer = "".join(final_answer_parts) if final_answer_parts else enhanced_result.get("final_answer", "")
+            if final_answer_parts:
+                final_answer = "".join(final_answer_parts)
+            elif enhanced_result:
+                final_answer = enhanced_result.get("final_answer", "")
+            else:
+                # Stream failed before producing any output
+                final_answer = ""
             
             # Create and save the final message for completed collaborations
             if final_answer and enhanced_result:

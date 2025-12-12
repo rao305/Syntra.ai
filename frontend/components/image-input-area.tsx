@@ -1,8 +1,6 @@
 "use client"
 
-import { CollaborateToggle } from "@/components/chat/CollaborateToggle"
 import { SYNTRA_MODELS } from "@/components/syntra-model-selector"
-import { useWorkflowStore } from "@/store/workflow-store"
 import {
   ArrowUp,
   Brain,
@@ -16,8 +14,10 @@ import {
   Search,
   Upload,
   X,
+  Zap,
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { cn } from "@/lib/utils"
 
 interface ImageFile {
   file: File
@@ -32,6 +32,9 @@ interface ImageInputAreaProps {
   isLoading?: boolean
   autoRoutedModel?: string | null
   showActionButtons?: boolean
+  orgId?: string
+  currentThreadId?: string | null
+  onCollaborate?: (query: string, orgId: string) => void
 }
 
 export function ImageInputArea({
@@ -40,15 +43,17 @@ export function ImageInputArea({
   onModelSelect,
   isLoading = false,
   autoRoutedModel,
-  showActionButtons = true
+  showActionButtons = true,
+  orgId,
+  currentThreadId,
+  onCollaborate
 }: ImageInputAreaProps) {
   const [isModelOpen, setIsModelOpen] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [images, setImages] = useState<ImageFile[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
-
-  const { isCollaborateMode, toggleCollaborateMode, mode, setMode } = useWorkflowStore()
+  const [isCollaborationMode, setIsCollaborationMode] = useState(false)
 
   const dropdownRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -148,13 +153,34 @@ export function ImageInputArea({
       return
     }
 
-    onSendMessage(inputValue.trim(), images.length > 0 ? images : undefined)
+    const trimmedInput = inputValue.trim()
+
+    // If collaboration mode is active, trigger collaboration instead of normal send
+    if (isCollaborationMode && onCollaborate && orgId) {
+      console.log('🤝 Sending in Collaboration Mode:', trimmedInput)
+      onCollaborate(trimmedInput, orgId)
+      setInputValue('')
+      setImages([])
+      setIsCollaborationMode(false) // Reset collaboration mode after sending
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto'
+      }
+      return
+    }
+
+    // Normal send
+    onSendMessage(trimmedInput, images.length > 0 ? images : undefined)
     setInputValue('')
     setImages([])
 
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
+  }
+
+  const toggleCollaborationMode = () => {
+    setIsCollaborationMode(!isCollaborationMode)
+    console.log('🔄 Collaboration mode:', !isCollaborationMode ? 'ENABLED' : 'DISABLED')
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -212,12 +238,29 @@ export function ImageInputArea({
 
         {/* Main Input Container */}
         <div
-          className={`relative bg-gradient-to-b from-zinc-800/50 to-zinc-900/50 border rounded-2xl p-3 backdrop-blur-sm transition-all duration-200 shadow-2xl shadow-blue-500/0 group-hover:shadow-blue-500/10 ${isDragOver ? 'border-blue-400/50 bg-blue-950/30' : 'border-zinc-700/50'
-            }`}
+          className={cn(
+            "relative bg-gradient-to-b from-zinc-800/50 to-zinc-900/50 border rounded-2xl p-3 backdrop-blur-sm transition-all duration-200 shadow-2xl",
+            isDragOver && 'border-blue-400/50 bg-blue-950/30',
+            isCollaborationMode 
+              ? 'border-purple-500/50 shadow-purple-500/20 ring-1 ring-purple-500/30' 
+              : 'border-zinc-700/50 shadow-blue-500/0 group-hover:shadow-blue-500/10'
+          )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
+        {/* Collaboration Mode Banner */}
+        {isCollaborationMode && (
+          <div className="mb-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30">
+            <Zap className="w-4 h-4 text-purple-400 animate-pulse" />
+            <span className="text-sm text-purple-200 font-medium">
+              Council Collaboration Mode Active
+            </span>
+            <span className="text-xs text-purple-300/70 ml-auto">
+              Press Enter or Send to start orchestration
+            </span>
+          </div>
+        )}
         {/* Image Preview Area */}
         {images.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
@@ -281,12 +324,24 @@ export function ImageInputArea({
 
             <div className="h-6 w-px bg-zinc-800 mx-1" />
 
-            <CollaborateToggle
-              isCollaborateMode={isCollaborateMode}
-              toggleCollaborateMode={toggleCollaborateMode}
-              mode={mode}
-              setMode={setMode}
-            />
+            {/* Collaboration Mode Toggle Button */}
+            {orgId && onCollaborate && (
+              <button
+                onClick={toggleCollaborationMode}
+                disabled={isLoading}
+                title={isCollaborationMode ? "Collaboration mode enabled - Send to start orchestration" : "Enable Council Collaboration mode"}
+                className={cn(
+                  'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium text-sm transition-all',
+                  isCollaborationMode
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/25 ring-2 ring-purple-400/50'
+                    : 'bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-zinc-100',
+                  'disabled:opacity-50 disabled:cursor-not-allowed'
+                )}
+              >
+                <Zap className={cn("w-4 h-4", isCollaborationMode && "animate-pulse")} />
+                <span>{isCollaborationMode ? 'Collaborate ✓' : 'Collaborate'}</span>
+              </button>
+            )}
 
             {/* Hidden File Input */}
             <input
@@ -396,10 +451,15 @@ export function ImageInputArea({
             <button
               onClick={handleSend}
               disabled={(!inputValue.trim() && images.length === 0) || isLoading}
-              className="p-2.5 bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all shadow-lg hover:shadow-blue-500/50 disabled:shadow-none"
-              title="Send message (Enter)"
+              className={cn(
+                "p-2.5 text-white rounded-lg transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none",
+                isCollaborationMode
+                  ? "bg-gradient-to-br from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 hover:shadow-purple-500/50"
+                  : "bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 hover:shadow-blue-500/50"
+              )}
+              title={isCollaborationMode ? "Start Council Orchestration (Enter)" : "Send message (Enter)"}
             >
-              <ArrowUp className="w-4 h-4" />
+              {isCollaborationMode ? <Zap className="w-4 h-4" /> : <ArrowUp className="w-4 h-4" />}
             </button>
           </div>
         </div>

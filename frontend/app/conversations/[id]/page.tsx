@@ -109,8 +109,42 @@ export default function ConversationPage() {
     const loadMessages = async () => {
       try {
         setIsLoadingHistory(true)
+        // CRITICAL FIX: Check sessionStorage first for messages saved before navigation
+        // This ensures messages are available immediately even if backend hasn't saved them yet
+        try {
+          const savedMessages = sessionStorage.getItem(`thread_messages_${threadId}`)
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:114',message:'Checking sessionStorage',data:{threadId,hasSavedMessages:!!savedMessages},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+          // #endregion
+          if (savedMessages) {
+            const parsedMessages = JSON.parse(savedMessages) as Message[]
+            console.log(`💾 Loaded ${parsedMessages.length} messages from sessionStorage for thread ${threadId}`)
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:120',message:'Loaded messages from sessionStorage',data:{threadId,messageCount:parsedMessages.length,roles:parsedMessages.map(m=>m.role)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+            // #endregion
+            setMessages(parsedMessages)
+            // Clear from sessionStorage after loading (one-time use)
+            sessionStorage.removeItem(`thread_messages_${threadId}`)
+            setIsLoadingHistory(false)
+            // Still fetch from backend in background to get the authoritative version
+            // but don't block on it
+          } else {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:128',message:'No messages in sessionStorage',data:{threadId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+            // #endregion
+          }
+        } catch (e) {
+          console.warn('Failed to load messages from sessionStorage:', e)
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:131',message:'Error loading from sessionStorage',data:{threadId,error:String(e)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+          // #endregion
+        }
+        
         // Don't clear messages immediately - keep old messages visible for smooth transition
         // Instead, we'll replace them once new ones load
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:109',message:'Loading messages from backend',data:{threadId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+        // #endregion
 
         const response = await apiFetch<{ messages: any[] }>(
           `/threads/${threadId}`,
@@ -121,8 +155,11 @@ export default function ConversationPage() {
             },
           }
         )
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:125',message:'Backend response received',data:{threadId,messageCount:response?.messages?.length||0,hasMessages:!!(response&&response.messages&&Array.isArray(response.messages)),messages:response?.messages?.map((m:any)=>({role:m.role,contentLength:m.content?.length||0}))||[]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+        // #endregion
 
-        if (response && response.messages && Array.isArray(response.messages)) {
+        if (response && response.messages && Array.isArray(response.messages) && response.messages.length > 0) {
           const formattedMessages: Message[] = response.messages
             .filter((msg: any) => msg && msg.content) // Filter out empty messages
             .map((msg: any, index: number) => {
@@ -151,10 +188,22 @@ export default function ConversationPage() {
                 ttftMs: ttfsMs,  // Time to first token in ms
               }
             })
-          // Replace messages with new ones (smooth transition)
+          // Replace messages with authoritative backend version
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:155',message:'Setting formatted messages from backend',data:{threadId,formattedCount:formattedMessages.length,roles:formattedMessages.map(m=>m.role)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+          // #endregion
           setMessages(formattedMessages)
+          // Clear sessionStorage since we now have authoritative backend data
+          try {
+            sessionStorage.removeItem(`thread_messages_${threadId}`)
+          } catch (e) {
+            // Ignore
+          }
         } else {
           // No messages found or invalid response - clear after failing to load
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:158',message:'No messages in response',data:{threadId,hasResponse:!!response},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+          // #endregion
           setMessages([])
         }
       } catch (error) {
@@ -212,6 +261,134 @@ export default function ConversationPage() {
     setSelectedModel(modelId)
     const modelName = SYNTRA_MODELS.find((m) => m.id === modelId)?.name
     toast.success(`Switched to ${modelName}`)
+  }
+
+  const handleCollaborationComplete = (output: string) => {
+    // Mark the orchestration message as completed and update with final answer
+    // This prevents the OrchestrationMessage from trying to reconnect
+    setMessages((prev) => {
+      // Find and update the orchestration message
+      const updatedMessages = prev.map((msg) => {
+        if ((msg as any).sessionId && !(msg as any).isCompleted) {
+          return {
+            ...msg,
+            isCompleted: true,
+            finalAnswer: output,
+            content: output, // Update content with final answer
+          }
+        }
+        return msg
+      })
+      
+      return updatedMessages
+    })
+  }
+
+  const handleCollaborate = async (query: string, orgIdParam: string) => {
+    // Add user message first
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: query,
+      timestamp: new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    }
+    setMessages((prev) => [...prev, userMessage])
+
+    // Create thread if this is a new conversation
+    let actualThreadId = threadId
+    if (threadId === 'new') {
+      try {
+        const newThread = await apiFetch<{ thread_id: string; created_at: string }>('/threads/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-org-id': orgIdParam,
+            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+          },
+          body: JSON.stringify({
+            user_id: user?.uid || null,
+            title: query.substring(0, 50),
+            description: '',
+          }),
+        })
+        actualThreadId = newThread.thread_id
+        // Navigate to the new thread
+        router.push(`/conversations/${actualThreadId}`)
+      } catch (error) {
+        console.error('Failed to create thread:', error)
+        const errorMessage: Message = {
+          id: `error-${Date.now()}`,
+          role: 'assistant',
+          content: 'Failed to create conversation. Please try again.',
+          timestamp: new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        }
+        setMessages((prev) => [...prev, errorMessage])
+        return
+      }
+    }
+
+    // Start orchestration and get session ID
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api'
+      const response = await fetch(`${apiUrl}/council/orchestrate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-org-id': orgIdParam,
+        },
+        body: JSON.stringify({
+          query,
+          output_mode: 'deliverable-ownership',
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to start orchestration')
+      }
+
+      const data = await response.json()
+      const sessionId = data.session_id
+
+      // Add orchestration message with session ID
+      const orchestrationMessage: Message = {
+        id: `council-${Date.now()}`,
+        role: 'assistant',
+        content: 'Council Orchestration in progress...',
+        timestamp: new Date().toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        modelName: 'Council Orchestration',
+        modelId: 'council-orchestration',
+        collaboration: {
+          mode: 'thinking',
+          stages: [],
+          currentStageId: undefined,
+        },
+        // Store session ID as custom property
+        sessionId: sessionId,
+        orchestrationQuery: query,
+      }
+      setMessages((prev) => [...prev, orchestrationMessage])
+    } catch (error) {
+      console.error('Failed to start orchestration:', error)
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: 'Failed to start Council Orchestration. Please try again.',
+        timestamp: new Date().toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      }
+      setMessages((prev) => [...prev, errorMessage])
+    }
   }
 
   const handleSendMessage = async (content: string, images?: ImageFile[]) => {
@@ -619,6 +796,9 @@ export default function ConversationPage() {
       onModelSelect={handleModelSelect}
       currentThreadId={threadId !== 'new' ? threadId : null}
       useNewThreadsSystem={true}
+      orgId={orgId}
+      onCollaborate={handleCollaborate}
+      onCollaborationComplete={handleCollaborationComplete}
     />
   )
 }

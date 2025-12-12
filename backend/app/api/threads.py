@@ -1701,6 +1701,54 @@ async def add_message_streaming(
     
     print(f"⚡ TOTAL SETUP TIME: {(perf_time.perf_counter() - start_routing)*1000:.0f}ms - Starting provider stream NOW...")
     
+    # CRITICAL FIX: Save user message to database BEFORE streaming starts
+    # This ensures it's available when frontend navigates immediately after stream completes
+    # Without this, navigation happens before background_cleanup commits the message
+    user_message_saved = False
+    try:
+        # Check if user message already exists in DB (avoid duplicates)
+        user_msg_exists = await db.execute(
+            select(Message).where(
+                Message.thread_id == thread_id,
+                Message.role == MessageRole.USER,
+                Message.content == user_content
+            ).order_by(Message.created_at.desc()).limit(1)
+        )
+        existing_user_msg = user_msg_exists.scalar_one_or_none()
+
+        if not existing_user_msg:
+            # Save user message to database BEFORE streaming
+            message_user_id = current_user.id if current_user else request.user_id
+            user_sequence = await _get_next_sequence(db, thread_id)
+            user_msg = Message(
+                thread_id=thread_id,
+                user_id=message_user_id,
+                role=MessageRole.USER,
+                content=user_content,
+                sequence=user_sequence,
+            )
+            db.add(user_msg)
+            await db.commit()  # Commit immediately so it's available for queries
+            user_message_saved = True
+            print(f"💾✅ Saved user message to database BEFORE streaming (sequence: {user_sequence}, user_id: {message_user_id}, thread_id: {thread_id})")
+            # Verify it was saved
+            verify_stmt = select(Message).where(Message.thread_id == thread_id, Message.sequence == user_sequence)
+            verify_result = await db.execute(verify_stmt)
+            verify_msg = verify_result.scalar_one_or_none()
+            if verify_msg:
+                print(f"✅✅ Verification: User message confirmed in database (id: {verify_msg.id})")
+            else:
+                print(f"❌❌ Verification FAILED: User message NOT found in database after commit!")
+        else:
+            print(f"ℹ️  User message already exists in database, skipping duplicate save")
+            user_message_saved = True
+    except Exception as save_error:
+        print(f"⚠️  Failed to save user message to database before streaming: {save_error}")
+        import traceback
+        print(traceback.format_exc())
+        await db.rollback()
+        # Continue anyway - background_cleanup will try again
+    
     # Start provider streaming IMMEDIATELY (don't wait for DB validation)
     from app.services.provider_dispatch import call_provider_adapter_streaming
     
@@ -1806,6 +1854,8 @@ async def add_message_streaming(
 
                 # CRITICAL: Save messages to database for persistence
                 # This ensures messages survive server restarts and can be loaded later
+                # NOTE: User message is already saved before streaming starts (see above)
+                # This check is just for safety in case the pre-stream save failed
                 try:
                     # Check if user message already exists in DB
                     user_msg_exists = await db.execute(
@@ -1818,7 +1868,7 @@ async def add_message_streaming(
                     existing_user_msg = user_msg_exists.scalar_one_or_none()
 
                     if not existing_user_msg:
-                        # Save user message to database
+                        # Save user message to database (fallback - should already be saved before streaming)
                         # CRITICAL: Use authenticated user's ID from JWT, fallback to request.user_id
                         message_user_id = current_user.id if current_user else request.user_id
                         user_sequence = await _get_next_sequence(db, thread_id)
@@ -1830,7 +1880,9 @@ async def add_message_streaming(
                             sequence=user_sequence,
                         )
                         db.add(user_msg)
-                        print(f"💾 Saved user message to database (sequence: {user_sequence}, user_id: {message_user_id})")
+                        print(f"💾 Saved user message to database in background_cleanup (fallback, sequence: {user_sequence}, user_id: {message_user_id})")
+                    else:
+                        print(f"ℹ️  User message already exists in database (saved before streaming)")
 
                     # Save assistant message to database if we have content
                     if response_content:
@@ -2645,15 +2697,26 @@ async def get_thread(
     result = await db.execute(stmt)
     messages = result.scalars().all()
 
-    # Debug: Log message retrieval
-    print(f"🔍 DEBUG get_thread: thread_id={thread_id}, org_id={org_id}, messages_retrieved={len(messages)}")
+    # Debug: Log message retrieval with detailed info
+    print(f"🔍 DEBUG get_thread: thread_id={thread_id}, org_id={org_id}, user_id={user_id}, messages_retrieved={len(messages)}")
+    if messages:
+        for msg in messages:
+            print(f"  📨 Message: role={msg.role.value}, sequence={msg.sequence}, content_length={len(msg.content) if msg.content else 0}")
     if len(messages) == 0:
         # Try to debug why no messages are found
-        # Check if there are ANY messages in this thread at all
+        # Check if there are ANY messages in this thread at all (without RLS filtering)
         count_stmt = select(func.count(Message.id)).where(Message.thread_id == thread_id)
         count_result = await db.execute(count_stmt)
         total_count = count_result.scalar() or 0
         print(f"⚠️  No messages retrieved but total_count in DB: {total_count}")
+        if total_count > 0:
+            # Try to get messages without sequence ordering to see what's there
+            all_msgs_stmt = select(Message).where(Message.thread_id == thread_id)
+            all_msgs_result = await db.execute(all_msgs_stmt)
+            all_msgs = all_msgs_result.scalars().all()
+            print(f"⚠️  Found {len(all_msgs)} messages without ordering:")
+            for msg in all_msgs:
+                print(f"    - role={msg.role.value}, sequence={msg.sequence}, created_at={msg.created_at}")
 
     return ThreadDetailResponse(
         id=thread.id,

@@ -41,6 +41,9 @@ interface EnhancedConversationLayoutProps {
   collabPanel?: CollabPanelState
   currentThreadId?: string | null
   useNewThreadsSystem?: boolean
+  orgId?: string
+  onCollaborate?: (query: string, orgId: string) => Promise<void>
+  onCollaborationComplete?: (output: string) => void
 }
 
 export function EnhancedConversationLayout({
@@ -60,6 +63,9 @@ export function EnhancedConversationLayout({
   collabPanel,
   currentThreadId = null,
   useNewThreadsSystem = true,
+  orgId,
+  onCollaborate,
+  onCollaborationComplete,
 }: EnhancedConversationLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const user = null
@@ -84,12 +90,16 @@ export function EnhancedConversationLayout({
             messages={messages}
             onSendMessage={onSendMessage}
             onUpdateMessage={onUpdateMessage}
+            onCollaborate={onCollaborate}
+            onCollaborationComplete={onCollaborationComplete}
             isLoading={isLoading}
             selectedModel={selectedModel}
             onModelSelect={onModelSelect}
             onContinueWorkflow={onContinueWorkflow}
             autoRoutedModel={autoRoutedModel}
             collabPanel={collabPanel}
+            orgId={orgId}
+            currentThreadId={currentThreadId}
           />
         </div>
       </main>

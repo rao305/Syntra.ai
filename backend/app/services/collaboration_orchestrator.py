@@ -51,11 +51,14 @@ class CollaborationOrchestrator:
             SSE events for stage progress and final content
         """
         
+        # Store chat history for use in director synthesis
+        self._chat_history = chat_history or []
+
         # Create run record if DB available
         run_id = str(uuid.uuid4())
         persist_to_db = False  # Don't persist during streaming to avoid transaction errors
         # The streaming endpoint will handle persistence separately if needed after message creation
-        
+
         start_time = time.perf_counter()
         stage_outputs = {}
         external_reviews = []
@@ -447,7 +450,13 @@ class CollaborationOrchestrator:
             }
             
         except Exception as e:
-            print(f"Review from {review_config['name']} failed: {e}")
+            logger.warning(f"Review from {review_config['name']} failed: {e}")
+            # Rollback transaction on DB error to prevent InFailedSQLTransactionError
+            if self.db:
+                try:
+                    await self.db.rollback()
+                except Exception:
+                    pass
             return None
 
     async def _run_fallback_review(
@@ -523,6 +532,11 @@ class CollaborationOrchestrator:
                 await self.db.flush()
             except Exception as e:
                 logger.warning(f"Failed to save fallback review record: {e}")
+                # Rollback transaction on DB error to prevent InFailedSQLTransactionError
+                try:
+                    await self.db.rollback()
+                except Exception:
+                    pass
 
         logger.info(f"✅ Fallback review from {review_config['name']} completed in {latency_ms}ms")
 
@@ -814,25 +828,33 @@ class CollaborationOrchestrator:
         error_msg: Optional[str] = None
     ):
         """Save stage execution record to database"""
-        
+
         if not self.db:
             return
-        
-        stage = CollaborateStage(
-            run_id=run_id,
-            stage_id=stage_id,
-            label=f"{stage_id.title()} stage",
-            provider=provider,
-            model=model,
-            status=status,
-            started_at=datetime.utcnow(),
-            finished_at=datetime.utcnow(),
-            latency_ms=int(latency_ms),
-            meta={"error": error_msg} if error_msg else None
-        )
-        
-        self.db.add(stage)
-        await self.db.flush()
+
+        try:
+            stage = CollaborateStage(
+                run_id=run_id,
+                stage_id=stage_id,
+                label=f"{stage_id.title()} stage",
+                provider=provider,
+                model=model,
+                status=status,
+                started_at=datetime.utcnow(),
+                finished_at=datetime.utcnow(),
+                latency_ms=int(latency_ms),
+                meta={"error": error_msg} if error_msg else None
+            )
+
+            self.db.add(stage)
+            await self.db.flush()
+        except Exception as e:
+            logger.warning(f"Failed to save stage record for {stage_id}: {e}")
+            # Rollback transaction on DB error to prevent InFailedSQLTransactionError
+            try:
+                await self.db.rollback()
+            except Exception:
+                pass
 
 
 # Global orchestrator instance

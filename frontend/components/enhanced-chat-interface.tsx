@@ -7,6 +7,7 @@ import { EnhancedMessageContent } from "@/components/enhanced-message-content"
 import { ImageInputArea } from "@/components/image-input-area"
 import { SimpleLoadingIndicator } from "@/components/simple-loading-indicator"
 import { ThinkingStream } from "@/components/thinking-stream"
+import { OrchestrationMessage } from "@/components/orchestration-message"
 import type { StageId, StageState, StageStatus } from "@/lib/collabStages"
 import { cn } from "@/lib/utils"
 import { useWorkflowStore } from "@/store/workflow-store"
@@ -154,29 +155,53 @@ interface ChatInterfaceProps {
   messages: Message[]
   onSendMessage: (content: string, images?: ImageFile[]) => void
   onUpdateMessage?: (messageId: string, updates: Partial<Message>) => void
+  onCollaborate?: (query: string, orgId: string) => Promise<void>
+  onCollaborationComplete?: (output: string) => void
   isLoading?: boolean
   selectedModel: string
   onModelSelect: (modelId: string) => void
   onContinueWorkflow?: () => void
   autoRoutedModel?: string | null
   collabPanel?: CollabPanelState
+  orgId?: string
+  currentThreadId?: string | null
 }
 
 export function EnhancedChatInterface({
   messages,
   onSendMessage,
   onUpdateMessage,
+  onCollaborate,
+  onCollaborationComplete,
   isLoading = false,
   selectedModel,
   onModelSelect,
   onContinueWorkflow,
   autoRoutedModel,
-  collabPanel
+  collabPanel,
+  orgId,
+  currentThreadId
 }: ChatInterfaceProps) {
   const [expandedThoughts, setExpandedThoughts] = useState<Set<string>>(new Set())
   const [codePanelOpen, setCodePanelOpen] = useState(false)
   const [codePanelContent, setCodePanelContent] = useState({ code: '', language: '', title: '' })
   const { isCollaborateMode, steps = [], updateStep, mode: storeMode, setMode: setStoreMode } = useWorkflowStore()
+
+  const handleCollaborateClick = async (query: string, orgIdParam: string) => {
+    if (onCollaborate) {
+      await onCollaborate(query, orgIdParam)
+    }
+  }
+
+  const handleCollaborationComplete = (output: string) => {
+    // Notify parent component that collaboration is complete
+    // Parent component will handle adding the message to the chat
+    if (onCollaborationComplete) {
+      onCollaborationComplete(output)
+    } else {
+      console.warn('onCollaborationComplete callback not provided')
+    }
+  }
 
   // Multi-Agent Thinking UI State - use store mode as source of truth
   const thinkingMode = storeMode
@@ -518,7 +543,17 @@ export function EnhancedChatInterface({
                     <div className="max-w-[90%]">
 
                       {/* Message Content */}
-                      {message.collaboration && message.collaboration.mode !== "complete" ? (
+                      {(message as any).sessionId ? (
+                        // Render orchestration message inline
+                        <OrchestrationMessage
+                          query={(message as any).orchestrationQuery || message.content}
+                          orgId={orgId || ''}
+                          sessionId={(message as any).sessionId}
+                          onComplete={handleCollaborationComplete}
+                          isCompleted={(message as any).isCompleted}
+                          finalAnswer={(message as any).finalAnswer}
+                        />
+                      ) : message.collaboration && message.collaboration.mode !== "complete" ? (
                         // Show thinking/streaming UI only while collaboration is in progress
                         <div className="px-1">
                           <ThinkingStream
@@ -543,8 +578,8 @@ export function EnhancedChatInterface({
                         </div>
                       )}
 
-                      {/* Model Information - Always show for assistant messages */}
-                      {message.role === 'assistant' && (() => {
+                      {/* Model Information - Always show for assistant messages (except orchestration) */}
+                      {message.role === 'assistant' && !(message as any).sessionId && (() => {
                         const displayName = getSupportedModelDisplayName(message.modelName)
                         // Always show model name - use supported name if available, otherwise use raw modelName
                         const modelToDisplay = displayName || message.modelName || 'Unknown Model'
@@ -570,7 +605,8 @@ export function EnhancedChatInterface({
                         />
                       )}
 
-                      {/* Message Actions */}
+                      {/* Message Actions (except for orchestration messages) */}
+                      {!(message as any).sessionId && (
                       <div className="flex items-center gap-1 pt-1">
                         <div></div>
 
@@ -598,6 +634,7 @@ export function EnhancedChatInterface({
                           />
                         </div>
                       </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -658,6 +695,9 @@ export function EnhancedChatInterface({
             isLoading={isLoading}
             autoRoutedModel={autoRoutedModel}
             showActionButtons={messages.length === 0}
+            orgId={orgId}
+            currentThreadId={currentThreadId}
+            onCollaborate={handleCollaborateClick}
           />
           <div className="flex justify-end mt-2">
             <button className="p-2 text-zinc-500 hover:text-zinc-400 transition-colors rounded-full hover:bg-zinc-900">
