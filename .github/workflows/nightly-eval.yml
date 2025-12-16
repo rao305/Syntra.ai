@@ -1,0 +1,168 @@
+name: Nightly Golden Prompt Evaluation
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC (adjust timezone as needed)
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dac_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      qdrant:
+        image: qdrant/qdrant:latest
+        ports:
+          - 6333:6333
+          - 6334:6334
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install requests
+      
+      - name: Start backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/dac_test
+          SECRET_KEY: test-secret-key-for-nightly-eval
+          ENCRYPTION_KEY: test-encryption-key-32-bytes-long-for-nightly-eval!!
+          QDRANT_URL: http://localhost:6333
+          QDRANT_API_KEY: ""
+          UPSTASH_REDIS_URL: redis://localhost:6379
+          UPSTASH_REDIS_TOKEN: ""
+          STRIPE_SECRET_KEY: sk_test_test
+          STRIPE_PUBLISHABLE_KEY: pk_test_test
+          STRIPE_WEBHOOK_SECRET: whsec_test
+          STRIPE_PRICE_ID: price_test
+          # Use mock/test API keys or set real ones as secrets
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
+          FRONTEND_URL: http://localhost:3000
+          ENVIRONMENT: test
+        run: |
+          cd backend
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 >/tmp/api.log 2>&1 &
+          sleep 15
+          curl -f http://localhost:8000/health || (cat /tmp/api.log && exit 1)
+          echo "✅ Backend started successfully"
+      
+      - name: Run golden tests through collaboration system
+        env:
+          API_URL: http://localhost:8000
+          ORG_ID: org_demo
+        run: |
+          python scripts/run_golden_tests.py > /tmp/test_results.json
+          echo "✅ Golden tests completed"
+      
+      - name: Call evaluation API
+        env:
+          API_URL: http://localhost:8000
+          ORG_ID: org_demo
+        run: |
+          # Add run metadata
+          jq '.run_metadata.date = "'$(date +%Y-%m-%d)'" | .run_metadata.build_commit = "'${{ github.sha }}'" | .run_metadata.environment = "github-actions"' /tmp/test_results.json > /tmp/eval_request.json
+          
+          # Call evaluation endpoint
+          curl -X POST "$API_URL/api/eval/evaluate" \
+            -H "Content-Type: application/json" \
+            -H "x-org-id: $ORG_ID" \
+            -d @/tmp/eval_request.json \
+            > /tmp/evaluation_result.json
+          
+          echo "✅ Evaluation completed"
+      
+      - name: Extract report
+        run: |
+          jq -r '.report' /tmp/evaluation_result.json > /tmp/nightly_report.md
+          echo "📊 Report extracted"
+          head -50 /tmp/nightly_report.md
+      
+      - name: Upload evaluation report
+        uses: actions/upload-artifact@v3
+        with:
+          name: nightly-eval-report-${{ github.run_number }}
+          path: |
+            /tmp/nightly_report.md
+            /tmp/evaluation_result.json
+      
+      - name: Check for regressions
+        run: |
+          AVG_SCORE=$(jq -r '.summary.average_score' /tmp/evaluation_result.json)
+          CONTRACT_RATE=$(jq -r '.summary.contract_pass_rate' /tmp/evaluation_result.json)
+          
+          echo "📈 Average Score: $AVG_SCORE/100"
+          echo "📈 Contract Pass Rate: $CONTRACT_RATE%"
+          
+          # Fail if average score drops below threshold
+          if (( $(echo "$AVG_SCORE < 80" | bc -l) )); then
+            echo "❌ REGRESSION: Average score ($AVG_SCORE) below threshold (80)"
+            exit 1
+          fi
+          
+          # Warn if contract pass rate drops
+          if (( $(echo "$CONTRACT_RATE < 90" | bc -l) )); then
+            echo "⚠️  WARNING: Contract pass rate ($CONTRACT_RATE%) below threshold (90%)"
+          fi
+          
+          echo "✅ No regressions detected"
+      
+      - name: Comment on PR (if PR)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('/tmp/nightly_report.md', 'utf8');
+            const summary = JSON.parse(fs.readFileSync('/tmp/evaluation_result.json', 'utf8'));
+            
+            const body = `## 📊 Nightly Evaluation Results
+            
+            **Average Score:** ${summary.summary.average_score.toFixed(1)}/100
+            **Contract Pass Rate:** ${summary.summary.contract_pass_rate.toFixed(1)}%
+            
+            <details>
+            <summary>Full Report</summary>
+            
+            \`\`\`markdown
+            ${report}
+            \`\`\`
+            
+            </details>`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
