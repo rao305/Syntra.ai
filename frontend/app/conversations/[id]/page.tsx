@@ -113,38 +113,22 @@ export default function ConversationPage() {
         // This ensures messages are available immediately even if backend hasn't saved them yet
         try {
           const savedMessages = sessionStorage.getItem(`thread_messages_${threadId}`)
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:114',message:'Checking sessionStorage',data:{threadId,hasSavedMessages:!!savedMessages},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-          // #endregion
           if (savedMessages) {
             const parsedMessages = JSON.parse(savedMessages) as Message[]
             console.log(`💾 Loaded ${parsedMessages.length} messages from sessionStorage for thread ${threadId}`)
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:120',message:'Loaded messages from sessionStorage',data:{threadId,messageCount:parsedMessages.length,roles:parsedMessages.map(m=>m.role)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-            // #endregion
             setMessages(parsedMessages)
             // Clear from sessionStorage after loading (one-time use)
             sessionStorage.removeItem(`thread_messages_${threadId}`)
             setIsLoadingHistory(false)
             // Still fetch from backend in background to get the authoritative version
             // but don't block on it
-          } else {
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:128',message:'No messages in sessionStorage',data:{threadId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-            // #endregion
           }
         } catch (e) {
           console.warn('Failed to load messages from sessionStorage:', e)
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:131',message:'Error loading from sessionStorage',data:{threadId,error:String(e)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-          // #endregion
         }
-        
+
         // Don't clear messages immediately - keep old messages visible for smooth transition
         // Instead, we'll replace them once new ones load
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:109',message:'Loading messages from backend',data:{threadId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-        // #endregion
 
         const response = await apiFetch<{ messages: any[] }>(
           `/threads/${threadId}`,
@@ -155,9 +139,6 @@ export default function ConversationPage() {
             },
           }
         )
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:125',message:'Backend response received',data:{threadId,messageCount:response?.messages?.length||0,hasMessages:!!(response&&response.messages&&Array.isArray(response.messages)),messages:response?.messages?.map((m:any)=>({role:m.role,contentLength:m.content?.length||0}))||[]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-        // #endregion
 
         if (response && response.messages && Array.isArray(response.messages) && response.messages.length > 0) {
           const formattedMessages: Message[] = response.messages
@@ -189,9 +170,6 @@ export default function ConversationPage() {
               }
             })
           // Replace messages with authoritative backend version
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:155',message:'Setting formatted messages from backend',data:{threadId,formattedCount:formattedMessages.length,roles:formattedMessages.map(m=>m.role)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-          // #endregion
           setMessages(formattedMessages)
           // Clear sessionStorage since we now have authoritative backend data
           try {
@@ -201,9 +179,6 @@ export default function ConversationPage() {
           }
         } else {
           // No messages found or invalid response - clear after failing to load
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/[id]/page.tsx:158',message:'No messages in response',data:{threadId,hasResponse:!!response},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-          // #endregion
           setMessages([])
         }
       } catch (error) {
@@ -263,7 +238,7 @@ export default function ConversationPage() {
     toast.success(`Switched to ${modelName}`)
   }
 
-  const handleCollaborationComplete = (output: string) => {
+  const handleCollaborationComplete = async (output: string) => {
     // Mark the orchestration message as completed and update with final answer
     // This prevents the OrchestrationMessage from trying to reconnect
     setMessages((prev) => {
@@ -279,13 +254,45 @@ export default function ConversationPage() {
         }
         return msg
       })
-      
+
       return updatedMessages
     })
+
+    // Save the final collaboration response to the database so it persists
+    const actualThreadId = threadId === 'new' ? null : threadId
+    if (actualThreadId) {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api'
+        await fetch(`${apiUrl}/threads/${actualThreadId}/messages/raw`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-org-id': orgId,
+            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+          },
+          body: JSON.stringify({
+            role: 'assistant',
+            content: output,
+            provider: 'council-orchestration',
+            model: 'multi-agent-council',
+            meta: {
+              engine: 'council',
+              council: {
+                mode: 'orchestration',
+                agents_count: 8,
+              }
+            }
+          }),
+        })
+        console.log('✅ Saved council collaboration response to database')
+      } catch (error) {
+        console.error('Failed to save collaboration response:', error)
+      }
+    }
   }
 
   const handleCollaborate = async (query: string, orgIdParam: string) => {
-    // Add user message first
+    // Add user message first (to local state)
     const userMessage: Message = {
       id: `user-${Date.now()}`,
       role: 'user',
@@ -331,6 +338,26 @@ export default function ConversationPage() {
         setMessages((prev) => [...prev, errorMessage])
         return
       }
+    }
+
+    // Save user message to database so it persists when switching chats
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api'
+      await fetch(`${apiUrl}/threads/${actualThreadId}/messages/raw`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-org-id': orgIdParam,
+          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+        },
+        body: JSON.stringify({
+          role: 'user',
+          content: query,
+        }),
+      })
+      console.log('✅ Saved council user message to database')
+    } catch (error) {
+      console.error('Failed to save user message:', error)
     }
 
     // Start orchestration and get session ID
@@ -414,7 +441,16 @@ export default function ConversationPage() {
       // Create thread if this is a new conversation (for both modes)
       let actualThreadId = threadId
       if (threadId === 'new') {
-        console.log('🧵 Creating new thread...')
+        // WARN: Only create thread if this is the FIRST message (prevents accidental thread recreation)
+        if (messages.length > 0) {
+          console.error('⚠️ THREAD CONTINUITY ERROR: Attempting to create new thread when messages exist!')
+          toast.error('Thread continuity error. Please stay in the same conversation for all messages.')
+          setIsLoading(false)
+          setMessages((prev) => prev.filter((m) => m.id !== userMessage.id))
+          return
+        }
+
+        console.log('🧵 Creating new thread (first message)...')
         const newThread = await apiFetch<{ thread_id: string; created_at: string }>('/threads/', {
           method: 'POST',
           headers: {
@@ -433,6 +469,9 @@ export default function ConversationPage() {
 
         // Navigate to the new thread immediately
         router.push(`/conversations/${actualThreadId}`)
+      } else {
+        // Existing thread - log for debugging
+        console.log(`📨 Sending message to existing thread: ${actualThreadId}`)
       }
 
       // Check if we should use collaboration streaming
@@ -549,6 +588,13 @@ export default function ConversationPage() {
           } catch {
             // Use default error message
           }
+
+          console.error(`❌ Stream request failed for thread ${actualThreadId}:`, {
+            status: streamResponse.status,
+            error: errorMessage,
+            threadId: actualThreadId
+          })
+
           throw new Error(errorMessage)
         }
 
@@ -650,6 +696,13 @@ export default function ConversationPage() {
                           )
                         )
                       }
+                    } else if (data.type === 'error') {
+                      // Handle SSE error events from backend
+                      const errorMsg = data.error || 'Unknown error occurred'
+                      console.error('❌ SSE Error event received:', errorMsg)
+
+                      // Show error in chat
+                      throw new Error(errorMsg)
                     } else if (data.type === 'meta' && data.ttft_ms !== undefined) {
                       // Store TTFT metrics
                       ttftMs = data.ttft_ms
@@ -770,9 +823,27 @@ export default function ConversationPage() {
           }
         }
 
-        toast.error(errorMessage)
-        // Remove both user and assistant placeholder messages on error
-        setMessages((prev) => prev.filter((m) => m.id !== userMessage.id && m.id !== assistantId))
+        console.error(`❌ Message send failed in thread ${actualThreadId}:`, {
+          error: errorMessage,
+          threadId: actualThreadId,
+          messageCount: messages.length,
+          userMessageId: userMessage.id
+        })
+
+        toast.error(errorMessage + ' (Thread preserved - you can retry)')
+
+        // CHANGED: Add error message instead of removing user message
+        // This preserves thread continuity and shows user what went wrong
+        const errorMsg: Message = {
+          id: `error-${Date.now()}`,
+          role: 'assistant',
+          content: `⚠️ **Error**: ${errorMessage}\n\nYour message was preserved. Please try sending again or check the console for details.`,
+          timestamp: new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        }
+        setMessages((prev) => [...prev.filter((m) => m.id !== assistantId), errorMsg])
       } finally {
         setIsLoading(false)
       }

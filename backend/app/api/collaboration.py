@@ -99,7 +99,7 @@ async def collaborate(
     """
     await set_rls_context(db, org_id)
     
-    # Collect API keys for all providers
+    # Collect API keys for all providers (OpenAI, Gemini, Perplexity, Kimi only - no OpenRouter)
     api_keys = {}
     for provider in [ProviderType.OPENAI, ProviderType.GEMINI, ProviderType.PERPLEXITY, ProviderType.KIMI]:
         try:

@@ -17,8 +17,11 @@ from app.services.council.config import (
 
 logger = logging.getLogger(__name__)
 
-# Timeout for individual provider calls (30 seconds)
+# Timeout for individual provider calls (in seconds)
+# Synthesizer and Judge need more time due to larger inputs
 PROVIDER_CALL_TIMEOUT = 30
+SYNTHESIZER_PROVIDER_TIMEOUT = 90  # 90 seconds for synthesizer
+JUDGE_PROVIDER_TIMEOUT = 120  # 120 seconds for judge
 
 
 async def run_agent(
@@ -112,7 +115,14 @@ async def run_agent(
 
         try:
             # Call the provider adapter with timeout protection
-            logger.debug(f"Calling provider adapter for {agent_name} via {provider_key} (timeout: {PROVIDER_CALL_TIMEOUT}s)...")
+            # Use longer timeouts for synthesizer and judge due to larger inputs
+            timeout = PROVIDER_CALL_TIMEOUT
+            if agent_name == "synthesizer":
+                timeout = SYNTHESIZER_PROVIDER_TIMEOUT
+            elif agent_name == "judge":
+                timeout = JUDGE_PROVIDER_TIMEOUT
+
+            logger.debug(f"Calling provider adapter for {agent_name} via {provider_key} (timeout: {timeout}s)...")
             try:
                 response = await asyncio.wait_for(
                     call_provider_adapter(
@@ -125,17 +135,17 @@ async def run_agent(
                         api_key=api_key,
                         max_tokens=max_tokens
                     ),
-                    timeout=PROVIDER_CALL_TIMEOUT
+                    timeout=timeout
                 )
                 logger.debug(f"Provider adapter returned response for {agent_name} via {provider_key}")
             except asyncio.TimeoutError:
-                error_msg = f"Provider {provider_key} timed out after {PROVIDER_CALL_TIMEOUT} seconds"
+                error_msg = f"Provider {provider_key} timed out after {timeout} seconds"
                 logger.warning(
                     f"{error_msg} for {agent_name}",
                     extra={
                         "agent": agent_name,
                         "provider": provider_key,
-                        "timeout_seconds": PROVIDER_CALL_TIMEOUT
+                        "timeout_seconds": timeout
                     }
                 )
                 raise Exception(error_msg)

@@ -1027,9 +1027,6 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       console.log('📝 New messages state:', newMessages)
       // Update ref synchronously
       messagesRef.current = newMessages
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:889',message:'User message added to state',data:{messageId:userMessage.id,contentLength:userMessage.content.length,prevCount:prev.length,newCount:newMessages.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-      // #endregion
       return newMessages
     })
     setIsLoading(true)
@@ -1043,10 +1040,6 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       let threadId: string
       const wasNewThread = !currentThreadId // Track before we create/set thread
 
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:903',message:'handleSendMessage: thread check',data:{wasNewThread,currentThreadId,contentLength:content.trim().length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
-
       if (currentThreadId) {
         // Use existing thread for follow-up messages
         console.log('🔄 Using existing thread:', currentThreadId)
@@ -1054,9 +1047,6 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       } else {
         // Create new thread for first message
         console.log('🧵 Creating new thread...')
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:911',message:'Creating new thread',data:{content:content.trim().substring(0,50)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
         const threadResponse = await apiFetch<{
           thread_id: string
           created_at: string
@@ -1124,9 +1114,6 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       }
 
       console.log('📡 Starting streaming request to:', `/api/chat`)
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:976',message:'Before API call',data:{threadId,contentLength:content.trim().length,hasUserId:!!userId,messagesCount:messages.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
 
       let streamResponse: Response
       try {
@@ -1135,9 +1122,6 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
           headers: streamHeaders,
           body: JSON.stringify(chatRequestBody),
         })
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:980',message:'API call completed',data:{status:streamResponse.status,ok:streamResponse.ok,threadId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-        // #endregion
       } catch (error) {
         console.error('🚨 Network error during fetch:', error)
         console.error('🚨 Attempted URL:', `/api/chat`)
@@ -1247,6 +1231,13 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
                 provider = eventData.provider || ''
                 model = eventData.model || ''
                 console.log('🔧 Router decision:', provider, model)
+                // Update message immediately with actual model info
+                if (model || provider) {
+                  updateMessage(assistantMessageId, {
+                    modelName: model || provider || 'DAC',
+                    modelId: model || provider || selectedModel,
+                  })
+                }
               } else if (eventType === 'delta') {
                 // Text content
                 if (!sawFirstDelta) {
@@ -1274,9 +1265,6 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
               } else if (eventType === 'done') {
                 // Stream complete
                 console.log('✅ Stream complete')
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:1139',message:'Stream done event received',data:{threadId,wasNewThread,assistantMessageId,messagesRefCount:messagesRef.current.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-                // #endregion
                 // Update final message with any metadata
                 if (provider || model) {
                   updateMessage(assistantMessageId, {
@@ -1341,10 +1329,6 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       if (selectedModel === 'auto' && assistantMessage.modelName) {
         setAutoRoutedModel(assistantMessage.modelName)
       }
-
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/d45c3890-d1ae-44c5-a65b-cf5d04e4cab4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'conversations/page.tsx:1208',message:'After stream complete, checking navigation',data:{wasNewThread,threadId,hasThreadId:!!threadId,messagesRefCount:messagesRef.current.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
-      // #endregion
 
       // If we just created a new thread, NOW set the currentThreadId (after streaming is complete)
       // This ensures the messages are already in state before any potential re-renders

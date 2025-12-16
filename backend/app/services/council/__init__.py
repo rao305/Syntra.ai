@@ -7,10 +7,20 @@ to collaboratively solve complex problems with full traceability.
 Supports multiple LLM providers: OpenAI, Perplexity, Gemini, Kimi.
 """
 
-from .orchestrator import CouncilOrchestrator, CouncilConfig, CouncilOutput
+from .orchestrator import (
+    CouncilOrchestrator,
+    CouncilConfig,
+    CouncilOutput,
+    RouterOrchestrator,
+    RouterConfig,
+    RouterOutput,
+)
 
 __all__ = [
     "CouncilOrchestrator",
     "CouncilConfig",
     "CouncilOutput",
+    "RouterOrchestrator",
+    "RouterConfig",
+    "RouterOutput",
 ]

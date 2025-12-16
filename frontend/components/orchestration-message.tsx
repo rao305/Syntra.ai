@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { ChevronDown, ChevronRight, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { EnhancedMessageContent } from '@/components/enhanced-message-content'
 
 type AgentName =
   | 'Optimizer Agent'
@@ -121,8 +122,9 @@ export function OrchestrationMessage({
     }
     
     // Prevent multiple connection attempts for the same session
-    if (connectionAttemptedRef.current) {
-      console.log(`Connection already attempted for session ${sessionId}, skipping`)
+    // But allow reconnection if the WebSocket is closed
+    if (connectionAttemptedRef.current && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      console.log(`WebSocket already connected for session ${sessionId}, skipping`)
       return
     }
     connectionAttemptedRef.current = true
@@ -191,16 +193,57 @@ export function OrchestrationMessage({
               console.log('Phase update:', message.phase)
             } else if (message.type === 'complete') {
               // Orchestration complete
-              const output = message.output || message.final_answer
-              console.log('Orchestration complete, final answer:', output)
+              const output = message.output || message.final_answer || ''
+              
+              console.log('Orchestration complete, final answer:', {
+                hasOutput: !!output,
+                outputLength: output?.length || 0,
+                outputPreview: output ? output.substring(0, 100) + '...' : 'empty',
+                messageKeys: Object.keys(message)
+              })
+              
               setAgents((prev) =>
                 prev.map((agent) =>
                   agent.name === 'Final Answer'
-                    ? { ...agent, status: 'complete', output }
+                    ? { ...agent, status: 'complete', output: output || agent.output }
                     : agent
                 )
               )
-              handleComplete(output)
+              
+              // If output is missing, try polling fallback to get it from API
+              if (output && output.trim() !== '') {
+                handleComplete(output)
+              } else {
+                console.warn('Complete message received but no output found, fetching from API...')
+                // Fetch from API as fallback
+                const apiUrl = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_API_URL
+                  ? process.env.NEXT_PUBLIC_API_URL
+                  : 'http://127.0.0.1:8000/api'
+                
+                fetch(`${apiUrl}/council/orchestrate/${sessionId}`, {
+                  method: 'GET',
+                  headers: { 'Content-Type': 'application/json' },
+                })
+                  .then(res => res.json())
+                  .then(data => {
+                    if (data.status === 'success' && data.output) {
+                      console.log('Fetched output from API fallback, length:', data.output.length)
+                      setAgents((prev) =>
+                        prev.map((agent) =>
+                          agent.name === 'Final Answer'
+                            ? { ...agent, status: 'complete', output: data.output }
+                            : agent
+                        )
+                      )
+                      handleComplete(data.output)
+                    } else {
+                      console.error('Failed to fetch output from API:', data)
+                    }
+                  })
+                  .catch(err => {
+                    console.error('Error fetching output from API:', err)
+                  })
+              }
             }
           } catch (error) {
             console.error('Error parsing WebSocket message:', error)
@@ -322,15 +365,22 @@ export function OrchestrationMessage({
       isCleanedUp = true
       mountedRef.current = false
       clearTimeout(connectionTimer)
-      
-      if (wsRef.current) {
+
+      // Only close WebSocket if session is completed or component is truly unmounting
+      // Don't close if this is just a dependency change re-run
+      if (wsRef.current && completedSessions.has(sessionId)) {
         try {
-          wsRef.current.close(1000, 'Component unmounted')
+          wsRef.current.close(1000, 'Session completed')
         } catch (e) {
           // Ignore close errors
         }
         wsRef.current = null
       }
+
+      // Reset connection attempted flag so reconnection is possible
+      // This handles the case where effect re-runs due to dependency changes
+      connectionAttemptedRef.current = false
+
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current)
         pollingIntervalRef.current = null
@@ -499,13 +549,13 @@ export function OrchestrationMessage({
         </div>
       )}
 
-      {/* Final Answer */}
+      {/* Final Answer - Rendered like a normal assistant message */}
       {finalAnswer && (
-        <div className="mt-4 p-4 rounded-lg bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/30">
-          <div className="text-sm font-semibold text-emerald-400 mb-2 flex items-center gap-2">
-            <span>✓</span> Final Answer
-          </div>
-          <div className="text-sm text-zinc-100 whitespace-pre-wrap leading-relaxed">{finalAnswer}</div>
+        <div className="mt-4 text-zinc-100 leading-relaxed">
+          <EnhancedMessageContent
+            content={finalAnswer}
+            role="assistant"
+          />
         </div>
       )}
     </div>

@@ -158,6 +158,19 @@ async def _save_turn_to_db(
     if should_auto_title(thread.title, next_sequence):
         thread.title = generate_thread_title(user_content)
 
+    # Persist transparent routing preference (if explicitly set), and honor user "hide routing" requests.
+    try:
+        from app.services.routing_header import user_requested_hide_routing
+        settings = thread.settings or {}
+        if request.transparent_routing is not None:
+            settings["transparent_routing"] = bool(request.transparent_routing)
+        if user_requested_hide_routing(user_content):
+            settings["transparent_routing"] = False
+        thread.settings = settings
+    except Exception:
+        # Never block message persistence on a settings update
+        pass
+
     # updated_at will be auto-updated by SQLAlchemy's onupdate
     
     # Create audit log
@@ -236,6 +249,7 @@ class AddMessageRequest(BaseModel):
     provider: Optional[ProviderType] = None  # Optional - will use intelligent routing if not specified
     model: Optional[str] = None  # Optional - will use intelligent routing if not specified
     reason: Optional[str] = None  # Optional - will be auto-generated if not specified
+    transparent_routing: Optional[bool] = None  # If true, prepend a user-visible routing header
     scope: ForwardScope = ForwardScope.PRIVATE
     use_memory: bool = True  # Enable memory-based context by default
     attachments: Optional[List[MessageAttachment]] = None  # Optional image/file attachments
@@ -268,6 +282,24 @@ class AddMessageResponse(BaseModel):
     user_message: MessageResponse
     assistant_message: MessageResponse
     # router field removed - internal routing hidden from users
+
+
+class SaveRawMessageRequest(BaseModel):
+    """Request to save a message directly without AI processing."""
+    role: str = Field(..., description="Message role: 'user' or 'assistant'")
+    content: str = Field(..., description="Message content")
+    provider: Optional[str] = Field(None, description="Provider name (for assistant messages)")
+    model: Optional[str] = Field(None, description="Model name (for assistant messages)")
+    meta: Optional[Dict[str, Any]] = Field(None, description="Additional metadata")
+
+
+class SaveRawMessageResponse(BaseModel):
+    """Response from saving a raw message."""
+    id: str
+    role: str
+    content: str
+    sequence: int
+    created_at: datetime
 
 
 class ThreadDetailResponse(BaseModel):
@@ -307,6 +339,7 @@ class UpdateThreadSettingsRequest(BaseModel):
     models: Optional[List[Dict[str, Any]]] = None
     temperature: Optional[float] = None
     pinned: Optional[bool] = None
+    transparent_routing: Optional[bool] = None
 
 
 class AuditEntry(BaseModel):
@@ -586,6 +619,8 @@ async def update_thread_settings(
         settings["models"] = request.models
     if request.temperature is not None:
         settings["temperature"] = request.temperature
+    if request.transparent_routing is not None:
+        settings["transparent_routing"] = bool(request.transparent_routing)
 
     thread.settings = settings
 
@@ -737,6 +772,14 @@ async def add_message(
 
     thread = await _get_thread(db, thread_id, org_id, user_id)
 
+    # Transparent routing header flag (per request, falling back to per-thread setting)
+    thread_settings = thread.settings or {}
+    transparent_routing = (
+        bool(request.transparent_routing)
+        if request.transparent_routing is not None
+        else bool(thread_settings.get("transparent_routing", False))
+    )
+
     # Check if collaboration mode is enabled
     if request.collaboration_mode:
         # Use main assistant with collaboration
@@ -823,11 +866,24 @@ async def add_message(
             request=request,
             prompt_tokens_estimate=len(request.content) // 4,
         )
-        
-        return AddMessageResponse(
-            user_message=_to_message_response(user_msg, hide_provider=False),
-            assistant_message=_to_message_response(assistant_msg, hide_provider=False),
-        )
+
+        user_resp = _to_message_response(user_msg, hide_provider=False)
+        assistant_resp = _to_message_response(assistant_msg, hide_provider=False)
+        if transparent_routing:
+            from app.services.routing_header import RoutingHeaderInfo, build_routing_header, provider_name
+            header = build_routing_header(
+                RoutingHeaderInfo(
+                    provider=provider_name(assistant_msg.provider),
+                    model=assistant_msg.model or "unknown",
+                    route_reason="Multi-agent collaboration.",
+                    context="full_history",
+                    repair_attempts=0,
+                    fallback_used="no",
+                )
+            )
+            assistant_resp.content = f"{header}{assistant_resp.content}"
+
+        return AddMessageResponse(user_message=user_resp, assistant_message=assistant_resp)
 
     org = await _get_org(db, org_id)
     request_limit = org.requests_per_day or settings.default_requests_per_day
@@ -1263,6 +1319,14 @@ async def add_message(
         return {
             "user_message": _to_message_response(user_msg, hide_provider=False),
             "assistant_message": _to_message_response(assistant_msg, hide_provider=False),
+            "routing_meta": {
+                "provider": request.provider,
+                "model": current_attempt_model,
+                "route_reason": request.reason,
+                "context": "full_history",
+                "repair_attempts": 0,
+                "fallback_used": "yes" if current_attempt_model != current_model else "no",
+            },
         }
     
     # Feature flag check
@@ -1288,10 +1352,90 @@ async def add_message(
     
     # Both leader and followers return the same response
     # Router decision is now hidden from end users to maintain DAC persona
+    if transparent_routing:
+        from app.services.routing_header import RoutingHeaderInfo, build_routing_header, provider_name
+        routing_meta = response_data.get("routing_meta") or {}
+        header = build_routing_header(
+            RoutingHeaderInfo(
+                provider=provider_name(routing_meta.get("provider")),
+                model=routing_meta.get("model") or "unknown",
+                route_reason=routing_meta.get("route_reason") or "unknown",
+                context=routing_meta.get("context") or "full_history",
+                repair_attempts=int(routing_meta.get("repair_attempts") or 0),
+                fallback_used=routing_meta.get("fallback_used") or "no",
+            )
+        )
+        response_data["assistant_message"].content = f"{header}{response_data['assistant_message'].content}"
     return AddMessageResponse(
         user_message=response_data["user_message"],
         assistant_message=response_data["assistant_message"],
     )
+
+
+@router.post("/{thread_id}/messages/raw", response_model=SaveRawMessageResponse)
+async def save_raw_message(
+    thread_id: str,
+    request: SaveRawMessageRequest,
+    org_id: str = Depends(require_org_id),
+    current_user: Optional[CurrentUser] = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Save a message directly to the database without triggering AI processing.
+
+    Use this endpoint for:
+    - Saving council orchestration messages
+    - Saving messages from external sources
+    - Manually adding context to a conversation
+    """
+    from app.models.message import Message, MessageRole
+    from sqlalchemy import select, func
+
+    user_id = current_user.id if current_user else None
+    await set_rls_context(db, org_id, user_id)
+
+    # Verify thread exists
+    thread = await _get_thread(db, thread_id, org_id, user_id)
+
+    try:
+        # Get next sequence number
+        sequence_stmt = select(func.max(Message.sequence)).where(Message.thread_id == thread_id)
+        sequence_result = await db.execute(sequence_stmt)
+        max_sequence = sequence_result.scalar()
+        next_sequence = (max_sequence or -1) + 1
+
+        # Determine message role
+        role = MessageRole.USER if request.role.lower() == "user" else MessageRole.ASSISTANT
+
+        # Create message with meta if provided
+        message = Message(
+            thread_id=thread_id,
+            role=role,
+            content=request.content,
+            sequence=next_sequence,
+            provider=request.provider,
+            model=request.model,
+            meta=request.meta,
+        )
+        db.add(message)
+        await db.flush()
+        await db.refresh(message)
+        await db.commit()
+
+        print(f"💾 Saved raw message to thread {thread_id}: role={request.role}, sequence={next_sequence}")
+
+        return SaveRawMessageResponse(
+            id=str(message.id),
+            role=message.role.value,
+            content=message.content,
+            sequence=message.sequence,
+            created_at=message.created_at,
+        )
+
+    except Exception as e:
+        await db.rollback()
+        print(f"❌ Failed to save raw message: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save message: {str(e)}")
 
 
 @router.post("/{thread_id}/messages/stream")
@@ -1557,6 +1701,33 @@ async def add_message_streaming(
     request.model = validated_model
     if not request.reason:
         request.reason = forced_reason if has_image_attachments else reason
+
+    # Transparent routing header flag (per request, falling back to per-thread setting)
+    transparent_routing = bool(request.transparent_routing) if request.transparent_routing is not None else False
+    if request.transparent_routing is None:
+        try:
+            settings_stmt = select(Thread.settings).where(Thread.id == thread_id, Thread.org_id == org_id)
+            if current_user and current_user.id:
+                settings_stmt = settings_stmt.where(Thread.creator_id == current_user.id)
+            settings_result = await db.execute(settings_stmt)
+            settings_value = settings_result.scalar_one_or_none() or {}
+            transparent_routing = bool((settings_value or {}).get("transparent_routing", False))
+        except Exception:
+            transparent_routing = False
+
+    routing_header_text = None
+    if transparent_routing:
+        from app.services.routing_header import RoutingHeaderInfo, build_routing_header, provider_name
+        routing_header_text = build_routing_header(
+            RoutingHeaderInfo(
+                provider=provider_name(provider_enum),
+                model=validated_model or "unknown",
+                route_reason=request.reason or "unknown",
+                context="full_history",
+                repair_attempts=0,
+                fallback_used="no",
+            )
+        )
     
     # Detect intent from routing reason for LaTeX math formatting
     from app.services.syntra_persona import detect_intent_from_reason
@@ -1782,6 +1953,11 @@ async def add_message_streaming(
             "provider": provider_enum.value,
             "model": validated_model,
         }
+
+        # If enabled, prepend the transparent routing header as the first visible content.
+        # Do NOT append this to `response_content` (keeps stored assistant message clean).
+        if routing_header_text:
+            yield {"type": "delta", "delta": routing_header_text}
         
         try:
             async for chunk in call_provider_adapter_streaming(
@@ -1851,6 +2027,18 @@ async def add_message_streaming(
                 org = await _get_org(db, org_id)
                 request_limit = org.requests_per_day or settings.default_requests_per_day
                 token_limit = org.tokens_per_day or settings.default_tokens_per_day
+
+                # Persist transparent routing preference (if explicitly set), and honor user "hide routing" requests.
+                try:
+                    from app.services.routing_header import user_requested_hide_routing
+                    thread_settings = thread.settings or {}
+                    if request.transparent_routing is not None:
+                        thread_settings["transparent_routing"] = bool(request.transparent_routing)
+                    if user_requested_hide_routing(user_content):
+                        thread_settings["transparent_routing"] = False
+                    thread.settings = thread_settings
+                except Exception:
+                    pass
 
                 # CRITICAL: Save messages to database for persistence
                 # This ensures messages survive server restarts and can be loaded later

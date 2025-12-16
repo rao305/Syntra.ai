@@ -321,13 +321,30 @@ class NextGenCollaborationEngine:
         """Execute simple parallel model execution without full orchestration"""
         
         print("⚡ Executing Parallel Models mode...")
-        
+
         # Route to best models for this intent
         available_models = list(api_keys.keys())
         model_assignments = intent_classifier.route_to_models(
             intent_vector, available_models, max_models=3
         )
-        
+
+        # Fallback: if no models assigned, use all 4 available models
+        if not model_assignments:
+            print("⚠️  No models assigned by intent classifier, using all 4 available models as fallback")
+            # Map provider names to model names (all 4 providers: OpenAI, Gemini, Kimi, Perplexity)
+            provider_to_model = {
+                "openai": "gpt-4o-mini",
+                "gemini": "gemini-2.0-flash-exp",
+                "perplexity": "sonar",
+                "kimi": "moonshot-v1-8k"
+            }
+            model_assignments = [
+                (provider_to_model.get(provider, provider), 1.0, [])
+                for provider in available_models
+                if provider in provider_to_model
+            ]  # Use all 4 models
+            print(f"📌 Using all 4 fallback models: {[m[0] for m in model_assignments]}")
+
         # Execute models in parallel
         tasks = []
         for model_id, score, assigned_intents in model_assignments:
@@ -473,8 +490,8 @@ class NextGenCollaborationEngine:
                     temperature=0.7
                 )
                 content = response.content
-                
-            elif provider == "google":
+
+            elif provider == "gemini":
                 from app.adapters.gemini import call_gemini
                 response = await call_gemini(
                     messages=[{"role": "user", "content": prompt}],
@@ -483,7 +500,7 @@ class NextGenCollaborationEngine:
                     temperature=0.7
                 )
                 content = response.content
-                
+
             elif provider == "perplexity":
                 from app.adapters.perplexity import call_perplexity
                 response = await call_perplexity(
@@ -492,7 +509,17 @@ class NextGenCollaborationEngine:
                     api_key=api_key
                 )
                 content = response.content
-                
+
+            elif provider == "kimi":
+                from app.adapters.kimi import call_kimi
+                response = await call_kimi(
+                    messages=[{"role": "user", "content": prompt}],
+                    model=model_id,
+                    api_key=api_key,
+                    temperature=0.7
+                )
+                content = response.content
+
             else:
                 raise ValueError(f"Unsupported provider: {provider}")
             
@@ -510,13 +537,30 @@ class NextGenCollaborationEngine:
             raise e
     
     def _get_provider_for_model(self, model_id: str) -> str:
-        """Map model IDs to provider names"""
+        """Map model IDs to provider names (matching ProviderType values)"""
         provider_map = {
+            # OpenAI models
             "gpt-4o": "openai",
-            "claude-3-5-sonnet": "anthropic",
-            "gemini-2.0-flash": "google",
+            "gpt-4o-mini": "openai",
+            "gpt-4-turbo": "openai",
+            "gpt-3.5-turbo": "openai",
+
+            # Gemini models (use "gemini" to match ProviderType.GEMINI)
+            "gemini-2.0-flash": "gemini",
+            "gemini-2.0-flash-exp": "gemini",
+            "gemini-1.5-pro": "gemini",
+            "gemini-1.5-flash": "gemini",
+            "gemini-pro": "gemini",
+
+            # Perplexity models
+            "sonar": "perplexity",
             "sonar-pro": "perplexity",
-            "kimi": "moonshot"
+
+            # Kimi models (use "kimi" to match ProviderType.KIMI)
+            "kimi": "kimi",
+            "moonshot-v1-8k": "kimi",
+            "moonshot-v1-32k": "kimi",
+            "moonshot-v1-128k": "kimi",
         }
         return provider_map.get(model_id, "openai")
     

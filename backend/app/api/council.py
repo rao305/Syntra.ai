@@ -8,7 +8,7 @@ supporting all configured LLM providers (OpenAI, Gemini, Perplexity, Kimi).
 import logging
 import uuid
 import json
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from fastapi import APIRouter, Depends, HTTPException, status, WebSocket, WebSocketDisconnect
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
@@ -43,6 +43,23 @@ class CouncilRequest(BaseModel):
     preferred_providers: Optional[Dict[str, str]] = Field(
         None,
         description="Map of agent names to preferred providers (e.g., {'architect': 'openai'})"
+    )
+    # Syntra SuperBenchmark features
+    context_pack: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Context pack dict with locked_decisions, glossary, open_questions, style_rules"
+    )
+    lexicon_lock: Optional[Dict[str, List[str]]] = Field(
+        None,
+        description="Lexicon lock with 'allowed_terms' and/or 'forbidden_terms' lists"
+    )
+    output_contract: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Output contract with required_headings, file_count, format constraints"
+    )
+    transparency_mode: bool = Field(
+        False,
+        description="Whether to show internal stages/models in output"
     )
 
 
@@ -211,7 +228,11 @@ async def orchestrate_council(
             query=request.query,
             output_mode=request.output_mode,
             api_keys=api_keys,
-            preferred_providers=preferred_providers
+            preferred_providers=preferred_providers,
+            context_pack=request.context_pack,
+            lexicon_lock=request.lexicon_lock,
+            output_contract=request.output_contract,
+            transparency_mode=request.transparency_mode
         )
     )
 
@@ -492,7 +513,11 @@ async def _run_council_async(
     query: str,
     output_mode: str,
     api_keys: Dict[str, str],
-    preferred_providers: Optional[Dict[str, ProviderType]] = None
+    preferred_providers: Optional[Dict[str, ProviderType]] = None,
+    context_pack: Optional[Dict[str, Any]] = None,
+    lexicon_lock: Optional[Dict[str, List[str]]] = None,
+    output_contract: Optional[Dict[str, Any]] = None,
+    transparency_mode: bool = False
 ):
     """Run council orchestration asynchronously."""
 
@@ -609,7 +634,11 @@ async def _run_council_async(
             output_mode=OutputMode(output_mode),
             api_keys=api_keys,
             preferred_providers=preferred_providers,
-            verbose=True
+            verbose=True,
+            context_pack=context_pack,
+            lexicon_lock=lexicon_lock,
+            output_contract=output_contract,
+            transparency_mode=transparency_mode
         )
 
         # Run council

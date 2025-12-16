@@ -651,7 +651,8 @@ export function EnhancedChatInterface({
                   (() => {
                     const activeStage = collaborationStages.find((s) => s.status === "running")
                     const stageName = activeStage?.label ? `${activeStage.label} in progress…` : "Processing your request…"
-                    const modelName = activeStage?.modelName || "Processing"
+                    // Use the actual model name from the active stage, or show "Selecting model..." as fallback
+                    const modelName = activeStage?.modelName || "Selecting model..."
                     // Get the model output from the running step
                     const runningStep = steps.find((s) => s.status === "running")
                     const modelOutput = runningStep?.outputDraft || runningStep?.outputFinal || ""

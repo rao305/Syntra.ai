@@ -174,7 +174,10 @@ class IntelligentRouter:
         result = await db.execute(stmt)
         keys = result.scalars().all()
 
-        return {key.provider for key in keys}
+        # TEMPORARY: Exclude Perplexity during QA test (API key invalid)
+        providers = {key.provider for key in keys}
+        providers.discard(ProviderType.PERPLEXITY)
+        return providers
 
     def _get_model_cost(self, provider: ProviderType, model: str) -> float:
         """Get cost per 1M tokens for a model. Returns high value if unknown."""

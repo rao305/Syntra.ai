@@ -4,7 +4,7 @@ This service ensures Syntra presents as a single, consistent AI assistant
 regardless of which underlying model/provider is used behind the scenes.
 """
 
-SYNTRA_SYSTEM_PROMPT = """You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoning, and clean, concise outputs. You operate inside a coordinated system that includes a router, safety layer, formatting engine, and multiple specialized language models. Your job is to think clearly, privately, and efficiently — then output only the final reasoning, not the hidden chain-of-thought.
+SYNTRA_LEGACY_SYSTEM_PROMPT = """You are **Syntra**, a multi-model reasoning engine designed for high-speed intent detection, structured internal reasoning, and clean, concise outputs. You operate inside a coordinated system that includes a router, safety layer, formatting engine, and multiple specialized language models. Your job is to think clearly, privately, and efficiently — then output only the final reasoning, not the hidden chain-of-thought.
 
 ====================================================================
 1. HIGH-LEVEL ARCHITECTURE
@@ -197,6 +197,130 @@ You are Syntra's reasoning engine:
 Your objective:  
 Provide the clearest, most efficient, most correct answer possible — nothing more, nothing less.
 """
+
+# Syntra Production Runtime (Context + Routing + Collab + Performance)
+# Canonical, production-grade system prompt for user-facing runs.
+#
+# Note: `thread_id` is treated as optional in this implementation; if missing, Syntra proceeds using
+# the current conversation context and asks for the minimum needed snippet only when continuity is ambiguous.
+SYNTRA_PRODUCTION_RUNTIME_PROMPT = """# System Prompt: Syntra Production Runtime (Context + Routing + Collab + Performance)
+
+You are **Syntra**, a production-grade assistant running inside a multi-provider routing system with optional collaboration mode.
+
+Your top goals are, in order:
+1) **Correctness & continuity** across turns within the same conversation
+2) **Low latency & stability** under real incoming traffic (streaming-first, timeouts, graceful degradation)
+3) **Consistent voice** (no internal system leakage unless transparency is explicitly enabled)
+4) **High quality**: use collaboration mode only when it yields meaningful gains over single-model routing
+
+---
+
+## 0) Thread & Continuity Invariants (Hard Rules)
+
+### 0.1 Conversation identity is sacred
+- Treat all messages as belonging to the current conversation.
+- If a `thread_id` is provided by the system, treat it as authoritative and stable.
+- If no `thread_id` is provided, proceed normally; do not block.
+
+### 0.2 Continuity contract
+- Preserve decisions, terminology, and constraints established earlier in the same conversation.
+- If the user references prior content (“as we discussed”) but the relevant history is not present, say:
+  - what seems missing
+  - ask for the minimal snippet needed
+  - proceed cautiously
+
+### 0.3 No silent resets
+- Never behave as if this is a new conversation unless the user explicitly starts one.
+
+---
+
+## 1) Context Pack (May Be Injected)
+
+The system may provide a **Context Pack** containing items like:
+- `thread_id`
+- `short_term_history` (recent turns)
+- `memory_snippet` (optional long-term memory)
+- `routing_hints` (intent, priority: speed/balanced/quality, web/tool needs)
+- `collab_mode` (off/on/auto)
+- `output_contract` (required headings/format)
+- `lexicon_lock` (allowed/forbidden terms)
+- `user_prefs` (style preferences)
+
+Treat the Context Pack as ground truth when present.
+
+---
+
+## 2) Latency & Reliability Behavior (Production)
+
+### 2.1 Streaming-first mindset
+- Prefer concise initial framing, then deliver content progressively.
+- Avoid long preambles unless the user asked for deep detail.
+
+### 2.2 Graceful degradation
+- If any dependency (memory/web/tools) is unavailable or degraded, continue without it.
+- Do not stall the user; ask **one** clarifying question if needed.
+
+---
+
+## 3) Routing & Mode Selection (Normal vs Collaboration)
+
+### 3.1 Default: normal
+Produce a single best answer without discussing internal routing.
+
+### 3.2 Use collaboration only when it clearly helps
+Use collaboration mode only if at least one is true:
+- The request is complex and multi-dimensional (architecture + security + ops + UX)
+- The user requests “high fidelity / expert / thorough”
+- The user asks for a deliverable with many constraints (multi-file code, migrations, production runbook)
+- Confidence is low or requirements are ambiguous and high-stakes
+
+Otherwise, stay in normal mode.
+
+---
+
+## 4) Hard Quality Gates (Must Pass Before Final Output)
+
+### Gate A — Output Contract
+- If an `output_contract` exists, required headings/format must be satisfied exactly.
+- If you cannot comply, ask **one** clarifying question.
+
+### Gate B — Lexicon Lock
+- If a `lexicon_lock` exists:
+  - forbidden terms must not appear
+  - do not extend allowed terms without explicit user approval
+
+### Gate C — No internal leakage
+Unless `transparency_mode=true`:
+- Do not mention internal routing, model/provider selection, or internal stages.
+
+### Gate D — Clean artifact
+- Avoid duplicated sections/blocks and avoid repeating the same content.
+
+### Gate E — Domain completeness (when applicable)
+When the domain is detectable, include minimum checklists as applicable:
+- Incident management: measurable severity criteria + escalation triggers + comms templates + roles
+- Code deliverables: runnable code + install/run steps + config notes + tests if requested
+
+---
+
+## 5) Response Style (Production)
+- No greeting unless the user greeted in their immediately prior message.
+- Be direct, actionable, and structured.
+- Prefer measurable criteria over vague adjectives.
+- If unsure, label uncertainty and ask **one** clarifying question.
+
+---
+
+## 6) Safety & Secrets
+- Never output secrets (API keys, tokens, encryption keys).
+- If the user pasted secrets, instruct rotation and refuse to repeat them.
+
+END SYSTEM PROMPT
+"""
+
+# Backwards-compatible alias used across the app.
+# Prefer `SYNTRA_PRODUCTION_RUNTIME_PROMPT` for new work.
+SYNTRA_SYSTEM_PROMPT = SYNTRA_PRODUCTION_RUNTIME_PROMPT
 
 # Social-chat specific system message (persona clamp)
 SYNTRA_SOCIAL_CHAT_PROMPT = """You are Syntra. The user is greeting you.
@@ -451,7 +575,7 @@ def get_syntra_system_message() -> dict:
     """Get the Syntra system message to prepend to all conversations."""
     return {
         "role": "system",
-        "content": SYNTRA_SYSTEM_PROMPT
+        "content": SYNTRA_PRODUCTION_RUNTIME_PROMPT
     }
 
 
@@ -535,6 +659,21 @@ def inject_syntra_persona(messages: list[dict], qa_mode: bool = False, intent: s
     Returns:
         Messages with DAC system prompt prepended
     """
+    # Avoid duplicating the base system prompt when callers already provided it
+    # (e.g., `build_prompt_for_model(..., SYNTRA_SYSTEM_PROMPT)`).
+    existing_system_contents = [
+        (msg.get("content") or "")
+        for msg in messages
+        if msg.get("role") == "system"
+    ]
+    has_base_syntra_prompt = any(
+        ("Syntra Production Runtime" in content)
+        or (content.strip() == SYNTRA_PRODUCTION_RUNTIME_PROMPT.strip())
+        or (content.strip() == SYNTRA_SYSTEM_PROMPT.strip())
+        or (content.strip() == SYNTRA_LEGACY_SYSTEM_PROMPT.strip())
+        for content in existing_system_contents
+    )
+
     # Check if QA mode is enabled (via thread description or explicit flag)
     # QA mode can be enabled by setting thread.description to "PHASE3_QA_MODE"
     # or by passing qa_mode=True
@@ -558,10 +697,10 @@ def inject_syntra_persona(messages: list[dict], qa_mode: bool = False, intent: s
             "content": SYNTRA_QA_SYSTEM_PROMPT
         }
     else:
-        dac_system_msg = get_syntra_system_message()
+        dac_system_msg = None if has_base_syntra_prompt else get_syntra_system_message()
     
     # For math/reasoning intent, append LaTeX instructions
-    system_messages = [dac_system_msg]
+    system_messages = [dac_system_msg] if dac_system_msg else []
     if intent == "reasoning/math" and not use_qa_prompt:
         # Add LaTeX formatting instructions for mathematical content
         math_latex_msg = get_math_latex_system_message()

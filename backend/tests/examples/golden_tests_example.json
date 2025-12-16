@@ -1,0 +1,105 @@
+{
+  "tests": [
+    {
+      "test_id": "test_001",
+      "title": "Incident Severity Framework - Lexicon Lock",
+      "user_prompt": "Design an incident severity framework with ONLY severities P1, P2, P3 (no P0/SEV0) and ONLY roles: IC, Comms Lead, On-call Engineer, Eng Manager, Support. This is a hard lexicon lock.",
+      "expected_output_contract": {
+        "required_headings": ["AGENT OUTPUTS", "SYNTHESIZED FINAL", "JUDGE CHECK"]
+      },
+      "lexicon_lock": {
+        "forbidden_terms": ["P0", "SEV0", "Scribe", "Incident Liaison"],
+        "allowed_terms": ["P1", "P2", "P3", "IC", "Comms Lead", "On-call Engineer", "Eng Manager", "Support"]
+      },
+      "domain_checklist": [
+        "measurable severity criteria",
+        "escalation triggers",
+        "comms templates",
+        "roles/RACI"
+      ],
+      "priority": "P0"
+    },
+    {
+      "test_id": "test_002",
+      "title": "Code Deliverable - File Count",
+      "user_prompt": "Create exactly 3 Python files: main.py, utils.py, and config.py for a web scraper.",
+      "expected_output_contract": {
+        "required_headings": ["Final Deliverable", "How to Run"],
+        "file_count": 3
+      },
+      "domain_checklist": [
+        "runnable code",
+        "install/run steps"
+      ],
+      "priority": "P1"
+    },
+    {
+      "test_id": "test_003",
+      "title": "JSON Schema Validation",
+      "user_prompt": "Generate a configuration JSON with 'api_url', 'timeout', and 'retries' fields.",
+      "expected_output_contract": {
+        "required_headings": ["Configuration"],
+        "json_schema": {
+          "required": ["api_url", "timeout", "retries"]
+        }
+      },
+      "priority": "P1"
+    }
+  ],
+  "transcripts": [
+    {
+      "run_id": "run_001",
+      "timestamp": "2024-01-15T10:30:00Z",
+      "thread_id": "thread_abc123",
+      "routing": {
+        "architect": "openai/gpt-4o",
+        "synthesizer": "openai/gpt-4o",
+        "judge": "openai/gpt-4o"
+      },
+      "repair_attempts": 0,
+      "fallback_used": false,
+      "final_output": "# Incident Severity Framework\n\n## AGENT OUTPUTS\n\n### Specialist A Output\n- P1: Critical production outage\n- P2: Service degradation\n- P3: Minor issues\n\n## SYNTHESIZED FINAL\n\n### Severity Definitions\n- **P1**: Critical production outage affecting all users\n- **P2**: Service degradation affecting subset of users\n- **P3**: Minor issues with workarounds\n\n## JUDGE CHECK\n\n**VERDICT: APPROVED ✅**\n\nAll constraints met. No forbidden terms found.",
+      "user_rating": 4
+    },
+    {
+      "run_id": "run_002",
+      "timestamp": "2024-01-15T10:35:00Z",
+      "thread_id": "thread_def456",
+      "routing": {
+        "architect": "gemini/gemini-2.0-flash",
+        "synthesizer": "openai/gpt-4o",
+        "judge": "openai/gpt-4o"
+      },
+      "repair_attempts": 1,
+      "fallback_used": false,
+      "final_output": "# Web Scraper\n\n## Final Deliverable\n\n### `main.py`\n```python\nimport requests\nfrom utils import parse_html\n\nif __name__ == '__main__':\n    # Scraper code\n    pass\n```\n\n### `utils.py`\n```python\ndef parse_html(html):\n    # Parse logic\n    pass\n```\n\n### `config.py`\n```python\nAPI_URL = 'https://example.com'\n```\n\n## How to Run\n```bash\npython main.py\n```",
+      "user_rating": 5
+    },
+    {
+      "run_id": "run_003",
+      "timestamp": "2024-01-15T10:40:00Z",
+      "thread_id": "thread_ghi789",
+      "routing": {
+        "architect": "openai/gpt-4o",
+        "synthesizer": "openai/gpt-4o",
+        "judge": "openai/gpt-4o"
+      },
+      "repair_attempts": 0,
+      "fallback_used": false,
+      "final_output": "# Configuration\n\n```json\n{\n  \"api_url\": \"https://api.example.com\",\n  \"timeout\": 30,\n  \"retries\": 3\n}\n```",
+      "user_rating": 4
+    }
+  ],
+  "run_metadata": {
+    "date": "2024-01-15",
+    "build_commit": "abc123def456",
+    "environment": "production",
+    "providers_enabled": ["openai", "gemini", "perplexity"],
+    "notes": "Nightly evaluation run - testing lexicon locks and file counts"
+  },
+  "prior_run": {
+    "average_score": 85.5,
+    "date": "2024-01-14"
+  }
+}
+
