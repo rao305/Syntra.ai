@@ -3,6 +3,7 @@
 import React from "react";
 import { FinalAnswer } from "@/lib/collaborate-types";
 import { getConfidenceBadgeColor, getConfidenceEmoji } from "@/lib/collaborate-types";
+import { EnhancedMessageContent } from "@/components/enhanced-message-content";
 
 interface FinalAnswerCardProps {
   finalAnswer: FinalAnswer;
@@ -33,10 +34,11 @@ export function FinalAnswerCard({ finalAnswer, meta }: FinalAnswerCardProps) {
 
       {/* Content */}
       <div className="px-6 py-4">
-        <div className="prose prose-sm dark:prose-invert max-w-none">
-          <p className="text-slate-900 dark:text-slate-50 leading-relaxed whitespace-pre-wrap">
-            {finalAnswer.content}
-          </p>
+        <div className="text-slate-900 dark:text-slate-50">
+          <EnhancedMessageContent
+            content={finalAnswer.content}
+            role="assistant"
+          />
         </div>
       </div>
 

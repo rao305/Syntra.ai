@@ -218,6 +218,18 @@ class FinalAnswer(BaseModel):
 CollaborateMode = Literal["auto", "manual"]
 
 
+class QualityMetrics(BaseModel):
+    """Quality validation metrics for the response."""
+    substance_score: float = Field(..., ge=0, le=10, description="Ratio of actual content vs metadata (0-10)")
+    completeness_score: float = Field(..., ge=0, le=10, description="All sub-questions answered (0-10)")
+    depth_score: float = Field(..., ge=0, le=10, description="Appropriate depth for query complexity (0-10)")
+    accuracy_score: float = Field(..., ge=0, le=10, description="Correctness of claims and code (0-10)")
+    overall_score: float = Field(..., ge=0, le=10, description="Weighted average of all scores (0-10)")
+    quality_gate_passed: bool = Field(..., description="True if all scores >= 7")
+    query_complexity: int = Field(..., ge=1, le=5, description="Query complexity level (1-5)")
+    validation_timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
 class CollaborateRunMeta(BaseModel):
     run_id: str
     mode: CollaborateMode
@@ -225,6 +237,7 @@ class CollaborateRunMeta(BaseModel):
     finished_at: datetime
     total_latency_ms: Optional[int] = None
     models_involved: List[ModelInfo] = []
+    quality_metrics: Optional[QualityMetrics] = None  # NEW: Quality validation results
 
 
 class CollaborateResponse(BaseModel):

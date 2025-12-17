@@ -1,5 +1,5 @@
 """Collaboration engine models for persistence and analytics."""
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Text, Boolean
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Text, Boolean, Float
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -23,7 +23,17 @@ class CollaborateRun(Base):
     duration_ms = Column(Integer, nullable=True)
     status = Column(String(16), nullable=False, default="running", index=True)  # running | success | error
     error_reason = Column(Text, nullable=True)
-    
+
+    # Quality metrics (NEW)
+    query_complexity = Column(Integer, nullable=True)  # 1-5 complexity level
+    substance_score = Column(Float, nullable=True)  # 0-10
+    completeness_score = Column(Float, nullable=True)  # 0-10
+    depth_score = Column(Float, nullable=True)  # 0-10
+    accuracy_score = Column(Float, nullable=True)  # 0-10
+    overall_quality_score = Column(Float, nullable=True)  # 0-10
+    quality_gate_passed = Column(Boolean, nullable=True)
+    quality_validation_timestamp = Column(DateTime(timezone=True), nullable=True)
+
     # Relationships
     thread = relationship("Thread", foreign_keys=[thread_id])
     user_message = relationship("Message", foreign_keys=[user_message_id])

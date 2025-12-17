@@ -1,32 +1,27 @@
 'use client'
 
-import * as React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { DifferentiatorCard } from '@/components/differentiator-card'
+import { FeatureCard } from '@/components/feature-card'
+import Stagger, { item } from '@/components/motion/Stagger'
+import { SectionHeader } from '@/components/section-header'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { motion } from 'framer-motion'
 import {
-  Route,
-  Shield,
-  Zap,
-  BarChart3,
   ArrowRight,
+  BarChart3,
+  Brain,
   Code2,
   Image as ImageIcon,
-  Brain,
   Key,
-  Eye,
-  Users,
   MessageSquare,
+  Route,
+  Shield,
   Sparkles,
+  Users,
+  Zap
 } from 'lucide-react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import Reveal from '@/components/motion/Reveal'
-import Stagger, { item } from '@/components/motion/Stagger'
-import { MetricsStrip } from '@/components/metrics-strip'
-import { HeroMultiModelDemo } from '@/components/hero-multi-model-demo'
-import { SectionHeader } from '@/components/section-header'
-import { FeatureCard } from '@/components/feature-card'
-import { DifferentiatorCard } from '@/components/differentiator-card'
 
 export default function ProductPage() {
   return (
@@ -37,80 +32,80 @@ export default function ProductPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Column - Text */}
-            
-              <div className="space-y-6">
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-sm font-semibold text-emerald-400 uppercase tracking-wider"
-                >
-                  Operate across LLMs
-                </motion.p>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-100 tracking-tight">
-                  One assistant.
-                  <br />
-                  <span className="text-emerald-400">Every model.</span>
-                </h1>
-                <p className="text-lg md:text-xl text-slate-300 max-w-xl">
-                  Syntra lets you chat once while OpenAI, Claude, Gemini, and more collaborate behind
-                  the scenes in the same context window.
-                </p>
-                <div className="flex items-center gap-4 pt-4">
-                  <Link href="/conversations">
-                    <Button
-                      size="lg"
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white h-12 px-8"
-                    >
-                      Open Chat
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </Link>
-                  <Link href="/pricing">
-                    <Button size="lg" variant="outline" className="h-12 px-8">
-                      See Pricing
-                    </Button>
-                  </Link>
-                </div>
+
+            <div className="space-y-6">
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm font-semibold text-emerald-400 uppercase tracking-wider"
+              >
+                Operate across LLMs
+              </motion.p>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-100 tracking-tight">
+                One assistant.
+                <br />
+                <span className="text-emerald-400">Every model.</span>
+              </h1>
+              <p className="text-lg md:text-xl text-slate-300 max-w-xl">
+                Syntra lets you chat once while OpenAI, Claude, Gemini, and more collaborate behind
+                the scenes in the same context window.
+              </p>
+              <div className="flex items-center gap-4 pt-4">
+                <Link href="/conversations">
+                  <Button
+                    size="lg"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white h-12 px-8"
+                  >
+                    Open Chat
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </Link>
+                <Link href="/pricing">
+                  <Button size="lg" variant="outline" className="h-12 px-8">
+                    See Pricing
+                  </Button>
+                </Link>
               </div>
-            
+            </div>
+
 
             {/* Right Column - Multi-Model Demo */}
-            
-              <div className="relative">
-                
-              </div>
-            
+
+            <div className="relative">
+
+            </div>
+
           </div>
         </div>
       </section>
 
       {/* Metrics Strip */}
-      
+
 
       {/* Logos / Social Proof */}
       <section className="py-12 border-b border-white/10 bg-zinc-900/20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          
-            <p className="text-center text-sm text-muted-foreground mb-6 uppercase tracking-wider">
-              Used by leading teams
-            </p>
-            <div className="flex items-center justify-center gap-8 md:gap-12 flex-wrap opacity-60">
-              {['Acme Corp', 'TechStart', 'DataFlow', 'CloudScale', 'AI Labs'].map(
-                (logo, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 0.6 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: idx * 0.1 }}
-                    className="text-sm font-medium text-muted-foreground"
-                  >
-                    {logo}
-                  </motion.div>
-                ),
-              )}
-            </div>
-          
+
+          <p className="text-center text-sm text-muted-foreground mb-6 uppercase tracking-wider">
+            Used by leading teams
+          </p>
+          <div className="flex items-center justify-center gap-8 md:gap-12 flex-wrap opacity-60">
+            {['Acme Corp', 'TechStart', 'DataFlow', 'CloudScale', 'AI Labs'].map(
+              (logo, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 0.6 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: idx * 0.1 }}
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  {logo}
+                </motion.div>
+              ),
+            )}
+          </div>
+
         </div>
       </section>
 
@@ -122,7 +117,7 @@ export default function ProductPage() {
             subtitle="Syntra sits between your users and multiple models, keeping one shared context and picking the right model for each task."
           />
 
-          
+          <Stagger>
             <div className="relative max-w-5xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
                 {/* User */}
@@ -180,7 +175,7 @@ export default function ProductPage() {
                 </motion.div>
               </div>
             </div>
-          
+          </Stagger>
         </div>
       </section>
 
@@ -320,7 +315,7 @@ export default function ProductPage() {
             subtitle="See how teams use Syntra to operate across multiple LLMs"
           />
 
-          
+          <Stagger>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 {
@@ -366,7 +361,7 @@ export default function ProductPage() {
                 )
               })}
             </div>
-          
+          </Stagger>
 
           <div className="text-center mt-12">
             <Link href="/use-cases">
@@ -387,7 +382,7 @@ export default function ProductPage() {
             subtitle="See how teams are transforming their AI workflows with Syntra"
           />
 
-          
+          <Stagger>
             <div className="grid md:grid-cols-3 gap-6">
               {[
                 {
@@ -435,45 +430,45 @@ export default function ProductPage() {
                 </motion.div>
               ))}
             </div>
-          
+          </Stagger>
         </div>
       </section>
 
       {/* Final CTA */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-zinc-900/40 to-[#020409]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="space-y-6"
-            >
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                Ready to operate across LLMs?
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Start chatting with Syntra today. Experience the power of one assistant that can
-                leverage every model.
-              </p>
-              <div className="flex items-center justify-center gap-4 pt-4">
-                <Link href="/conversations">
-                  <Button
-                    size="lg"
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white h-12 px-8"
-                  >
-                    Open Chat
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
-                </Link>
-                <Link href="/pricing">
-                  <Button size="lg" variant="outline" className="h-12 px-8">
-                    View Pricing
-                  </Button>
-                </Link>
-              </div>
-            </motion.div>
-          
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="space-y-6"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+              Ready to operate across LLMs?
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Start chatting with Syntra today. Experience the power of one assistant that can
+              leverage every model.
+            </p>
+            <div className="flex items-center justify-center gap-4 pt-4">
+              <Link href="/conversations">
+                <Button
+                  size="lg"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white h-12 px-8"
+                >
+                  Open Chat
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button size="lg" variant="outline" className="h-12 px-8">
+                  View Pricing
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
+
         </div>
       </section>
     </div>

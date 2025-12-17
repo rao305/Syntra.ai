@@ -44,6 +44,19 @@ from app.services.council.base_system_prompt import (
     build_context_pack,
     inject_base_prompt
 )
+from app.services.council.quality_directive import (
+    QUALITY_DIRECTIVE,
+    get_role_specific_directive,
+    inject_quality_directive
+)
+from app.services.council.query_classifier import (
+    classify_query,
+    QueryComplexity
+)
+from app.services.council.quality_validator import (
+    validate_response_quality,
+    QualityScores
+)
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +74,10 @@ class CouncilConfig:
     lexicon_lock: Optional[Dict[str, List[str]]] = None  # {"allowed_terms": [...], "forbidden_terms": [...]}
     output_contract: Optional[Dict[str, Any]] = None  # {"required_headings": [...], "file_count": N, "format": "..."}
     transparency_mode: bool = False  # Whether to show internal stages/models
+    # Quality directive features
+    enable_quality_directive: bool = True  # Whether to inject quality directive
+    enable_quality_validation: bool = True  # Whether to run quality validation after judge
+    query_complexity: Optional[int] = None  # Manual complexity override (1-5), auto-detected if None
 
 
 @dataclass
@@ -129,6 +146,22 @@ class CouncilOrchestrator:
                 logger.info(f"Available providers: {[p.value for p in available]}")
 
             # =====================================================================
+            # QUERY COMPLEXITY CLASSIFICATION (for quality directive)
+            # =====================================================================
+            query_complexity = config.query_complexity
+            if query_complexity is None and config.enable_quality_directive:
+                # Auto-detect complexity if not manually specified
+                query_complexity, complexity_reasoning = await classify_query(
+                    query=config.query,
+                    api_keys=config.api_keys,
+                    use_llm=True  # Use LLM for accurate classification
+                )
+                if config.verbose:
+                    logger.info(f"📊 Query classified as Level {query_complexity}/5: {complexity_reasoning}")
+            else:
+                query_complexity = query_complexity or 3  # Default to medium complexity
+
+            # =====================================================================
             # PHASE 1: Run 5 agents in parallel
             # =====================================================================
             if progress_callback:
@@ -176,11 +209,24 @@ class CouncilOrchestrator:
                 preferred_provider=None
             ):
                 """Run agent with start/complete callbacks and base prompt injection."""
+                # Inject quality directive if enabled
+                if config.enable_quality_directive:
+                    role_directive = get_role_specific_directive(agent_name)
+                    enhanced_system_prompt = inject_quality_directive(
+                        agent_prompt=system_prompt,
+                        role=agent_name,
+                        query_complexity=query_complexity
+                    )
+                else:
+                    enhanced_system_prompt = system_prompt
+
                 # Inject base system prompt and context pack
                 enhanced_prompt = inject_base_prompt(
-                    agent_specific_prompt=system_prompt,
+                    agent_specific_prompt=enhanced_system_prompt,
                     context_pack=context_pack_str,
-                    transparency_mode=config.transparency_mode
+                    transparency_mode=config.transparency_mode,
+                    quality_directive=QUALITY_DIRECTIVE if config.enable_quality_directive else None,
+                    query_complexity=query_complexity if config.enable_quality_directive else None
                 )
                 # Send agent_start (with error handling to prevent blocking)
                 if progress_callback:
@@ -365,11 +411,23 @@ class CouncilOrchestrator:
                 if config.verbose:
                     logger.info(f"Starting Debate Synthesizer with {SYNTHESIZER_TIMEOUT}s timeout")
 
+                # Inject quality directive for synthesizer if enabled
+                if config.enable_quality_directive:
+                    synthesizer_prompt_with_quality = inject_quality_directive(
+                        agent_prompt=SYNTHESIZER_PROMPT,
+                        role="synthesizer",
+                        query_complexity=query_complexity
+                    )
+                else:
+                    synthesizer_prompt_with_quality = SYNTHESIZER_PROMPT
+
                 # Inject base prompt for synthesizer
                 synthesizer_enhanced_prompt = inject_base_prompt(
-                    agent_specific_prompt=SYNTHESIZER_PROMPT,
+                    agent_specific_prompt=synthesizer_prompt_with_quality,
                     context_pack=context_pack_str,
-                    transparency_mode=config.transparency_mode
+                    transparency_mode=config.transparency_mode,
+                    quality_directive=QUALITY_DIRECTIVE if config.enable_quality_directive else None,
+                    query_complexity=query_complexity if config.enable_quality_directive else None
                 )
                 
                 synthesis, synthesizer_provider = await asyncio.wait_for(
@@ -467,12 +525,24 @@ class CouncilOrchestrator:
                     "agent": "Judge Agent"
                 })
 
-            # Inject base prompt for judge
+            # Inject quality directive for judge if enabled
             judge_prompt = get_judge_prompt(config.output_mode.value)
+            if config.enable_quality_directive:
+                judge_prompt_with_quality = inject_quality_directive(
+                    agent_prompt=judge_prompt,
+                    role="judge",
+                    query_complexity=query_complexity
+                )
+            else:
+                judge_prompt_with_quality = judge_prompt
+
+            # Inject base prompt for judge
             judge_enhanced_prompt = inject_base_prompt(
-                agent_specific_prompt=judge_prompt,
+                agent_specific_prompt=judge_prompt_with_quality,
                 context_pack=context_pack_str,
-                transparency_mode=config.transparency_mode
+                transparency_mode=config.transparency_mode,
+                quality_directive=QUALITY_DIRECTIVE if config.enable_quality_directive else None,
+                query_complexity=query_complexity if config.enable_quality_directive else None
             )
 
             try:
@@ -547,6 +617,82 @@ class CouncilOrchestrator:
                         "provider": judge_provider.value
                     }
                 )
+
+            # =====================================================================
+            # QUALITY VALIDATION (if enabled)
+            # =====================================================================
+            quality_scores = None
+            if config.enable_quality_validation:
+                if progress_callback:
+                    await progress_callback({
+                        "type": "agent_start",
+                        "agent": "Quality Validator"
+                    })
+
+                if config.verbose:
+                    logger.info("🔍 Running Quality Validation...")
+
+                validation_start = time.perf_counter()
+
+                try:
+                    validation_result = await validate_response_quality(
+                        query=config.query,
+                        response=final_output,
+                        query_complexity=query_complexity,
+                        api_keys=config.api_keys,
+                        preferred_provider="openai"
+                    )
+
+                    quality_scores = validation_result.scores
+
+                    if config.verbose:
+                        logger.info(
+                            f"Quality Scores: Substance={quality_scores.substance_score:.1f}, "
+                            f"Completeness={quality_scores.completeness_score:.1f}, "
+                            f"Depth={quality_scores.depth_score:.1f}, "
+                            f"Accuracy={quality_scores.accuracy_score:.1f}, "
+                            f"Overall={quality_scores.overall_score:.1f}"
+                        )
+
+                    # If quality validation failed and there are gaps, append additional content
+                    if validation_result.needs_revision and validation_result.additional_content:
+                        if config.verbose:
+                            logger.warning(
+                                f"Quality gate failed. Adding {len(validation_result.additional_content)} chars of additional content."
+                            )
+                        # Append the additional content to the final output
+                        final_output += "\n\n" + validation_result.additional_content
+
+                    # If quality gate still failed, log warning
+                    if not quality_scores.quality_gate_passed:
+                        logger.warning(
+                            f"Quality gate not passed. Gaps: {', '.join(validation_result.gaps_identified)}"
+                        )
+
+                    if progress_callback:
+                        await progress_callback({
+                            "type": "agent_complete",
+                            "agent": "Quality Validator",
+                            "output": f"Quality validation complete. Overall score: {quality_scores.overall_score:.1f}/10",
+                            "scores": quality_scores.to_dict()
+                        })
+
+                except Exception as e:
+                    logger.error(f"Quality validation failed: {e}", exc_info=True)
+                    # Don't fail the entire council if quality validation fails
+                    if progress_callback:
+                        await progress_callback({
+                            "type": "agent_complete",
+                            "agent": "Quality Validator",
+                            "status": "error",
+                            "output": f"Quality validation error: {str(e)}"
+                        })
+
+                validation_duration = time.perf_counter() - validation_start
+                if config.verbose:
+                    logger.info(
+                        f"Quality validation completed in {int(validation_duration * 1000)}ms"
+                    )
 
             # =====================================================================
             # Return Result

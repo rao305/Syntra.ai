@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from config import get_settings
 from app.database import init_db, close_db
-from app.api import threads, router, providers, billing, audit, metrics, query_rewriter, entities, auth, collaboration, dynamic_collaborate, council, eval
+from app.api import threads, router, providers, billing, audit, metrics, query_rewriter, entities, auth, collaboration, dynamic_collaborate, council, eval, quality_analytics
 from app.middleware import ObservabilityMiddleware
 from app.adapters._client import get_client
 
@@ -100,6 +100,7 @@ app.include_router(collaboration.router, prefix="/api/collaboration", tags=["col
 app.include_router(dynamic_collaborate.router, prefix="/api/dynamic-collaborate", tags=["dynamic-collaboration"])
 app.include_router(council.router, tags=["council"])
 app.include_router(eval.router, tags=["eval"])
+app.include_router(quality_analytics.router, prefix="/api/analytics", tags=["quality-analytics"])
 
 
 @app.get("/")

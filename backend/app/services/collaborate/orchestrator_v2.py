@@ -80,6 +80,14 @@ class CouncilVerdict:
     must_keep_points: List[str]
     must_fix_issues: List[str]
     speculative_claims: List[str]
+    # Quality metrics
+    substance_score: float = 0.0
+    completeness_score: float = 0.0
+    depth_score: float = 0.0
+    accuracy_score: float = 0.0
+    overall_quality_score: float = 0.0
+    quality_gate_passed: bool = False
+    depth_appropriate: bool = True
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "CouncilVerdict":
@@ -91,6 +99,13 @@ class CouncilVerdict:
             must_keep_points=data.get("must_keep_points", []),
             must_fix_issues=data.get("must_fix_issues", []),
             speculative_claims=data.get("speculative_claims", []),
+            substance_score=data.get("substance_score", 0.0),
+            completeness_score=data.get("completeness_score", 0.0),
+            depth_score=data.get("depth_score", 0.0),
+            accuracy_score=data.get("accuracy_score", 0.0),
+            overall_quality_score=data.get("overall_quality_score", 0.0),
+            quality_gate_passed=data.get("quality_gate_passed", False),
+            depth_appropriate=data.get("depth_appropriate", True),
         )
 
 

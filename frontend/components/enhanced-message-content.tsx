@@ -5,11 +5,12 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import 'katex/dist/katex.min.css'
 import { Check, Copy, Maximize2 } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { BlockMath, InlineMath } from 'react-katex'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import remarkGfm from 'remark-gfm'
 
 interface CodeBlockProps {
   children: React.ReactNode
@@ -32,13 +33,56 @@ interface EnhancedMessageContentProps {
 // Threshold for determining when to show code in parallel panel (characters)
 const LARGE_CODE_THRESHOLD = 300
 
+// Persistent state for code block expansion across re-renders
+// Key: hash of code content, Value: expanded state
+const codeBlockExpandedState = new Map<string, boolean>()
+
+// Simple hash function for code content
+function hashCode(str: string): string {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32bit integer
+  }
+  return String(Math.abs(hash))
+}
+
 // Custom code block component
 const CodeBlock: React.FC<CodeBlockProps> = ({ children, className }) => {
   const [copied, setCopied] = useState(false)
-  const [isExpanded, setIsExpanded] = useState(false)
 
   const language = className?.replace('language-', '') || 'text'
   const codeString = String(children).replace(/\n$/, '')
+  const codeHash = hashCode(codeString)
+
+  // Use persistent state from Map - always read current value
+  const persistedExpanded = codeBlockExpandedState.get(codeHash) || false
+  const [isExpanded, setIsExpanded] = useState(persistedExpanded)
+  const initializedRef = useRef(false)
+
+  // Initialize and sync state from persistent storage
+  useEffect(() => {
+    const currentPersisted = codeBlockExpandedState.get(codeHash) || false
+    setIsExpanded(currentPersisted)
+    initializedRef.current = true
+  }, [codeHash])
+
+  // Update persistent state when expanded state changes
+  const handleSetExpanded = useCallback((expanded: boolean) => {
+    console.log('Expanding code block:', {
+      codeHash,
+      expanded,
+      codeLength: codeString.length,
+      lines: codeString.split('\n').length,
+      currentState: isExpanded,
+      persistedState: codeBlockExpandedState.get(codeHash)
+    })
+    // Update Map first, then state - use functional update to ensure we get latest
+    codeBlockExpandedState.set(codeHash, expanded)
+    setIsExpanded(expanded)
+  }, [codeHash, codeString.length, isExpanded])
+
   const isLargeCode = codeString.length > LARGE_CODE_THRESHOLD
 
   const handleCopy = async () => {
@@ -119,11 +163,16 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ children, className }) => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleExpand}
-            className="h-6 px-2 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 transition-colors"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              console.log('Expand All clicked')
+              handleSetExpanded(true)
+            }}
+            className="h-6 px-2 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 transition-colors cursor-pointer"
           >
             <Maximize2 className="w-3 h-3 mr-1" />
-            Expand
+            Expand All
           </Button>
           <Button
             variant="ghost"
@@ -162,8 +211,13 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ children, className }) => {
         {hasMoreLines && !isExpanded && (
           <div className="mt-2 pt-2 border-t border-zinc-700/30">
             <button
-              onClick={() => setIsExpanded(true)}
-              className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log('Show more lines clicked')
+                handleSetExpanded(true)
+              }}
+              className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
             >
               Show {codeString.split('\n').length - 8} more lines...
             </button>
@@ -174,9 +228,9 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ children, className }) => {
   )
 }
 
-// Custom inline code component
+// Custom inline code component - renders as subtle inline code, NOT a block with header/copy button
 const InlineCode: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <code className="px-1.5 py-0.5 rounded bg-zinc-800/80 text-zinc-200 text-sm font-mono border border-zinc-700/50">
+  <code className="inline-code px-1.5 py-0.5 mx-0.5 bg-zinc-700/60 text-zinc-200 rounded text-sm font-mono border-0 whitespace-nowrap align-middle">
     {children}
   </code>
 )
@@ -378,6 +432,48 @@ const processLatexInText = (text: string): React.ReactNode[] => {
   })
 }
 
+// Expandable container for long content
+interface ExpandableContainerProps {
+  children: React.ReactNode
+  maxHeight?: number
+}
+
+const ExpandableContainer: React.FC<ExpandableContainerProps> = ({ children, maxHeight = 400 }) => {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [contentHeight, setContentHeight] = useState(0)
+  const contentRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (contentRef.current) {
+      setContentHeight(contentRef.current.scrollHeight)
+    }
+  }, [children])
+
+  const isLongContent = contentHeight > maxHeight
+  const shouldTruncate = isLongContent && !isExpanded
+
+  return (
+    <>
+      <div
+        ref={contentRef}
+        style={shouldTruncate ? { maxHeight: `${maxHeight}px`, overflow: 'hidden' } : {}}
+      >
+        {children}
+      </div>
+      {isLongContent && !isExpanded && (
+        <div className="mt-3 pt-3 border-t border-zinc-700/30">
+          <button
+            onClick={() => setIsExpanded(true)}
+            className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors font-medium"
+          >
+            Show more content ↓
+          </button>
+        </div>
+      )}
+    </>
+  )
+}
+
 // Custom paragraph component that always uses div to avoid HTML nesting issues
 // This prevents hydration errors from block-level elements (code blocks, math, etc.) inside <p> tags
 const Paragraph: React.FC<{ children: React.ReactNode; node?: any }> = ({ children, node }) => {
@@ -423,60 +519,96 @@ export const EnhancedMessageContent: React.FC<EnhancedMessageContentProps> = ({
 
       {/* Text Content */}
       {content && (
-        <ReactMarkdown
-          components={{
-            code({ node, inline, className, children, ...props }) {
-              if (inline) {
-                return <InlineCode>{children}</InlineCode>
-              }
-              return (
-                <CodeBlock className={className}>
+        <ExpandableContainer maxHeight={600}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              code({ node, inline, className, children, ...props }) {
+                // Check inline flag first - this is the definitive indicator for single backticks
+                if (inline) {
+                  return <InlineCode>{children}</InlineCode>
+                }
+
+                // For block code, extract language from className (format: language-xxx)
+                const match = /language-(\w+)/.exec(className || '')
+                const language = match ? match[1] : null
+
+                // If no language detected, render as inline code instead of a block with "TEXT" header
+                if (!language && !className) {
+                  return <InlineCode>{children}</InlineCode>
+                }
+
+                // Create a stable key from code content to prevent remounting
+                const codeContent = String(children).replace(/\n$/, '')
+                const codeKey = hashCode(codeContent)
+
+                return (
+                  <CodeBlock
+                    key={`codeblock-${codeKey}`}
+                    className={`language-${language || 'text'}`}
+                  >
+                    {children}
+                  </CodeBlock>
+                )
+              },
+              p: Paragraph,
+              // Style other markdown elements
+              h1: ({ children }) => <h1 className="text-2xl font-bold mb-4 mt-6 text-zinc-100 first:mt-0">{children}</h1>,
+              h2: ({ children }) => <h2 className="text-xl font-semibold mb-3 mt-5 text-zinc-200 first:mt-0">{children}</h2>,
+              h3: ({ children }) => <h3 className="text-lg font-medium mb-2 mt-4 text-zinc-200 first:mt-0">{children}</h3>,
+              h4: ({ children }) => <h4 className="text-base font-medium mb-2 mt-3 text-zinc-200 first:mt-0">{children}</h4>,
+              ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-2 text-zinc-200">{children}</ul>,
+              ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-2 text-zinc-200">{children}</ol>,
+              li: ({ children }) => <li className="text-zinc-200 leading-relaxed">{children}</li>,
+              strong: ({ children }) => <strong className="font-semibold text-zinc-100">{children}</strong>,
+              em: ({ children }) => <em className="italic text-zinc-200">{children}</em>,
+              blockquote: ({ children }) => (
+                <blockquote className="border-l-4 border-zinc-600 pl-4 italic text-zinc-300 my-4">
                   {children}
-                </CodeBlock>
+                </blockquote>
+              ),
+              a: ({ href, children }) => (
+                <a href={href} className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">
+                  {children}
+                </a>
+              ),
+              table: ({ children }) => (
+                <div className="overflow-x-auto my-4">
+                  <table className="w-full border-collapse border border-zinc-700 rounded-lg bg-zinc-900/50">
+                    {children}
+                  </table>
+                </div>
+              ),
+              thead: ({ children }) => (
+                <thead className="bg-zinc-800/80">
+                  {children}
+                </thead>
+              ),
+              tbody: ({ children }) => (
+                <tbody>
+                  {children}
+                </tbody>
+              ),
+              tr: ({ children }) => (
+                <tr className="border-b border-zinc-700 hover:bg-zinc-800/30 transition-colors">
+                  {children}
+                </tr>
+              ),
+              th: ({ children }) => (
+                <th className="border border-zinc-700 px-4 py-3 bg-zinc-800 text-zinc-200 font-semibold text-left">
+                  {children}
+                </th>
+              ),
+              td: ({ children }) => (
+                <td className="border border-zinc-700 px-4 py-2 text-zinc-300">
+                  {children}
+                </td>
               )
-            },
-            p: Paragraph,
-            // Style other markdown elements
-            h1: ({ children }) => <h1 className="text-2xl font-bold mb-4 mt-6 text-zinc-100 first:mt-0">{children}</h1>,
-            h2: ({ children }) => <h2 className="text-xl font-semibold mb-3 mt-5 text-zinc-200 first:mt-0">{children}</h2>,
-            h3: ({ children }) => <h3 className="text-lg font-medium mb-2 mt-4 text-zinc-200 first:mt-0">{children}</h3>,
-            h4: ({ children }) => <h4 className="text-base font-medium mb-2 mt-3 text-zinc-200 first:mt-0">{children}</h4>,
-            ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-2 text-zinc-200">{children}</ul>,
-            ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-2 text-zinc-200">{children}</ol>,
-            li: ({ children }) => <li className="text-zinc-200 leading-relaxed">{children}</li>,
-            strong: ({ children }) => <strong className="font-semibold text-zinc-100">{children}</strong>,
-            em: ({ children }) => <em className="italic text-zinc-200">{children}</em>,
-            blockquote: ({ children }) => (
-              <blockquote className="border-l-4 border-zinc-600 pl-4 italic text-zinc-300 my-4">
-                {children}
-              </blockquote>
-            ),
-            a: ({ href, children }) => (
-              <a href={href} className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">
-                {children}
-              </a>
-            ),
-            table: ({ children }) => (
-              <div className="overflow-x-auto my-4">
-                <table className="min-w-full border border-zinc-700 rounded-lg">
-                  {children}
-                </table>
-              </div>
-            ),
-            th: ({ children }) => (
-              <th className="border border-zinc-700 px-3 py-2 bg-zinc-800 text-zinc-200 font-medium text-left">
-                {children}
-              </th>
-            ),
-            td: ({ children }) => (
-              <td className="border border-zinc-700 px-3 py-2 text-zinc-300">
-                {children}
-              </td>
-            )
-          }}
-        >
-          {content}
-        </ReactMarkdown>
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+        </ExpandableContainer>
       )}
     </div>
   )

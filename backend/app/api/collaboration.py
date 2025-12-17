@@ -842,6 +842,19 @@ async def thread_collaborate_stream(
 
             try:
                 # Create and save the final message
+                # Build complete collaboration metadata including pipeline data
+                collaborate_meta = {
+                    "mode": request.mode,
+                    "stages_completed": enhanced_result.get("stages_completed", 6) if enhanced_result else 6,
+                    "external_reviews_count": enhanced_result.get("external_reviews_count", 0) if enhanced_result else 0,
+                    "confidence_level": "high",
+                    "duration_ms": enhanced_result.get("duration_ms", 0) if enhanced_result else 0
+                }
+
+                # Include pipeline data (stages, reviews, etc.) for frontend display
+                if enhanced_result and "pipeline_data" in enhanced_result:
+                    collaborate_meta["pipeline_data"] = enhanced_result["pipeline_data"]
+
                 final_message = Message(
                     thread_id=thread_id,
                     role=MessageRole.ASSISTANT,
@@ -850,13 +863,7 @@ async def thread_collaborate_stream(
                     model="multi-model",
                     meta={
                         "engine": "collaborate",
-                        "collaborate": {
-                            "mode": request.mode,
-                            "stages_completed": enhanced_result.get("stages_completed", 6) if enhanced_result else 6,
-                            "external_reviews_count": enhanced_result.get("external_reviews_count", 0) if enhanced_result else 0,
-                            "confidence_level": "high",
-                            "duration_ms": enhanced_result.get("duration_ms", 0) if enhanced_result else 0
-                        }
+                        "collaborate": collaborate_meta
                     },
                     sequence=assistant_sequence
                 )

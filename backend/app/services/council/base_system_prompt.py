@@ -247,36 +247,51 @@ def build_context_pack(
     return context_pack
 
 
-def inject_base_prompt(agent_specific_prompt: str, context_pack: str = None, transparency_mode: bool = False) -> str:
+def inject_base_prompt(
+    agent_specific_prompt: str,
+    context_pack: str = None,
+    transparency_mode: bool = False,
+    quality_directive: str = None,
+    query_complexity: int = None
+) -> str:
     """
     Inject the base system prompt and context pack into an agent-specific prompt.
-    
+
     Args:
         agent_specific_prompt: The role-specific prompt for this agent
         context_pack: Optional context pack to inject
         transparency_mode: Whether to enable transparency mode
-    
+        quality_directive: Optional quality directive to inject
+        query_complexity: Optional query complexity level (1-5)
+
     Returns:
-        Combined prompt with base system prompt + context pack + agent prompt
+        Combined prompt with base system prompt + quality directive + context pack + agent prompt
     """
     parts = []
-    
+
     # Base system prompt
     parts.append(SYNTRA_BASE_SYSTEM_PROMPT)
-    
+
+    # Quality directive (if provided)
+    if quality_directive:
+        parts.append("\n\n---\n## QUALITY DIRECTIVE\n---\n")
+        parts.append(quality_directive)
+        if query_complexity:
+            parts.append(f"\n\nQUERY COMPLEXITY LEVEL: {query_complexity}/5")
+
     # Context pack (if provided)
     if context_pack:
         parts.append("\n\n---\n## CURRENT CONTEXT PACK\n---\n")
         parts.append(context_pack)
-    
+
     # Transparency mode note
     if transparency_mode:
         parts.append("\n\n---\n## TRANSPARENCY MODE: ENABLED\n---\n")
         parts.append("You may mention internal stages/models in your output header if relevant.")
-    
+
     # Agent-specific prompt
     parts.append("\n\n---\n## YOUR SPECIFIC ROLE\n---\n")
     parts.append(agent_specific_prompt)
-    
+
     return "\n".join(parts)
 

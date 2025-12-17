@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { ChevronDown, ChevronRight, Zap } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { CollaborationAttribution } from '@/components/collaboration-attribution'
 import { EnhancedMessageContent } from '@/components/enhanced-message-content'
+import { ResponseMetrics } from '@/components/response-metrics'
+import { cn } from '@/lib/utils'
+import { ChevronDown, ChevronRight, Zap } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 type AgentName =
   | 'Optimizer Agent'
@@ -88,12 +90,12 @@ export function OrchestrationMessage({
   // Memoized completion handler to prevent recreating on each render
   const handleComplete = useCallback((output: string) => {
     if (!mountedRef.current) return
-    
+
     // Mark session as completed globally
     completedSessions.add(sessionId)
     setIsSessionCompleted(true)
     setFinalAnswer(output)
-    
+
     // Clean up WebSocket
     if (wsRef.current) {
       try {
@@ -103,13 +105,13 @@ export function OrchestrationMessage({
       }
       wsRef.current = null
     }
-    
+
     // Clear polling
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current)
       pollingIntervalRef.current = null
     }
-    
+
     onComplete(output)
   }, [sessionId, onComplete])
 
@@ -120,7 +122,7 @@ export function OrchestrationMessage({
       console.log(`Session ${sessionId} already completed, skipping WebSocket connection`)
       return
     }
-    
+
     // Prevent multiple connection attempts for the same session
     // But allow reconnection if the WebSocket is closed
     if (connectionAttemptedRef.current && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -154,7 +156,7 @@ export function OrchestrationMessage({
 
         wsRef.current.onmessage = (event) => {
           if (isCleanedUp || !mountedRef.current) return
-          
+
           try {
             const message = JSON.parse(event.data)
             console.log('WebSocket message received:', message.type, message)
@@ -173,18 +175,18 @@ export function OrchestrationMessage({
                 prev.map((agent) =>
                   agent.name === agentName
                     ? {
-                        ...agent,
-                        status: message.status,
-                        // Always use new output if provided, otherwise keep existing
-                        output: message.output !== undefined && message.output !== null && message.output !== '' 
-                          ? message.output 
-                          : agent.output,
-                        duration: message.duration || agent.duration,
-                        // Set startTime when agent starts running
-                        startTime: message.status === 'running' && !agent.startTime
-                          ? Date.now()
-                          : agent.startTime,
-                      }
+                      ...agent,
+                      status: message.status,
+                      // Always use new output if provided, otherwise keep existing
+                      output: message.output !== undefined && message.output !== null && message.output !== ''
+                        ? message.output
+                        : agent.output,
+                      duration: message.duration || agent.duration,
+                      // Set startTime when agent starts running
+                      startTime: message.status === 'running' && !agent.startTime
+                        ? Date.now()
+                        : agent.startTime,
+                    }
                     : agent
                 )
               )
@@ -194,14 +196,14 @@ export function OrchestrationMessage({
             } else if (message.type === 'complete') {
               // Orchestration complete
               const output = message.output || message.final_answer || ''
-              
+
               console.log('Orchestration complete, final answer:', {
                 hasOutput: !!output,
                 outputLength: output?.length || 0,
                 outputPreview: output ? output.substring(0, 100) + '...' : 'empty',
                 messageKeys: Object.keys(message)
               })
-              
+
               setAgents((prev) =>
                 prev.map((agent) =>
                   agent.name === 'Final Answer'
@@ -209,7 +211,7 @@ export function OrchestrationMessage({
                     : agent
                 )
               )
-              
+
               // If output is missing, try polling fallback to get it from API
               if (output && output.trim() !== '') {
                 handleComplete(output)
@@ -219,7 +221,7 @@ export function OrchestrationMessage({
                 const apiUrl = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_API_URL
                   ? process.env.NEXT_PUBLIC_API_URL
                   : 'http://127.0.0.1:8000/api'
-                
+
                 fetch(`${apiUrl}/council/orchestrate/${sessionId}`, {
                   method: 'GET',
                   headers: { 'Content-Type': 'application/json' },
@@ -252,7 +254,7 @@ export function OrchestrationMessage({
 
         wsRef.current.onerror = (event: Event) => {
           if (isCleanedUp || !mountedRef.current) return
-          
+
           wsConnectAttempts++
           console.error('WebSocket error (attempt ' + wsConnectAttempts + '):', event)
 
@@ -266,14 +268,14 @@ export function OrchestrationMessage({
 
         wsRef.current.onclose = (event) => {
           if (isCleanedUp) return
-          
+
           console.log('WebSocket closed:', {
             code: event.code,
             reason: event.reason,
             wasClean: event.wasClean
           })
           setWsConnected(false)
-          
+
           // Don't reconnect if session is completed or component is unmounted
           if (completedSessions.has(sessionId) || !mountedRef.current) {
             return
@@ -282,14 +284,14 @@ export function OrchestrationMessage({
 
         wsRef.current.onopen = () => {
           if (isCleanedUp || !mountedRef.current) return
-          
+
           console.log('WebSocket connected successfully')
           setWsConnected(true)
           wsConnectAttempts = 0 // Reset counter on successful connection
         }
       } catch (error) {
         if (isCleanedUp || !mountedRef.current) return
-        
+
         console.error('Failed to create WebSocket:', error)
         wsConnectAttempts++
         if (wsConnectAttempts >= maxWsAttempts) {
@@ -301,7 +303,7 @@ export function OrchestrationMessage({
 
     const startPolling = () => {
       if (isCleanedUp || !mountedRef.current || pollingIntervalRef.current) return
-      
+
       console.log('Starting polling for session:', sessionId)
       const apiUrl = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_API_URL
         ? process.env.NEXT_PUBLIC_API_URL
@@ -315,7 +317,7 @@ export function OrchestrationMessage({
           }
           return
         }
-        
+
         try {
           const response = await fetch(`${apiUrl}/council/orchestrate/${sessionId}`, {
             method: 'GET',
@@ -496,8 +498,8 @@ export function OrchestrationMessage({
             {/* Right: Selected Agent Output - Expanded for Judge Agent */}
             <div className={cn(
               "overflow-hidden",
-              selectedAgent === "Judge Agent" 
-                ? "col-span-3 max-h-[600px]" 
+              selectedAgent === "Judge Agent"
+                ? "col-span-3 max-h-[600px]"
                 : "col-span-3 max-h-[600px]"
             )}>
               {selectedAgent ? (
@@ -524,13 +526,13 @@ export function OrchestrationMessage({
                           {agents.find((a) => a.name === selectedAgent)?.status === 'pending'
                             ? '⊙ Waiting to execute...'
                             : agents.find((a) => a.name === selectedAgent)?.status === 'running'
-                            ? (
-                              <div className="flex flex-col items-center gap-2">
-                                <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
-                                <span>Processing output...</span>
-                              </div>
-                            )
-                            : '● No output available'}
+                              ? (
+                                <div className="flex flex-col items-center gap-2">
+                                  <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                                  <span>Processing output...</span>
+                                </div>
+                              )
+                              : '● No output available'}
                         </div>
                       </div>
                     )}
@@ -552,9 +554,23 @@ export function OrchestrationMessage({
       {/* Final Answer - Rendered like a normal assistant message */}
       {finalAnswer && (
         <div className="mt-4 text-zinc-100 leading-relaxed">
+          <CollaborationAttribution
+            contributions={agents
+              .filter(a => a.status === 'complete' && a.output && a.name !== 'Final Answer')
+              .map(a => ({
+                model: 'GPT-4o', // Default to GPT-4o as we don't have model info in AgentOutput yet
+                role: a.name.replace(' Agent', '').toLowerCase(),
+                provider: 'openai'
+              }))}
+          />
           <EnhancedMessageContent
             content={finalAnswer}
             role="assistant"
+          />
+          <ResponseMetrics
+            durationMs={executionTime * 1000}
+            modelsUsed={agents.filter(a => a.status === 'complete').length}
+            stagesCompleted={agents.filter(a => a.status === 'complete').length}
           />
         </div>
       )}

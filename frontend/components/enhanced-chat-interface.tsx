@@ -1,20 +1,22 @@
 "use client"
 
 import { CodePanel } from "@/components/code-panel"
-import { CollabPanel, type CollabPanelState } from "@/components/collaborate/CollabPanel"
 import { CollaborationPipelineDetails } from "@/components/collaborate/CollaborationPipelineDetails"
+import { CollabPanel, type CollabPanelState } from "@/components/collaborate/CollabPanel"
 import { EnhancedMessageContent } from "@/components/enhanced-message-content"
 import { ImageInputArea } from "@/components/image-input-area"
-import { SimpleLoadingIndicator } from "@/components/simple-loading-indicator"
-import { ThinkingStream } from "@/components/thinking-stream"
+import { LoadingState } from "@/components/LoadingState"
 import { OrchestrationMessage } from "@/components/orchestration-message"
+import { SYNTRA_MODELS } from "@/components/syntra-model-selector"
+import { ThinkingStream } from "@/components/thinking-stream"
+import { WelcomeScreen } from "@/components/WelcomeScreen"
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts"
 import type { StageId, StageState, StageStatus } from "@/lib/collabStages"
 import { cn } from "@/lib/utils"
 import { useWorkflowStore } from "@/store/workflow-store"
 import { Bookmark, Brain, Bug, Copy, RefreshCw, Share2 } from "lucide-react"
-import Image from "next/image"
 import * as React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 /**
  * Mapping of supported backend model IDs to display names
@@ -186,6 +188,49 @@ export function EnhancedChatInterface({
   const [codePanelOpen, setCodePanelOpen] = useState(false)
   const [codePanelContent, setCodePanelContent] = useState({ code: '', language: '', title: '' })
   const { isCollaborateMode, steps = [], updateStep, mode: storeMode, setMode: setStoreMode } = useWorkflowStore()
+
+  // Enhanced loading state tracking
+  const [loadingStartTime, setLoadingStartTime] = useState<number>(0)
+  const [elapsedMs, setElapsedMs] = useState<number>(0)
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onNewChat: () => {
+      // TODO: Implement new chat navigation
+      console.log('New chat shortcut triggered')
+    },
+    onFocusInput: () => {
+      const textarea = document.querySelector('textarea')
+      if (textarea) textarea.focus()
+    },
+    onToggleSidebar: () => {
+      // TODO: Implement sidebar toggle if exposed
+      console.log('Sidebar toggle shortcut triggered')
+    }
+  })
+
+  // Track loading elapsed time
+  useEffect(() => {
+    if (isLoading) {
+      setLoadingStartTime(Date.now())
+    } else {
+      setElapsedMs(0)
+      setLoadingStartTime(0)
+    }
+  }, [isLoading])
+
+  // Update elapsed time continuously while loading
+  useEffect(() => {
+    if (!isLoading || loadingStartTime === 0) {
+      return
+    }
+
+    const interval = setInterval(() => {
+      setElapsedMs(Date.now() - loadingStartTime)
+    }, 100)
+
+    return () => clearInterval(interval)
+  }, [isLoading, loadingStartTime])
 
   const handleCollaborateClick = async (query: string, orgIdParam: string) => {
     if (onCollaborate) {
@@ -499,21 +544,11 @@ export function EnhancedChatInterface({
       <div className="flex-1 overflow-y-auto p-4 pb-40">
         <div className="max-w-4xl mx-auto pt-8 pb-40 space-y-6">
           {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
-              <Image
-                src="/syntralogo.png"
-                alt="Syntra Logo"
-                width={120}
-                height={120}
-                className="mb-4"
-              />
-              <h2 className="text-2xl font-semibold text-white">
-                Your Multi-Agent Workspace Starts Here.
-              </h2>
-              <p className="text-white/80 max-w-lg">
-                I'm powered by a network of specialized models. Ask anything — I'll gather the right experts and reason step-by-step.
-              </p>
-            </div>
+            <WelcomeScreen
+              onSendMessage={onSendMessage}
+              onStartCollaboration={handleCollaborateClick}
+              orgId={orgId}
+            />
           )}
 
           {collabPanel && <CollabPanel state={collabPanel} />}
@@ -607,33 +642,33 @@ export function EnhancedChatInterface({
 
                       {/* Message Actions (except for orchestration messages) */}
                       {!(message as any).sessionId && (
-                      <div className="flex items-center gap-1 pt-1">
-                        <div></div>
+                        <div className="flex items-center gap-1 pt-1">
+                          <div></div>
 
-                        <div className="flex items-center">
-                          <ActionButton
-                            icon={Copy}
-                            onClick={() => copyToClipboard(message.content)}
-                            tooltip="Copy message"
-                          />
-                          <ActionButton
-                            icon={RefreshCw}
-                            tooltip="Regenerate"
-                          />
-                          <ActionButton
-                            icon={Share2}
-                            tooltip="Share"
-                          />
-                          <ActionButton
-                            icon={Bookmark}
-                            tooltip="Bookmark"
-                          />
-                          <ActionButton
-                            icon={Bug}
-                            tooltip="Report issue"
-                          />
+                          <div className="flex items-center">
+                            <ActionButton
+                              icon={Copy}
+                              onClick={() => copyToClipboard(message.content)}
+                              tooltip="Copy message"
+                            />
+                            <ActionButton
+                              icon={RefreshCw}
+                              tooltip="Regenerate"
+                            />
+                            <ActionButton
+                              icon={Share2}
+                              tooltip="Share"
+                            />
+                            <ActionButton
+                              icon={Bookmark}
+                              tooltip="Bookmark"
+                            />
+                            <ActionButton
+                              icon={Bug}
+                              tooltip="Report issue"
+                            />
+                          </div>
                         </div>
-                      </div>
                       )}
                     </div>
                   </div>
@@ -642,41 +677,42 @@ export function EnhancedChatInterface({
             )
           })}
 
-          {/* Loading Indicator - Simple loading with expandable prompt */}
+          {/* Loading Indicator - Enhanced loading with collaboration support */}
           {isLoading && (
             <div className="flex justify-start">
               <div className="max-w-[90%] space-y-2 w-full">
                 {isCollaborateMode ? (
-                  // Use SimpleLoadingIndicator for collaboration mode
+                  // Use enhanced LoadingState for collaboration mode
                   (() => {
                     const activeStage = collaborationStages.find((s) => s.status === "running")
-                    const stageName = activeStage?.label ? `${activeStage.label} in progress…` : "Processing your request…"
-                    // Use the actual model name from the active stage, or show "Selecting model..." as fallback
-                    const modelName = activeStage?.modelName || "Selecting model..."
-                    // Get the model output from the running step
                     const runningStep = steps.find((s) => s.status === "running")
-                    const modelOutput = runningStep?.outputDraft || runningStep?.outputFinal || ""
+                    const completedCount = steps.filter((s) => s.status === "done").length
+
                     return (
-                      <SimpleLoadingIndicator
-                        modelName={modelName}
-                        stageName={stageName}
-                        modelOutput={modelOutput}
-                        isVisible={true}
+                      <LoadingState
+                        mode="collaborate"
+                        currentStage={activeStage?.id || runningStep?.role}
+                        currentModel={activeStage?.modelName || runningStep?.model || "Selecting..."}
+                        stagesCompleted={completedCount}
+                        totalStages={steps.length || 6}
+                        elapsedMs={elapsedMs}
+                        status="processing"
                       />
                     )
                   })()
                 ) : (
-                  <SimpleLoadingIndicator
-                    modelName={
+                  // Use enhanced LoadingState for auto/single mode
+                  <LoadingState
+                    mode="auto"
+                    currentModel={
                       autoRoutedModel
                         ? autoRoutedModel
                         : selectedModel !== 'auto'
-                        ? (SYNTRA_MODELS.find(m => m.id === selectedModel)?.name || selectedModel)
-                        : "Auto-selecting best model..."
+                          ? (SYNTRA_MODELS.find(m => m.id === selectedModel)?.name || selectedModel)
+                          : undefined
                     }
-                    stageName="Processing your request…"
-                    modelOutput=""
-                    isVisible={true}
+                    elapsedMs={elapsedMs}
+                    status={autoRoutedModel || selectedModel !== 'auto' ? 'generating' : 'selecting'}
                   />
                 )}
               </div>

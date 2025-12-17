@@ -7,6 +7,7 @@ import { EnhancedConversationLayout } from '@/components/enhanced-conversation-l
 import { SYNTRA_MODELS } from '@/components/syntra-model-selector'
 import { useUserConversations } from '@/hooks/use-user-conversations'
 import { apiFetch } from '@/lib/api'
+import { ensureConversationMetadata, updateConversationMetadata } from '@/lib/firestore-conversations'
 import { useWorkflowStore } from '@/store/workflow-store'
 import { useRouter } from 'next/navigation'
 import * as React from 'react'
@@ -65,11 +66,39 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
   const [autoRoutedModel, setAutoRoutedModel] = React.useState<string | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const [currentThreadId, setCurrentThreadId] = React.useState<string | null>(null)
-  
+
   // Keep ref in sync with state
   React.useEffect(() => {
     messagesRef.current = messages
   }, [messages])
+
+  // Load messages from sessionStorage if available (for new threads created on this page)
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    // Check if we have a thread ID in the URL (means we navigated here after creating a thread)
+    const urlMatch = window.location.pathname.match(/^\/conversations\/([^/]+)$/)
+    if (urlMatch) {
+      const threadId = urlMatch[1]
+      if (threadId && threadId !== 'new') {
+        try {
+          const savedMessages = sessionStorage.getItem(`thread_messages_${threadId}`)
+          if (savedMessages) {
+            const parsedMessages = JSON.parse(savedMessages) as Message[]
+            console.log(`💾 Loaded ${parsedMessages.length} messages from sessionStorage for thread ${threadId}`)
+            setMessages(parsedMessages)
+            // Clear from sessionStorage after loading
+            sessionStorage.removeItem(`thread_messages_${threadId}`)
+            // Set the thread ID
+            setCurrentThreadId(threadId)
+            return
+          }
+        } catch (e) {
+          console.warn('Failed to load messages from sessionStorage:', e)
+        }
+      }
+    }
+  }, []) // Only run once on mount
 
   // Update message helper function
   const updateMessage = React.useCallback((messageId: string, updates: any) => {
@@ -824,7 +853,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         }
         return msg
       })
-      
+
       return updatedMessages
     })
   }
@@ -935,7 +964,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
     }
   }
 
-  const handleSendMessage = async (content: string, images?: ImageFile[]) => {
+  const handleSendMessage = React.useCallback(async (content: string, images?: ImageFile[]) => {
     console.log('🚀 handleSendMessage called with content:', content, 'images:', images)
 
     if (!content.trim() && (!images || images.length === 0)) {
@@ -1064,6 +1093,15 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         // DON'T set currentThreadId yet - this might cause a re-render/navigation issue
         // We'll set it at the end after everything completes
         console.log('📌 Thread ID stored (not setting state yet):', threadId)
+
+        // Ensure conversation metadata exists for the sidebar
+        if (user?.uid) {
+          await ensureConversationMetadata(user.uid, threadId, {
+            title: content.trim().substring(0, 50),
+            lastMessagePreview: content.trim().substring(0, 100),
+          })
+          console.log('✅ Conversation metadata created for sidebar')
+        }
       }
 
       // Prepare request body
@@ -1335,10 +1373,28 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       if (wasNewThread && threadId) {
         console.log(`✅ Stream complete for new thread: ${threadId}. Now setting currentThreadId.`)
         console.log(`📋 Current messages in state: ${messagesRef.current.length}`)
-        
+
+        // Update conversation metadata with the AI response for the sidebar
+        if (user?.uid && assistantMessage.content) {
+          await updateConversationMetadata(user.uid, threadId, {
+            lastMessagePreview: assistantMessage.content.substring(0, 100),
+            lastProvider: assistantMessage.modelId,
+            lastModel: assistantMessage.modelName,
+          })
+          console.log('✅ Conversation metadata updated with AI response')
+        }
+
+        // CRITICAL FIX: Save messages to sessionStorage so individual conversation page can load them
+        try {
+          sessionStorage.setItem(`thread_messages_${threadId}`, JSON.stringify(messagesRef.current))
+          console.log(`💾 Saved ${messagesRef.current.length} messages to sessionStorage for thread ${threadId}`)
+        } catch (e) {
+          console.warn('Failed to save messages to sessionStorage:', e)
+        }
+
         // Now it's safe to set the thread ID - messages are already displayed
         setCurrentThreadId(threadId)
-        
+
         // Update URL without triggering navigation (keeps component mounted, preserves state)
         window.history.replaceState(
           { ...window.history.state, threadId },
@@ -1366,7 +1422,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       console.log('🏁 Finally block - setting loading to false')
       setIsLoading(false)
     }
-  }
+  }, [user, orgId, accessToken, selectedModel, messages, currentThreadId, updateMessage, setMessages, setCurrentThreadId, setAutoRoutedModel, ensureConversationMetadata, updateConversationMetadata])
 
   // No loading state needed since we removed auth
 

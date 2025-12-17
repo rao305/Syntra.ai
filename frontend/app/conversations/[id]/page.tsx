@@ -154,8 +154,10 @@ export default function ConversationPage() {
               const meta = msg.meta || {}
               const latencyMs = meta.latency_ms || 0
               const ttfsMs = meta.ttfs_ms || undefined
+              // Backend sets meta.collaborate with the collaboration data
+              const collaborateData = meta.collaborate || meta.collaboration
 
-              return {
+              const formattedMsg: Message = {
                 id: validId,
                 role: msg.role,
                 content: msg.content,
@@ -168,6 +170,19 @@ export default function ConversationPage() {
                 processingTime: latencyMs,  // Total response time in ms
                 ttftMs: ttfsMs,  // Time to first token in ms
               }
+
+              // Add collaboration metadata if this is a collaboration response
+              if (collaborateData && (collaborateData.mode || collaborateData.pipeline_data)) {
+                const pipelineData = collaborateData.pipeline_data || {}
+                formattedMsg.collaboration = {
+                  mode: 'complete' as const,
+                  stages: pipelineData.stages || [],
+                  pipelineStages: pipelineData.pipeline_stages || pipelineData.pipelineStages || [],
+                  reviews: pipelineData.reviews || []
+                }
+              }
+
+              return formattedMsg
             })
           // Replace messages with authoritative backend version
           setMessages(formattedMessages)
@@ -239,26 +254,29 @@ export default function ConversationPage() {
   }
 
   const handleCollaborationComplete = async (output: string) => {
-    // Mark the orchestration message as completed and update with final answer
-    // This prevents the OrchestrationMessage from trying to reconnect
+    let collaborationMetadata: any = null
+
+    // Find the collaboration message and extract its metadata
     setMessages((prev) => {
-      // Find and update the orchestration message
       const updatedMessages = prev.map((msg) => {
-        if ((msg as any).sessionId && !(msg as any).isCompleted) {
+        // Find the collab message (has collaboration property)
+        if (msg.collaboration && !msg.id.startsWith('user-')) {
+          collaborationMetadata = msg.collaboration
           return {
             ...msg,
-            isCompleted: true,
-            finalAnswer: output,
             content: output, // Update content with final answer
+            collaboration: {
+              ...msg.collaboration,
+              mode: 'complete' as const
+            }
           }
         }
         return msg
       })
-
       return updatedMessages
     })
 
-    // Save the final collaboration response to the database so it persists
+    // Save the final collaboration response to the database with full metadata
     const actualThreadId = threadId === 'new' ? null : threadId
     if (actualThreadId) {
       try {
@@ -273,18 +291,21 @@ export default function ConversationPage() {
           body: JSON.stringify({
             role: 'assistant',
             content: output,
-            provider: 'council-orchestration',
-            model: 'multi-agent-council',
+            provider: 'collaboration',
+            model: 'syntra-collaborate',
             meta: {
-              engine: 'council',
-              council: {
-                mode: 'orchestration',
-                agents_count: 8,
-              }
+              engine: 'collaboration',
+              collaboration: collaborationMetadata || {
+                mode: 'complete',
+                stages: [],
+                pipelineStages: [],
+                reviews: []
+              },
+              is_collaboration_response: true,
             }
           }),
         })
-        console.log('✅ Saved council collaboration response to database')
+        console.log('✅ Saved collaboration response with metadata to database')
       } catch (error) {
         console.error('Failed to save collaboration response:', error)
       }
