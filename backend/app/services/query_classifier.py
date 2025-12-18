@@ -111,13 +111,25 @@ class QueryClassifier:
         """
         query_lower = query.lower()
 
-        # PRIORITY 1: Check if this is a translation/localization request
-        # (translation should ALWAYS route to Kimi regardless of other task type)
+        # PRIORITY 1: Chinese/CJK languages → Route to Kimi
+        # Kimi is excellent at Chinese + good at code/math/technical tasks
+        # User asking in Chinese prefers responses in Chinese
+        if self.CHINESE_PATTERN.search(query):
+            return QueryClassification(
+                query_type=QueryType.MULTILINGUAL,
+                complexity=self._assess_complexity(query, conversation_history),
+                recommended_provider=ProviderType.KIMI,
+                recommended_model="moonshot-v1-32k",
+                reason="Chinese language query - Kimi specializes in Chinese with 128k context and is capable at all task types",
+                confidence=0.95
+            )
+
+        # PRIORITY 2: Check if this is a translation/localization request
+        # (translation should route to Kimi)
         if self._is_translation_request(query_lower):
             return self._classify_translation(query)
 
-        # PRIORITY 2: Detect query type based on keywords (CODE, FACTUAL, REASONING, etc.)
-        # This works across languages (e.g., "python" keyword in Chinese query still matches)
+        # PRIORITY 3: Detect query type based on keywords (CODE, FACTUAL, REASONING, etc.)
         query_type = self._detect_query_type(query_lower)
 
         # Assess complexity
