@@ -111,17 +111,19 @@ class QueryClassifier:
         """
         query_lower = query.lower()
 
-        # Check for multilingual first
-        if self._is_multilingual(query):
-            return self._classify_multilingual(query)
+        # PRIORITY 1: Check if this is a translation/localization request
+        # (translation should ALWAYS route to Kimi regardless of other task type)
+        if self._is_translation_request(query_lower):
+            return self._classify_translation(query)
 
-        # Detect query type based on keywords
+        # PRIORITY 2: Detect query type based on keywords (CODE, FACTUAL, REASONING, etc.)
+        # This works across languages (e.g., "python" keyword in Chinese query still matches)
         query_type = self._detect_query_type(query_lower)
 
         # Assess complexity
         complexity = self._assess_complexity(query, conversation_history)
 
-        # Get routing recommendation
+        # Get routing recommendation based on task type
         provider, model, reason = self._get_routing_recommendation(
             query_type, complexity, query_lower
         )
@@ -138,65 +140,60 @@ class QueryClassifier:
             confidence=confidence
         )
 
-    def _is_multilingual(self, query: str) -> bool:
-        """Check if query contains non-English characters or is a translation request."""
+    def _is_translation_request(self, query: str) -> bool:
+        """Check if query is specifically asking for translation/localization."""
+        query_lower = query.lower()
+        translation_keywords = [
+            "translate", "translation", "translate to", "translate from",
+            "翻译", "翻譯", "번역", "ترجمة",
+            "localize", "localization", "bilingual content", "multilingual content"
+        ]
+        return any(kw in query_lower for kw in translation_keywords)
+
+    def _classify_translation(self, query: str) -> QueryClassification:
+        """Handle translation/localization requests."""
         query_lower = query.lower()
 
-        # Check for non-English characters
-        has_non_english = bool(
-            self.CHINESE_PATTERN.search(query) or
-            self.JAPANESE_PATTERN.search(query) or
-            self.KOREAN_PATTERN.search(query) or
-            self.ARABIC_PATTERN.search(query)
+        # Kimi is excellent for translation, especially with CJK languages
+        # Can handle large context windows (128k) for document translation
+        return QueryClassification(
+            query_type=QueryType.MULTILINGUAL,
+            complexity=ComplexityLevel.MEDIUM,
+            recommended_provider=ProviderType.KIMI,
+            recommended_model="moonshot-v1-32k",
+            reason="Translation request - Kimi specializes in bilingual content with 128k context",
+            confidence=0.95
         )
 
-        # Check for translation/multilingual keywords
-        multilingual_keywords = [
-            "translate", "translation", "translate to", "translate from",
-            "bilingual", "multilingual", "chinese", "japanese", "korean", "arabic",
-            "中文", "日本語", "한국어", "العربية",
-            "language", "languages", "localize", "localization",
-            "cjk", "character", "characters"
-        ]
-        has_multilingual_keyword = any(kw in query_lower for kw in multilingual_keywords)
-
-        return has_non_english or has_multilingual_keyword
-
     def _classify_multilingual(self, query: str) -> QueryClassification:
-        """Handle multilingual queries."""
-        query_lower = query.lower()
+        """
+        Handle multilingual queries (Chinese, Japanese, etc.).
 
-        # Kimi is excellent for Chinese - highest priority
+        NOTE: This should only be called for queries with non-English characters
+        but NOT translation requests (those are handled by _classify_translation).
+
+        Route based on task type (CODE, FACTUAL, etc.) within that language,
+        not automatically to Kimi.
+        """
+        # If Chinese characters detected, lean toward Kimi with high confidence
+        # but only if no specific task type detected
         if self.CHINESE_PATTERN.search(query):
             return QueryClassification(
                 query_type=QueryType.MULTILINGUAL,
                 complexity=ComplexityLevel.MEDIUM,
                 recommended_provider=ProviderType.KIMI,
                 recommended_model="moonshot-v1-32k",
-                reason="Chinese language detected - Kimi specializes in Chinese with 128k context",
-                confidence=0.95
-            )
-
-        # Kimi also handles translation requests and other CJK languages well
-        translation_keywords = ["translate", "translation", "translate to", "translate from"]
-        cjk_keywords = ["japanese", "korean", "cjk", "bilingual", "multilingual"]
-        if any(kw in query_lower for kw in translation_keywords + cjk_keywords):
-            return QueryClassification(
-                query_type=QueryType.MULTILINGUAL,
-                complexity=ComplexityLevel.MEDIUM,
-                recommended_provider=ProviderType.KIMI,
-                recommended_model="moonshot-v1-32k",
-                reason="Translation/multilingual request - Kimi excels at CJK languages and long context",
+                reason="Chinese language query - Kimi specializes in Chinese with 128k context",
                 confidence=0.90
             )
 
-        # Gemini is strong for other multilingual (Arabic, European languages, etc.)
+        # For other multilingual content, use Gemini's strong multilingual support
         return QueryClassification(
             query_type=QueryType.MULTILINGUAL,
             complexity=ComplexityLevel.MEDIUM,
             recommended_provider=ProviderType.GEMINI,
             recommended_model="gemini-2.5-pro",
-            reason="Multilingual query detected - Gemini has strong support for world languages",
+            reason="Multilingual query detected - Gemini has strong world language support",
             confidence=0.85
         )
 
