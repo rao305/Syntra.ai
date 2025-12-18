@@ -68,6 +68,8 @@ from config import get_settings
 import asyncio
 import uuid
 import os
+import logging
+logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
@@ -204,9 +206,9 @@ async def _save_turn_to_db(
         from app.services.threads_store import add_turn, Turn
         add_turn(thread_id, Turn(role="user", content=user_content))
         add_turn(thread_id, Turn(role="assistant", content=assistant_content))
-        print(f"✅ Added turns to in-memory store for thread {thread_id}")
+        logger.info(f"✅ Added turns to in-memory store for thread {thread_id}")
     except Exception as e:
-        print(f"⚠️  Failed to add turns to in-memory store: {e}")
+        logger.warning(f"⚠️  Failed to add turns to in-memory store: {e}")
         # This is non-critical - DB will be fallback
 
     return user_message, assistant_message
@@ -737,7 +739,7 @@ async def create_thread(
         if user:
             creator_id = user.id
         else:
-            print(f"⚠️ User '{request.user_id}' not found in users table - thread will have no creator")
+            logger.warning(f"⚠️ User '{request.user_id}' not found in users table - thread will have no creator")
 
     # Create thread
     new_thread = Thread(
@@ -765,7 +767,7 @@ async def add_message(
     db: AsyncSession = Depends(get_db)
 ):
     """Add a message to a thread with optional multi-agent collaboration."""
-    print(f"🔍 DEBUG: add_message called - collaboration_mode={request.collaboration_mode}, content={request.content[:50]}...")
+    logger.debug(f"🔍 DEBUG: add_message called - collaboration_mode={request.collaboration_mode}, content={request.content[:50]}...")
     user_id = current_user.id if current_user else None
     await set_rls_context(db, org_id, user_id)
     await memory_guard.ensure_health()
@@ -997,9 +999,9 @@ async def add_message(
                 timeout=2.0  # 2 second timeout
             )
         except asyncio.TimeoutError:
-            print("⚠️  Memory retrieval timeout, continuing without memory")
+            logger.warning("⚠️  Memory retrieval timeout, continuing without memory")
         except Exception as e:
-            print(f"⚠️  Memory retrieval error: {e}, continuing without memory")
+            logger.warning(f"⚠️  Memory retrieval error: {e}, continuing without memory")
 
     # STEP 3: Use centralized context builder
     # This ensures ALL models get the same rich context (history + memory + rewritten query)
@@ -1063,32 +1065,32 @@ async def add_message(
     
     # CRITICAL LOGGING: Log provider call with detailed context info
     # This matches the TypeScript blueprint format for debugging
-    print(f"\n{'='*80}")
-    print(f"📤 SENDING TO PROVIDER (non-streaming): {request.provider.value}/{request.model}")
-    print(f"{'='*80}")
-    print(f"Using centralized context builder ✓")
-    print(f"Total messages: {len(prompt_messages)}")
-    print(f"Conversation history turns: {len(context_result.short_term_history)}")
-    print(f"Memory snippet present: {context_result.memory_snippet is not None}")
+    logger.info(f"\n{'='*80}")
+    logger.info(f"📤 SENDING TO PROVIDER (non-streaming): {request.provider.value}/{request.model}")
+    logger.info(f"{'='*80}")
+    logger.info(f"Using centralized context builder ✓")
+    logger.info(f"Total messages: {len(prompt_messages)}")
+    logger.info(f"Conversation history turns: {len(context_result.short_term_history)}")
+    logger.info(f"Memory snippet present: {context_result.memory_snippet is not None}")
     if context_result.memory_snippet:
-        print(f"Memory snippet length: {len(context_result.memory_snippet)} chars")
-    print(f"Query rewritten: {context_result.rewritten_query is not None}")
+        logger.info(f"Memory snippet length: {len(context_result.memory_snippet)} chars")
+    logger.info(f"Query rewritten: {context_result.rewritten_query is not None}")
     
     # Detailed messages preview (matches TypeScript blueprint)
-    print(f"\nMessages preview (first 120 chars each):")
+    logger.info(f"\nMessages preview (first 120 chars each):")
     for i, msg in enumerate(prompt_messages):
         role = msg.get('role', 'unknown')
         content = msg.get('content', '')
         if isinstance(content, str):
             preview = content[:120]
-            print(f"  [{i}] {role}: {preview}{'...' if len(content) > 120 else ''}")
+            logger.info(f"  [{i}] {role}: {preview}{'...' if len(content) > 120 else ''}")
         else:
-            print(f"  [{i}] {role}: [non-string content]")
+            logger.info(f"  [{i}] {role}: [non-string content]")
     
     if context_result.rewritten_query:
-        print(f"\nRewritten query (first 120 chars): {context_result.rewritten_query[:120]}{'...' if len(context_result.rewritten_query) > 120 else ''}")
+        logger.info(f"\nRewritten query (first 120 chars): {context_result.rewritten_query[:120]}{'...' if len(context_result.rewritten_query) > 120 else ''}")
     
-    print(f"{'='*80}\n")
+    logger.info(f"{'='*80}\n")
 
     prompt_tokens_estimate = estimate_messages_tokens(prompt_messages)
 
@@ -1291,12 +1293,12 @@ async def add_message(
                     timeout=3.0  # 3 second timeout
                 )
                 if fragments_saved > 0:
-                    print(f"✅ Saved {fragments_saved} memory fragments from turn")
+                    logger.info(f"✅ Saved {fragments_saved} memory fragments from turn")
             except asyncio.TimeoutError:
-                print(f"⚠️  Memory save timeout, continuing without saving")
+                logger.warning(f"⚠️  Memory save timeout, continuing without saving")
             except Exception as e:
                 # Don't fail the request if memory saving fails
-                print(f"⚠️  Memory save error: {e}, continuing without saving")
+                logger.warning(f"⚠️  Memory save error: {e}, continuing without saving")
 
         # Complete performance tracking
         perf_metrics.mark_end()
@@ -1422,7 +1424,7 @@ async def save_raw_message(
         await db.refresh(message)
         await db.commit()
 
-        print(f"💾 Saved raw message to thread {thread_id}: role={request.role}, sequence={next_sequence}")
+        logger.info(f"💾 Saved raw message to thread {thread_id}: role={request.role}, sequence={next_sequence}")
 
         return SaveRawMessageResponse(
             id=str(message.id),
@@ -1434,7 +1436,7 @@ async def save_raw_message(
 
     except Exception as e:
         await db.rollback()
-        print(f"❌ Failed to save raw message: {e}")
+        logger.warning(f"❌ Failed to save raw message: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to save message: {str(e)}")
 
 
@@ -1485,32 +1487,32 @@ async def add_message_streaming(
     try:
         from app.services.threads_store import get_history
         history_turns = get_history(thread_id, max_turns=5)
-        print(f"🔍 Checking history for previous AI message. Found {len(history_turns)} turns")
+        logger.debug(f"🔍 Checking history for previous AI message. Found {len(history_turns)} turns")
         # Find the last assistant message (skip the current user message which was just added)
         for turn in reversed(history_turns):
             role_str = str(turn.role).lower() if hasattr(turn, 'role') else ''
-            print(f"  Turn role: {role_str}, content: {turn.content[:50] if turn.content else 'empty'}...")
+            logger.info(f"  Turn role: {role_str}, content: {turn.content[:50] if turn.content else 'empty'}...")
             if role_str == 'assistant':
                 previous_ai_message = turn.content
-                print(f"✅ Found previous AI message: {previous_ai_message[:100]}...")
+                logger.info(f"✅ Found previous AI message: {previous_ai_message[:100]}...")
                 break
         if not previous_ai_message:
-            print(f"⚠️  No previous assistant message found in history")
+            logger.warning(f"⚠️  No previous assistant message found in history")
     except Exception as e:
-        print(f"⚠️  Could not get previous message for context: {e}")
+        logger.warning(f"⚠️  Could not get previous message for context: {e}")
         import traceback
-        print(traceback.format_exc())
+        logger.info(traceback.format_exc())
     
     media_intent, media_metadata = media_intent_detector.detect_intent(user_content, previous_ai_message)
     should_generate_media = media_intent != "none"
     
     # Log intent detection for debugging
     if should_generate_media:
-        print(f"🎨 Media generation intent detected: {media_intent}, metadata: {media_metadata}")
+        logger.info(f"🎨 Media generation intent detected: {media_intent}, metadata: {media_metadata}")
         if media_metadata and media_metadata.get("use_previous"):
-            print(f"📝 Using previous AI message as prompt: {previous_ai_message[:100] if previous_ai_message else 'None'}...")
+            logger.info(f"📝 Using previous AI message as prompt: {previous_ai_message[:100] if previous_ai_message else 'None'}...")
     else:
-        print(f"ℹ️  No media generation intent detected for: {user_content[:50]}...")
+        logger.info(f"ℹ️  No media generation intent detected for: {user_content[:50]}...")
     
     # Step 1.5: Query Rewriter (if enabled)
     # Feature flag for query rewriting
@@ -1561,8 +1563,8 @@ async def add_message_streaming(
                 is_ambiguous = True
 
                 # Log for debugging
-                print(f"🔍 LLM detected ambiguity: {user_content[:50]}...")
-                print(f"   Reason: {rewrite_result.get('reasoning', 'unknown')}")
+                logger.debug(f"🔍 LLM detected ambiguity: {user_content[:50]}...")
+                logger.info(f"   Reason: {rewrite_result.get('reasoning', 'unknown')}")
 
                 # Return disambiguation as SSE event
                 async def disambiguation_source():
@@ -1590,13 +1592,13 @@ async def add_message_streaming(
 
                 # Log for debugging
                 if rewritten_content != user_content:
-                    print(f"✏️  LLM rewrite: {user_content[:50]}... → {rewritten_content[:50]}...")
-                    print(f"   Reasoning: {rewrite_result.get('reasoning', 'N/A')}")
+                    logger.info(f"✏️  LLM rewrite: {user_content[:50]}... → {rewritten_content[:50]}...")
+                    logger.info(f"   Reasoning: {rewrite_result.get('reasoning', 'N/A')}")
         except Exception as e:
             # If rewriter fails, fall back to original content
             import traceback
-            print(f"⚠️  LLM context error: {e}")
-            print(traceback.format_exc())
+            logger.warning(f"⚠️  LLM context error: {e}")
+            logger.info(traceback.format_exc())
             rewritten_content = user_content
     
     # Step 2: ULTRA-FAST PATH - Route and stream immediately, validate in background
@@ -1690,11 +1692,11 @@ async def add_message_streaming(
         #     except: pass
         # asyncio.create_task(run_dynamic_router_in_background())
 
-    print(f"⚡ Provider selected in {(perf_time.perf_counter() - start_routing)*1000:.0f}ms -> {provider_enum.value}/{validated_model}")
+    logger.info(f"⚡ Provider selected in {(perf_time.perf_counter() - start_routing)*1000:.0f}ms -> {provider_enum.value}/{validated_model}")
 
     # Log LLM rewrite if it happened
     if FEATURE_COREWRITE and rewritten_content != user_content:
-        print(f"📝 LLM context-aware rewrite: '{user_content[:80]}...' → '{rewritten_content[:80]}...'")
+        logger.info(f"📝 LLM context-aware rewrite: '{user_content[:80]}...' → '{rewritten_content[:80]}...'")
 
     # Ensure downstream components see the actual provider/model we plan to call
     request.provider = provider_enum
@@ -1806,39 +1808,39 @@ async def add_message_streaming(
     
     # CRITICAL LOGGING: Log provider call with detailed context info
     # This matches the TypeScript blueprint format for debugging
-    print(f"\n{'='*80}")
-    print(f"📤 SENDING TO PROVIDER: {provider_enum.value}/{validated_model}")
-    print(f"{'='*80}")
-    print(f"Using centralized context builder ✓")
-    print(f"Total messages: {len(prompt_messages)}")
-    print(f"Conversation history turns: {len(context_result.short_term_history)}")
-    print(f"Memory snippet present: {context_result.memory_snippet is not None}")
+    logger.info(f"\n{'='*80}")
+    logger.info(f"📤 SENDING TO PROVIDER: {provider_enum.value}/{validated_model}")
+    logger.info(f"{'='*80}")
+    logger.info(f"Using centralized context builder ✓")
+    logger.info(f"Total messages: {len(prompt_messages)}")
+    logger.info(f"Conversation history turns: {len(context_result.short_term_history)}")
+    logger.info(f"Memory snippet present: {context_result.memory_snippet is not None}")
     if context_result.memory_snippet:
-        print(f"Memory snippet length: {len(context_result.memory_snippet)} chars")
-    print(f"Query rewritten: {context_result.rewritten_query is not None}")
+        logger.info(f"Memory snippet length: {len(context_result.memory_snippet)} chars")
+    logger.info(f"Query rewritten: {context_result.rewritten_query is not None}")
     
     # Detailed messages preview (matches TypeScript blueprint)
-    print(f"\nMessages preview (first 120 chars each):")
+    logger.info(f"\nMessages preview (first 120 chars each):")
     for i, msg in enumerate(prompt_messages):
         role = msg.get('role', 'unknown')
         content = msg.get('content', '')
         if isinstance(content, str):
             preview = content[:120]
-            print(f"  [{i}] {role}: {preview}{'...' if len(content) > 120 else ''}")
+            logger.info(f"  [{i}] {role}: {preview}{'...' if len(content) > 120 else ''}")
         else:
-            print(f"  [{i}] {role}: [non-string content]")
+            logger.info(f"  [{i}] {role}: [non-string content]")
     
     if context_result.rewritten_query:
-        print(f"\nRewritten query (first 120 chars): {context_result.rewritten_query[:120]}{'...' if len(context_result.rewritten_query) > 120 else ''}")
+        logger.info(f"\nRewritten query (first 120 chars): {context_result.rewritten_query[:120]}{'...' if len(context_result.rewritten_query) > 120 else ''}")
     
-    print(f"{'='*80}\n")
+    logger.info(f"{'='*80}\n")
     
     # NOTE: User message is added to in-memory storage AFTER context building
     # This is correct - we don't want to include the current message in its own history
     # The context builder should see PREVIOUS turns (from prior requests)
     # This will be added later after streaming completes (see background_cleanup)
     
-    print(f"⚡ Memory + prompt built in {(perf_time.perf_counter() - start_db)*1000:.0f}ms")
+    logger.info(f"⚡ Memory + prompt built in {(perf_time.perf_counter() - start_db)*1000:.0f}ms")
     
     # EXTREME OPTIMIZATION: Skip RLS, get API key from cache/env instead of DB
     # This is the fastest possible path - stream immediately
@@ -1860,17 +1862,17 @@ async def add_message_streaming(
     
     # If not in env or settings, fall back to DB
     if not api_key:
-        print(f"⚠️  No env var for {provider_enum.value}, fetching from DB...")
+        logger.warning(f"⚠️  No env var for {provider_enum.value}, fetching from DB...")
         start_wait = perf_time.perf_counter()
         # RLS context is already set on line 1355, just await the API key task
         api_key = await api_key_task
-        print(f"⚡ DB fetch done in {(perf_time.perf_counter() - start_wait)*1000:.0f}ms")
+        logger.info(f"⚡ DB fetch done in {(perf_time.perf_counter() - start_wait)*1000:.0f}ms")
     else:
-        print(f"⚡ Using cached API key from env for {provider_enum.value}")
+        logger.info(f"⚡ Using cached API key from env for {provider_enum.value}")
         # Don't await RLS if we have API key - it's only needed for DB operations
         # RLS will be set in background cleanup if needed
     
-    print(f"⚡ TOTAL SETUP TIME: {(perf_time.perf_counter() - start_routing)*1000:.0f}ms - Starting provider stream NOW...")
+    logger.info(f"⚡ TOTAL SETUP TIME: {(perf_time.perf_counter() - start_routing)*1000:.0f}ms - Starting provider stream NOW...")
     
     # CRITICAL FIX: Save user message to database BEFORE streaming starts
     # This ensures it's available when frontend navigates immediately after stream completes
@@ -1901,22 +1903,22 @@ async def add_message_streaming(
             db.add(user_msg)
             await db.commit()  # Commit immediately so it's available for queries
             user_message_saved = True
-            print(f"💾✅ Saved user message to database BEFORE streaming (sequence: {user_sequence}, user_id: {message_user_id}, thread_id: {thread_id})")
+            logger.info(f"💾✅ Saved user message to database BEFORE streaming (sequence: {user_sequence}, user_id: {message_user_id}, thread_id: {thread_id})")
             # Verify it was saved
             verify_stmt = select(Message).where(Message.thread_id == thread_id, Message.sequence == user_sequence)
             verify_result = await db.execute(verify_stmt)
             verify_msg = verify_result.scalar_one_or_none()
             if verify_msg:
-                print(f"✅✅ Verification: User message confirmed in database (id: {verify_msg.id})")
+                logger.info(f"✅✅ Verification: User message confirmed in database (id: {verify_msg.id})")
             else:
-                print(f"❌❌ Verification FAILED: User message NOT found in database after commit!")
+                logger.warning(f"❌❌ Verification FAILED: User message NOT found in database after commit!")
         else:
-            print(f"ℹ️  User message already exists in database, skipping duplicate save")
+            logger.info(f"ℹ️  User message already exists in database, skipping duplicate save")
             user_message_saved = True
     except Exception as save_error:
-        print(f"⚠️  Failed to save user message to database before streaming: {save_error}")
+        logger.warning(f"⚠️  Failed to save user message to database before streaming: {save_error}")
         import traceback
-        print(traceback.format_exc())
+        logger.info(traceback.format_exc())
         await db.rollback()
         # Continue anyway - background_cleanup will try again
     
@@ -1936,14 +1938,14 @@ async def add_message_streaming(
         try:
             from app.services.threads_store import add_turn, Turn
             add_turn(thread_id, Turn(role=request.role.value, content=user_content))
-            print(f"💾 Added user message to in-memory thread storage IMMEDIATELY (for next request context)")
+            logger.info(f"💾 Added user message to in-memory thread storage IMMEDIATELY (for next request context)")
         except Exception as e:
-            print(f"⚠️  Failed to save user message to in-memory storage: {e}")
+            logger.warning(f"⚠️  Failed to save user message to in-memory storage: {e}")
             import traceback
-            print(traceback.format_exc())
+            logger.info(traceback.format_exc())
 
         # Stream directly from provider (THIS STARTS IMMEDIATELY)
-        print(f"⚡ Starting provider stream for {provider_enum.value}/{validated_model}...")
+        logger.info(f"⚡ Starting provider stream for {provider_enum.value}/{validated_model}...")
         stream_start = perf_time.perf_counter()
         first_chunk = True
 
@@ -1967,7 +1969,7 @@ async def add_message_streaming(
                 api_key
             ):
                 if first_chunk:
-                    print(f"🚀 FIRST CHUNK received in {(perf_time.perf_counter() - stream_start)*1000:.0f}ms from provider!")
+                    logger.info(f"🚀 FIRST CHUNK received in {(perf_time.perf_counter() - stream_start)*1000:.0f}ms from provider!")
                     first_chunk = False
                 # Collect content for memory
                 if chunk.get("type") == "delta" and "delta" in chunk:
@@ -1977,7 +1979,7 @@ async def add_message_streaming(
                         usage_data.update(chunk["usage"])
                     finish_reason = chunk.get("finish_reason")
                     if finish_reason and finish_reason == "length":
-                        print(f"⚠️  Provider {provider_enum.value} reported finish_reason=length (likely hit max output tokens)")
+                        logger.warning(f"⚠️  Provider {provider_enum.value} reported finish_reason=length (likely hit max output tokens)")
                 elif chunk.get("type") == "done":
                     if "usage" in chunk and isinstance(chunk["usage"], dict):
                         usage_data.update(chunk["usage"])
@@ -1999,7 +2001,7 @@ async def add_message_streaming(
         except Exception as e:
             import traceback
             error_trace = traceback.format_exc()
-            print(f"❌ Provider adapter error: {e}\n{error_trace}")
+            logger.error(f"❌ Provider adapter error: {e}\n{error_trace}")
             # Yield error chunk so frontend can handle it
             yield {"type": "error", "error": str(e)}
             raise  # Re-raise to be caught by outer handler
@@ -2012,11 +2014,11 @@ async def add_message_streaming(
             if response_content:
                 from app.services.threads_store import add_turn, Turn
                 add_turn(thread_id, Turn(role="assistant", content=response_content))
-                print(f"💾 Added assistant message to in-memory thread storage IMMEDIATELY (for next request context)")
+                logger.info(f"💾 Added assistant message to in-memory thread storage IMMEDIATELY (for next request context)")
         except Exception as e:
-            print(f"⚠️  Failed to save assistant message to in-memory storage: {e}")
+            logger.warning(f"⚠️  Failed to save assistant message to in-memory storage: {e}")
             import traceback
-            print(traceback.format_exc())
+            logger.info(traceback.format_exc())
         
         # Post-stream: Background validation and logging (non-blocking)
         async def background_cleanup():
@@ -2068,9 +2070,9 @@ async def add_message_streaming(
                             sequence=user_sequence,
                         )
                         db.add(user_msg)
-                        print(f"💾 Saved user message to database in background_cleanup (fallback, sequence: {user_sequence}, user_id: {message_user_id})")
+                        logger.info(f"💾 Saved user message to database in background_cleanup (fallback, sequence: {user_sequence}, user_id: {message_user_id})")
                     else:
-                        print(f"ℹ️  User message already exists in database (saved before streaming)")
+                        logger.info(f"ℹ️  User message already exists in database (saved before streaming)")
 
                     # Save assistant message to database if we have content
                     if response_content:
@@ -2094,16 +2096,16 @@ async def add_message_streaming(
                             }
                         )
                         db.add(assistant_msg)
-                        print(f"💾 Saved assistant message to database (sequence: {assistant_sequence}, user_id: {message_user_id})")
+                        logger.info(f"💾 Saved assistant message to database (sequence: {assistant_sequence}, user_id: {message_user_id})")
 
                     # Commit both messages to database
                     await db.commit()
-                    print(f"✅ Messages persisted to database for thread {thread_id}")
+                    logger.info(f"✅ Messages persisted to database for thread {thread_id}")
 
                 except Exception as save_error:
-                    print(f"⚠️  Failed to save messages to database: {save_error}")
+                    logger.warning(f"⚠️  Failed to save messages to database: {save_error}")
                     import traceback
-                    print(traceback.format_exc())
+                    logger.info(traceback.format_exc())
                     await db.rollback()
 
                 # Auto-generate title if this is the first message
@@ -2130,7 +2132,7 @@ async def add_message_streaming(
                         # Sync DB messages to in-memory storage
                         for msg in prior_messages:
                             add_turn(thread_id, Turn(role=msg.role.value, content=msg.content))
-                        print(f"💾 Synced DB messages to in-memory storage ({len(prior_messages)} messages)")
+                        logger.info(f"💾 Synced DB messages to in-memory storage ({len(prior_messages)} messages)")
                 
                 # Log observability
                 from app.services.token_track import normalize_usage
@@ -2181,21 +2183,21 @@ async def add_message_streaming(
                         )
                         db.add(router_run)
                         await db.commit()
-                        print(f"📊 Logged router run: {router_decision.chosen_model.display_name} (task: {router_decision.intent.task_type})")
+                        logger.info(f"📊 Logged router run: {router_decision.chosen_model.display_name} (task: {router_decision.intent.task_type})")
                     except Exception as router_log_error:
-                        print(f"⚠️  Failed to log router run: {router_log_error}")
+                        logger.warning(f"⚠️  Failed to log router run: {router_log_error}")
                         import traceback
-                        print(traceback.format_exc())
+                        logger.info(traceback.format_exc())
                         await db.rollback()
             except Exception as e:
                 # Log but don't fail - streaming already completed
-                print(f"Background cleanup error: {e}")
+                logger.error(f"Background cleanup error: {e}")
         
         # Run cleanup but track it so we can ensure it completes
         # This will be awaited by event_source() after streaming ends
         cleanup_task = asyncio.create_task(background_cleanup())  # noqa: This uses nonlocal cleanup_task
         # Store task reference to allow frontend to verify persistence if needed
-        print(f"📝 Background cleanup task created for thread {thread_id}")
+        logger.info(f"📝 Background cleanup task created for thread {thread_id}")
 
     # Return streaming response immediately (starts streaming ASAP)
     cleanup_task = None  # Will be set by stream_with_background_validation
@@ -2252,7 +2254,7 @@ async def add_message_streaming(
                                 prompt = media_metadata.get("prompt", user_content)
                                 
                                 # Log prompt being used
-                                print(f"📝 Image generation prompt: '{prompt[:200]}...'")
+                                logger.info(f"📝 Image generation prompt: '{prompt[:200]}...'")
                                 
                                 # Get API keys for image generation
                                 api_keys_dict = {}
@@ -2300,10 +2302,10 @@ async def add_message_streaming(
                                 from app.services.collaborate.image_generation_service import select_image_provider
                                 selected_provider, selected_key = select_image_provider(api_keys_dict)
                                 
-                                print(f"🔍 Image generation check - Provider: {selected_provider}, Has key: {bool(selected_key)}, Available keys: {list(api_keys_dict.keys())}")
+                                logger.debug(f"🔍 Image generation check - Provider: {selected_provider}, Has key: {bool(selected_key)}, Available keys: {list(api_keys_dict.keys())}")
                                 
                                 if selected_provider and selected_key:
-                                    print(f"🎨 Generating image with {selected_provider} using prompt: '{prompt}'")
+                                    logger.info(f"🎨 Generating image with {selected_provider} using prompt: '{prompt}'")
                                     # Create a temporary API keys dict with just the selected provider
                                     temp_api_keys = {selected_provider: selected_key}
                                     
@@ -2322,20 +2324,20 @@ async def add_message_streaming(
                                             }
                                             yield f"event: media\n"
                                             yield f"data: {json.dumps(image_data)}\n\n"
-                                            print(f"✅ Image generated and sent to client: {generated_image.url[:100] if len(generated_image.url) > 100 else generated_image.url}")
+                                            logger.info(f"✅ Image generated and sent to client: {generated_image.url[:100] if len(generated_image.url) > 100 else generated_image.url}")
                                         else:
-                                            print(f"⚠️  Image generation returned no result (generated_image is None)")
+                                            logger.warning(f"⚠️  Image generation returned no result (generated_image is None)")
                                     except Exception as img_gen_error:
                                         import traceback
-                                        print(f"❌ Image generation error: {img_gen_error}")
-                                        print(traceback.format_exc())
+                                        logger.error(f"❌ Image generation error: {img_gen_error}")
+                                        logger.info(traceback.format_exc())
                                 else:
-                                    print(f"⚠️  No image generation provider available. Available providers: {list(api_keys_dict.keys())}")
+                                    logger.warning(f"⚠️  No image generation provider available. Available providers: {list(api_keys_dict.keys())}")
                                     
                             elif media_intent == "graph":
                                 # Generate graph
                                 graph_request = media_metadata.get("request", user_content)
-                                print(f"📊 Generating graph from request: {graph_request[:100]}...")
+                                logger.info(f"📊 Generating graph from request: {graph_request[:100]}...")
                                 
                                 graph_data_uri = await media_generation_service.generate_graph_from_request(
                                     graph_request
@@ -2351,19 +2353,19 @@ async def add_message_streaming(
                                     }
                                     yield f"event: media\n"
                                     yield f"data: {json.dumps(graph_data)}\n\n"
-                                    print(f"✅ Graph generated and sent to client")
+                                    logger.info(f"✅ Graph generated and sent to client")
                                 else:
-                                    print(f"⚠️  Graph generation returned no result")
+                                    logger.warning(f"⚠️  Graph generation returned no result")
                         except Exception as media_error:
                             import traceback
-                            print(f"⚠️  Media generation error: {media_error}")
-                            print(traceback.format_exc())
+                            logger.warning(f"⚠️  Media generation error: {media_error}")
+                            logger.info(traceback.format_exc())
                             # Don't fail the request if media generation fails
                             
         except Exception as e:
             import traceback
             error_trace = traceback.format_exc()
-            print(f"❌ Streaming error: {e}\n{error_trace}")
+            logger.error(f"❌ Streaming error: {e}\n{error_trace}")
             yield f"event: error\n"
             yield f"data: {json.dumps({'type': 'error', 'error': str(e)})}\n\n"
 
@@ -2371,14 +2373,14 @@ async def add_message_streaming(
         # This prevents chat history from being empty when user navigates away during generation
         if cleanup_task:
             try:
-                print(f"⏳ Waiting for database persistence (cleanup task)...")
+                logger.info(f"⏳ Waiting for database persistence (cleanup task)...")
                 await cleanup_task
-                print(f"✅ Database persistence confirmed for thread {thread_id}")
+                logger.info(f"✅ Database persistence confirmed for thread {thread_id}")
                 # Emit final "persisted" event so frontend knows messages are safe in database
                 yield "event: persisted\n"
                 yield f"data: {json.dumps({'type': 'persisted', 'thread_id': thread_id})}\n\n"
             except Exception as e:
-                print(f"⚠️  Cleanup task error: {e}")
+                logger.warning(f"⚠️  Cleanup task error: {e}")
                 # Still emit persisted event - cleanup may have partially succeeded
                 yield "event: persisted\n"
                 yield f"data: {json.dumps({'type': 'persisted', 'thread_id': thread_id, 'error': str(e)})}\n\n"
@@ -2645,7 +2647,7 @@ async def collaborate_thread_streaming(
                 if key:
                     api_keys[provider] = key
         except Exception as e:
-            print(f"Could not get API key for {provider}: {e}")
+            logger.info(f"Could not get API key for {provider}: {e}")
             continue
 
     if not api_keys:
@@ -2826,7 +2828,7 @@ async def collaborate_thread(
                 if key:
                     api_keys[provider] = key
         except Exception as e:
-            print(f"Could not get API key for {provider}: {e}")
+            logger.info(f"Could not get API key for {provider}: {e}")
             continue
 
     if not api_keys:
@@ -2890,25 +2892,25 @@ async def get_thread(
     messages = result.scalars().all()
 
     # Debug: Log message retrieval with detailed info
-    print(f"🔍 DEBUG get_thread: thread_id={thread_id}, org_id={org_id}, user_id={user_id}, messages_retrieved={len(messages)}")
+    logger.debug(f"🔍 DEBUG get_thread: thread_id={thread_id}, org_id={org_id}, user_id={user_id}, messages_retrieved={len(messages)}")
     if messages:
         for msg in messages:
-            print(f"  📨 Message: role={msg.role.value}, sequence={msg.sequence}, content_length={len(msg.content) if msg.content else 0}")
+            logger.info(f"  📨 Message: role={msg.role.value}, sequence={msg.sequence}, content_length={len(msg.content) if msg.content else 0}")
     if len(messages) == 0:
         # Try to debug why no messages are found
         # Check if there are ANY messages in this thread at all (without RLS filtering)
         count_stmt = select(func.count(Message.id)).where(Message.thread_id == thread_id)
         count_result = await db.execute(count_stmt)
         total_count = count_result.scalar() or 0
-        print(f"⚠️  No messages retrieved but total_count in DB: {total_count}")
+        logger.warning(f"⚠️  No messages retrieved but total_count in DB: {total_count}")
         if total_count > 0:
             # Try to get messages without sequence ordering to see what's there
             all_msgs_stmt = select(Message).where(Message.thread_id == thread_id)
             all_msgs_result = await db.execute(all_msgs_stmt)
             all_msgs = all_msgs_result.scalars().all()
-            print(f"⚠️  Found {len(all_msgs)} messages without ordering:")
+            logger.warning(f"⚠️  Found {len(all_msgs)} messages without ordering:")
             for msg in all_msgs:
-                print(f"    - role={msg.role.value}, sequence={msg.sequence}, created_at={msg.created_at}")
+                logger.info(f"    - role={msg.role.value}, sequence={msg.sequence}, created_at={msg.created_at}")
 
     return ThreadDetailResponse(
         id=thread.id,
@@ -3182,7 +3184,7 @@ async def collaborate_thread_streaming(
                 if key:
                     api_keys[provider] = key
         except Exception as e:
-            print(f"Could not get API key for {provider}: {e}")
+            logger.info(f"Could not get API key for {provider}: {e}")
             continue
 
     if not api_keys:
@@ -3363,7 +3365,7 @@ async def collaborate_thread(
                 if key:
                     api_keys[provider] = key
         except Exception as e:
-            print(f"Could not get API key for {provider}: {e}")
+            logger.info(f"Could not get API key for {provider}: {e}")
             continue
 
     if not api_keys:

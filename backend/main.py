@@ -24,6 +24,7 @@ from app.database import init_db, close_db
 from app.api import router, providers, billing, audit, metrics, query_rewriter, entities, auth, collaboration, dynamic_collaborate, council, eval, quality_analytics
 from app.api import threads as threads_module
 from app.core.security_middleware import configure_security
+from app.core.error_handlers import register_error_handlers
 
 # Import intelligent router endpoints (Phase 1)
 try:
@@ -90,6 +91,9 @@ app = FastAPI(
 
 # Security middleware (CORS, headers, etc.)
 configure_security(app)
+
+# Error handlers
+register_error_handlers(app)
 
 # Observability middleware (Phase 1.5)
 app.add_middleware(ObservabilityMiddleware)

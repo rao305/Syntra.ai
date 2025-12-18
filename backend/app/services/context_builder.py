@@ -108,7 +108,7 @@ class ContextBuilder:
         except Exception as e:
             logger.error("❌ CRITICAL: Failed to load history: {e}")
             import traceback
-            print(traceback.format_exc())
+            logger.info(traceback.format_exc())
             short_term_history = []  # Graceful degradation
         
         # Validate history format
@@ -220,7 +220,7 @@ class ContextBuilder:
         #     except Exception as e:
         #         logger.error("⚠️  Query rewriter error: {e}, using original message")
         #         import traceback
-        #         print(traceback.format_exc())
+        #         logger.info(traceback.format_exc())
         #         rewritten_query = None
         
         # STEP 4: Build final messages array with validation
@@ -268,7 +268,7 @@ class ContextBuilder:
         except Exception as e:
             logger.error("❌ CRITICAL: Failed to build messages array: {e}")
             import traceback
-            print(traceback.format_exc())
+            logger.info(traceback.format_exc())
             # FALLBACK: Build minimal valid messages array
             messages = [
                 {"role": "system", "content": base_system_prompt or "You are a helpful assistant."},
@@ -418,7 +418,7 @@ class ContextBuilder:
         except Exception as e:
             logger.error("⚠️  In-memory thread storage error: {e}, falling back to DB")
             import traceback
-            print(traceback.format_exc())
+            logger.info(traceback.format_exc())
         
         # STRATEGY 2: Fall back to database (with retry logic)
         for attempt in range(max_retries):

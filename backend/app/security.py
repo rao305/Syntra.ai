@@ -8,6 +8,7 @@ import logging
 from config import get_settings
 
 from app.core.database_utils import SafeQueryBuilder
+from app.core.error_handlers import ValidationAPIError
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -51,7 +52,10 @@ class RowLevelSecurity:
         try:
             uuid.UUID(org_id)
         except ValueError:
-            raise ValueError(f"org_id must be a valid UUID, got: {org_id}")
+            raise ValidationAPIError(
+                "Invalid organization ID",
+                details={"field": "org_id", "message": f"org_id must be a valid UUID, got: {org_id}"}
+            )
 
         # SAFE: Using parameterized query
         await db.execute(
@@ -63,7 +67,10 @@ class RowLevelSecurity:
             try:
                 uuid.UUID(user_id)
             except ValueError:
-                raise ValueError(f"user_id must be a valid UUID, got: {user_id}")
+                raise ValidationAPIError(
+                    "Invalid user ID",
+                    details={"field": "user_id", "message": f"user_id must be a valid UUID, got: {user_id}"}
+                )
 
             await db.execute(
                 text("SET LOCAL app.current_user_id = :user_id"),

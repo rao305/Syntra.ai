@@ -6,6 +6,8 @@ separation between read and write operations to prevent accidental resets.
 """
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
+import logging
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -35,7 +37,7 @@ def get_thread(thread_id: str) -> Optional[Thread]:
     """
     thread_id = str(thread_id)
     thread = THREADS.get(thread_id)
-    print(f"[THREAD_STORE] get_thread: id={thread_id!r}, exists={thread is not None}, obj_id={id(thread) if thread else None}, turns={len(thread.turns) if thread else 0}")
+    logger.info(f"[THREAD_STORE] get_thread: id={thread_id!r}, exists={thread is not None}, obj_id={id(thread) if thread else None}, turns={len(thread.turns) if thread else 0}")
     return thread
 
 
@@ -48,13 +50,13 @@ def get_or_create_thread(thread_id: str) -> Thread:
     thread_id = str(thread_id)
     thread = THREADS.get(thread_id)
     if thread is not None:
-        print(f"[THREAD_STORE] get_or_create_thread: existing id={thread_id!r}, obj_id={id(thread)}, turns={len(thread.turns)}")
+        logger.info(f"[THREAD_STORE] get_or_create_thread: existing id={thread_id!r}, obj_id={id(thread)}, turns={len(thread.turns)}")
         return thread
     
     # Only create if missing
     thread = Thread(thread_id=thread_id)
     THREADS[thread_id] = thread
-    print(f"[THREAD_STORE] get_or_create_thread: NEW id={thread_id!r}, obj_id={id(thread)}")
+    logger.info(f"[THREAD_STORE] get_or_create_thread: NEW id={thread_id!r}, obj_id={id(thread)}")
     return thread
 
 
@@ -65,9 +67,9 @@ def add_turn(thread_id: str, turn: Turn) -> None:
     This is the ONLY function that should be used to add turns.
     """
     thread = get_or_create_thread(thread_id)
-    print(f"[THREAD_STORE] add_turn BEFORE: id={thread_id!r}, obj_id={id(thread)}, len(turns)={len(thread.turns)}")
+    logger.info(f"[THREAD_STORE] add_turn BEFORE: id={thread_id!r}, obj_id={id(thread)}, len(turns)={len(thread.turns)}")
     thread.turns.append(turn)
-    print(f"[THREAD_STORE] add_turn AFTER: id={thread_id!r}, obj_id={id(thread)}, len(turns)={len(thread.turns)}")
+    logger.info(f"[THREAD_STORE] add_turn AFTER: id={thread_id!r}, obj_id={id(thread)}, len(turns)={len(thread.turns)}")
 
 
 def get_history(thread_id: str, max_turns: int = 12) -> List[Turn]:
@@ -78,10 +80,10 @@ def get_history(thread_id: str, max_turns: int = 12) -> List[Turn]:
     """
     thread = get_thread(thread_id)
     if thread is None:
-        print(f"[THREAD_STORE] get_history: no thread for id={thread_id!r}")
+        logger.info(f"[THREAD_STORE] get_history: no thread for id={thread_id!r}")
         return []
     
-    print(f"[THREAD_STORE] get_history: id={thread_id!r}, obj_id={id(thread)}, len(turns)={len(thread.turns)}")
+    logger.info(f"[THREAD_STORE] get_history: id={thread_id!r}, obj_id={id(thread)}, len(turns)={len(thread.turns)}")
     if len(thread.turns) > max_turns:
         return list(thread.turns[-max_turns:])
     return list(thread.turns)
@@ -95,8 +97,8 @@ def clear_thread(thread_id: str) -> None:
     """
     thread = get_thread(thread_id)
     if thread is not None:
-        print(f"[THREAD_STORE] clear_thread: id={thread_id!r}, clearing {len(thread.turns)} turns")
+        logger.info(f"[THREAD_STORE] clear_thread: id={thread_id!r}, clearing {len(thread.turns)} turns")
         thread.turns.clear()
     else:
-        print(f"[THREAD_STORE] clear_thread: id={thread_id!r}, thread does not exist")
+        logger.info(f"[THREAD_STORE] clear_thread: id={thread_id!r}, thread does not exist")
 
