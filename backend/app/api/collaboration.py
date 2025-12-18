@@ -1076,7 +1076,7 @@ async def resume_collaboration_stream(
                     })
                     
                 except Exception as e:
-                    print(f"❌ Failed to save resumed collaboration message: {e}")
+                    logger.error("❌ Failed to save resumed collaboration message: {e}")
                     await db.rollback()
             
         except Exception as e:

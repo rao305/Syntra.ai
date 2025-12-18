@@ -16,6 +16,9 @@ from app.services.council.query_classifier import (
     get_expected_response_characteristics
 )
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class QualityScores:
@@ -381,7 +384,7 @@ async def validate_response_quality(
         )
 
     except Exception as e:
-        print(f"Quality validation failed: {e}")
+        logger.info("Quality validation failed: {e}")
         # Return conservative scores on failure
         return QualityValidationResult(
             scores=QualityScores(

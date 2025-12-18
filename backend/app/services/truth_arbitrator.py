@@ -264,7 +264,11 @@ class TruthArbitrator:
                 context_words = set(text1.split()) & set(text2.split())
                 if len(context_words) >= 2 and abs(num1 - num2) / max(num1, num2) > 0.5:
                     return True
-            except:
+            except (ValueError, ZeroDivisionError, IndexError) as num_error:
+                # Numerical comparison failed, continue with other checks
+                pass
+            except Exception as e:
+                logger.warning(f"Unexpected error in numerical contradiction check: {e}")
                 pass
         
         # Check for explicit contradictions

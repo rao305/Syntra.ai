@@ -645,7 +645,8 @@ Respond with your expert analysis:""")
                     performance_metrics={"success_rate": 1.0, "fallback_used": True},
                     memory_updates=[]
                 )
-            except:
+            except Exception as fallback_error:
+                logger.warning(f"Failed to create fallback swarm result: {fallback_error}")
                 pass
         
         # Ultimate fallback

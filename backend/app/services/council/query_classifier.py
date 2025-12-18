@@ -11,6 +11,9 @@ from enum import IntEnum
 from app.models.provider_key import ProviderType
 from app.services.provider_dispatch import call_provider_adapter
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class QueryComplexity(IntEnum):
     """Query complexity levels."""
@@ -193,7 +196,7 @@ Respond in JSON format:
 
     except Exception as e:
         # Fall back to heuristic if LLM fails
-        print(f"LLM classification failed: {e}, using heuristic")
+        logger.info("LLM classification failed: {e}, using heuristic")
         level = classify_query_heuristic(query)
         return level, "Heuristic classification (LLM failed)"
 

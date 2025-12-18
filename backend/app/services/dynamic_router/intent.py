@@ -5,6 +5,9 @@ import json
 import os
 from app.adapters.openai_adapter import call_openai
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 TaskType = Literal[
     "generic_chat",
@@ -136,7 +139,7 @@ async def get_router_intent(
 
     except (json.JSONDecodeError, KeyError, ValueError) as e:
         # Fallback to safe defaults
-        print(f"⚠️ Router LLM parsing error: {e}, using defaults")
+        logger.error("⚠️ Router LLM parsing error: {e}, using defaults")
         return RouterIntent(
             task_type="generic_chat",
             requires_web=False,

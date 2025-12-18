@@ -3,6 +3,9 @@ from typing import Optional, Dict, Any
 from app.models.message import Message, MessageRole
 from app.services.chat_encryption import chat_encryption_service
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 async def create_encrypted_message(
     thread_id: str,
@@ -62,7 +65,7 @@ async def decrypt_message_content(message: Message) -> str:
             )
         except Exception as e:
             # Fallback to plaintext if decryption fails
-            print(f"Decryption failed for message {message.id}: {e}")
+            logger.info("Decryption failed for message {message.id}: {e}")
             return message.content or "[Decryption Error]"
 
     return message.content or ""

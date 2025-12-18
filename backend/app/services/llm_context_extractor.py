@@ -6,6 +6,9 @@ that integrate with the coreference resolution service for comprehensive context
 import json
 from typing import List, Dict, Any, Optional, Tuple
 from app.services.coreference_service import (
+
+import logging
+logger = logging.getLogger(__name__)
     get_conversation_context,
     Entity,
     resolve_vague_reference,
@@ -76,7 +79,7 @@ Return ONLY valid JSON array, no other text."""
         settings = get_settings()
         api_key = settings.openai_api_key
         if not api_key:
-            print("⚠️  No OpenAI API key, skipping LLM context extraction")
+            logger.warning("⚠️  No OpenAI API key, skipping LLM context extraction")
             return []
 
         response = await call_openai(
@@ -98,7 +101,7 @@ Return ONLY valid JSON array, no other text."""
 
         # Validate structure
         if not isinstance(entities, list):
-            print(f"⚠️  LLM returned non-list: {type(entities)}")
+            logger.warning("⚠️  LLM returned non-list: {type(entities)}")
             return []
 
         # Ensure each entity has required fields
@@ -114,10 +117,10 @@ Return ONLY valid JSON array, no other text."""
         return validated
 
     except json.JSONDecodeError as e:
-        print(f"⚠️  Failed to parse LLM response as JSON: {e}")
+        logger.warning("⚠️  Failed to parse LLM response as JSON: {e}")
         return []
     except Exception as e:
-        print(f"⚠️  LLM context extraction error: {e}")
+        logger.error("⚠️  LLM context extraction error: {e}")
         return []
 
 
@@ -223,14 +226,14 @@ Rewrite this message to be self-contained. Return ONLY valid JSON."""
 
         # Log the rewrite
         if result.get("rewritten") != user_message:
-            print(f"✏️  LLM rewrite: {user_message[:50]}... → {result.get('rewritten', '')[:50]}...")
+            logger.info("✏️  LLM rewrite: {user_message[:50]}... → {result.get('rewritten', '')[:50]}...")
             if result.get("reasoning"):
-                print(f"   Reasoning: {result['reasoning']}")
+                logger.info("   Reasoning: {result['reasoning']}")
 
         return result
 
     except Exception as e:
-        print(f"⚠️  LLM query rewrite error: {e}")
+        logger.error("⚠️  LLM query rewrite error: {e}")
         return {
             "rewritten": user_message,
             "needs_clarification": False,

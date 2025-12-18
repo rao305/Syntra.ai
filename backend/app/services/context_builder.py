@@ -24,6 +24,9 @@ from app.services.topic_extractor import extract_topics_from_thread
 from app.services.llm_context_extractor import resolve_references_in_query
 from config import get_settings
 
+import logging
+logger = logging.getLogger(__name__)
+
 settings = get_settings()
 
 # Maximum number of conversation history messages to include
@@ -95,15 +98,15 @@ class ContextBuilder:
         # CRITICAL: This MUST succeed or we lose conversation context
         # CRITICAL: Normalize thread_id to string to ensure consistent key matching
         thread_id = str(thread_id)
-        print(f"[CTX] build_contextual_messages called with thread_id={thread_id!r}, type={type(thread_id).__name__}")
+        logger.info("[CTX] build_contextual_messages called with thread_id={thread_id!r}, type={type(thread_id).__name__}")
         
         try:
             short_term_history = await self._load_short_term_history(db, thread_id)
             if not isinstance(short_term_history, list):
-                print(f"⚠️  History is not a list: {type(short_term_history)}, converting...")
+                logger.warning("⚠️  History is not a list: {type(short_term_history)}, converting...")
                 short_term_history = []
         except Exception as e:
-            print(f"❌ CRITICAL: Failed to load history: {e}")
+            logger.error("❌ CRITICAL: Failed to load history: {e}")
             import traceback
             print(traceback.format_exc())
             short_term_history = []  # Graceful degradation
@@ -114,11 +117,11 @@ class ContextBuilder:
             if isinstance(msg, dict) and "role" in msg and "content" in msg:
                 validated_history.append(msg)
             else:
-                print(f"⚠️  Invalid message format: {msg}, skipping...")
+                logger.warning("⚠️  Invalid message format: {msg}, skipping...")
         short_term_history = validated_history
         
-        print(f"📚 Loaded {len(short_term_history)} validated history messages")
-        print(f"[CTX] Conversation history turns: {len(short_term_history)} (before adding current user message)")
+        logger.info("📚 Loaded {len(short_term_history)} validated history messages")
+        logger.info("[CTX] Conversation history turns: {len(short_term_history)} (before adding current user message)")
         
         # STEP 2: Retrieve long-term memory via supermemory (if enabled)
         memory_snippet = None
@@ -139,9 +142,9 @@ class ContextBuilder:
                 if memory_context and memory_context.total_fragments > 0:
                     memory_snippet = self._format_memory_snippet(memory_context)
             except Exception as e:
-                print(f"⚠️  Memory retrieval error: {e}, continuing without memory")
+                logger.error("⚠️  Memory retrieval error: {e}, continuing without memory")
         else:
-            print(f"[CTX] Memory retrieval disabled (memory_enabled={memory_enabled})")
+            logger.info("[CTX] Memory retrieval disabled (memory_enabled={memory_enabled})")
         
         # STEP 3: Run query rewriter WITH full context (history + memory)
         # TEMPORARILY DISABLED FOR DEBUGGING - Focus on short-term history first
@@ -204,7 +207,7 @@ class ContextBuilder:
         #                     rewritten_query = latest_user_message
         #         except ValueError as e:
         #             # Handle case where resolve_references_in_query returns wrong format
-        #             print(f"⚠️  Query rewriter return type error: {e}, using rule-based fallback")
+        #             logger.error("⚠️  Query rewriter return type error: {e}, using rule-based fallback")
         #             rewrite_result = self.query_rewriter.rewrite(
         #                 user_message=latest_user_message,
         #                 recent_turns=enhanced_history,
@@ -215,7 +218,7 @@ class ContextBuilder:
         #             else:
         #                 rewritten_query = latest_user_message
         #     except Exception as e:
-        #         print(f"⚠️  Query rewriter error: {e}, using original message")
+        #         logger.error("⚠️  Query rewriter error: {e}, using original message")
         #         import traceback
         #         print(traceback.format_exc())
         #         rewritten_query = None
@@ -250,20 +253,20 @@ class ContextBuilder:
             # CRITICAL: Ensure history is included (not just system + current message)
             history_count = len([m for m in messages if m.get("role") in ["user", "assistant"]])
             if history_count < len(short_term_history):
-                print(f"⚠️  WARNING: Only {history_count} history messages in array, expected {len(short_term_history)}")
-                print(f"   This may indicate a bug in _build_messages_array")
+                logger.warning("⚠️  WARNING: Only {history_count} history messages in array, expected {len(short_term_history)}")
+                logger.info("   This may indicate a bug in _build_messages_array")
             
             # Ensure latest user message is present
             last_message = messages[-1] if messages else None
             if not last_message or last_message.get("role") != "user":
-                print(f"⚠️  WARNING: Last message is not a user message, adding it...")
+                logger.warning("⚠️  WARNING: Last message is not a user message, adding it...")
                 messages.append({
                     "role": "user",
                     "content": latest_user_message
                 })
             
         except Exception as e:
-            print(f"❌ CRITICAL: Failed to build messages array: {e}")
+            logger.error("❌ CRITICAL: Failed to build messages array: {e}")
             import traceback
             print(traceback.format_exc())
             # FALLBACK: Build minimal valid messages array
@@ -310,42 +313,42 @@ class ContextBuilder:
         This is CRITICAL for debugging the "his children" bug - it shows exactly
         what context is being sent to providers.
         """
-        print(f"\n{'='*80}")
-        print(f"🔧 CONTEXT BUILDER: thread_id={thread_id}")
-        print(f"{'='*80}")
-        print(f"Short-term history turns: {len(short_term_history)}")
-        print(f"Memory snippet present: {memory_snippet is not None}")
+        logger.info("\n{'='*80}")
+        logger.info("🔧 CONTEXT BUILDER: thread_id={thread_id}")
+        logger.info("{'='*80}")
+        logger.info("Short-term history turns: {len(short_term_history)}")
+        logger.info("Memory snippet present: {memory_snippet is not None}")
         if memory_snippet:
-            print(f"Memory snippet length: {len(memory_snippet)} chars")
-        print(f"Query rewritten: {rewritten_query is not None and rewritten_query != messages[-1].get('content', '')}")
-        print(f"Is ambiguous: {is_ambiguous}")
-        print(f"Total messages: {len(messages)}")
-        print(f"System messages: {len([m for m in messages if m.get('role') == 'system'])}")
-        print(f"Conversation history turns: {len([m for m in messages if m.get('role') in ['user', 'assistant']])}")
+            logger.info("Memory snippet length: {len(memory_snippet)} chars")
+        logger.info("Query rewritten: {rewritten_query is not None and rewritten_query != messages[-1].get('content', '')}")
+        logger.info("Is ambiguous: {is_ambiguous}")
+        logger.info("Total messages: {len(messages)}")
+        logger.info("System messages: {len([m for m in messages if m.get('role') == 'system'])}")
+        logger.info("Conversation history turns: {len([m for m in messages if m.get('role') in ['user', 'assistant']])}")
         
         # Detailed messages preview (matches TypeScript blueprint format)
-        print(f"\nMessages array preview:")
+        logger.info("\nMessages array preview:")
         for i, msg in enumerate(messages):
             role = msg.get('role', 'unknown')
             content = msg.get('content', '')
             if isinstance(content, str):
                 preview = content[:120]
-                print(f"  [{i}] {role}: {preview}{'...' if len(content) > 120 else ''}")
+                logger.info("  [{i}] {role}: {preview}{'...' if len(content) > 120 else ''}")
             else:
-                print(f"  [{i}] {role}: [non-string content]")
+                logger.info("  [{i}] {role}: [non-string content]")
         
         if rewritten_query:
-            print(f"\nRewritten query (first 120 chars): {rewritten_query[:120]}{'...' if len(rewritten_query) > 120 else ''}")
+            logger.info("\nRewritten query (first 120 chars): {rewritten_query[:120]}{'...' if len(rewritten_query) > 120 else ''}")
         
         # Show conversation history summary for verification
-        print(f"\nConversation history summary:")
+        logger.info("\nConversation history summary:")
         for i, turn in enumerate(short_term_history[-5:]):  # Last 5 turns
             role = turn.get('role', 'unknown')
             content = turn.get('content', '')
             preview = content[:80] if isinstance(content, str) else str(content)[:80]
-            print(f"  [{i}] {role}: {preview}{'...' if len(content) > 80 else ''}")
+            logger.info("  [{i}] {role}: {preview}{'...' if len(content) > 80 else ''}")
         
-        print(f"{'='*80}\n")
+        logger.info("{'='*80}\n")
     
     async def _load_short_term_history(
         self,
@@ -379,7 +382,7 @@ class ContextBuilder:
         # CRITICAL: Normalize thread_id to string to ensure consistent key matching
         thread_id = str(thread_id)
         
-        print(f"[CTX] _load_short_term_history called with thread_id={thread_id!r}, type={type(thread_id).__name__}")
+        logger.info("[CTX] _load_short_term_history called with thread_id={thread_id!r}, type={type(thread_id).__name__}")
         
         history = []
         
@@ -387,9 +390,9 @@ class ContextBuilder:
         # CRITICAL: This is the primary source for conversation continuity
         # CRITICAL: Use get_history (read-only) - NEVER creates or overwrites threads
         try:
-            print(f"[CTX] Attempting to load from in-memory thread storage...")
+            logger.info("[CTX] Attempting to load from in-memory thread storage...")
             history_turns = get_history(thread_id, max_turns=MAX_CONTEXT_MESSAGES)
-            print(f"[CTX] get_history returned {len(history_turns)} turns for thread_id={thread_id!r}")
+            logger.info("[CTX] get_history returned {len(history_turns)} turns for thread_id={thread_id!r}")
             
             if history_turns:
                 # Convert in-memory turns to message format
@@ -400,20 +403,20 @@ class ContextBuilder:
                     }
                     for turn in history_turns
                 ]
-                print(f"[CTX] short_term_history_len={len(history)}")
-                print(f"✅ Loaded {len(history)} messages from in-memory thread storage (thread_id: {thread_id})")
+                logger.info("[CTX] short_term_history_len={len(history)}")
+                logger.info("✅ Loaded {len(history)} messages from in-memory thread storage (thread_id: {thread_id})")
                 if history:
                     # Validate we have both user and assistant messages
                     user_count = len([m for m in history if m.get("role") == "user"])
                     assistant_count = len([m for m in history if m.get("role") == "assistant"])
-                    print(f"   History breakdown: {user_count} user, {assistant_count} assistant messages")
+                    logger.info("   History breakdown: {user_count} user, {assistant_count} assistant messages")
                     return history
                 else:
-                    print(f"⚠️  In-memory thread storage exists but has no turns")
+                    logger.warning("⚠️  In-memory thread storage exists but has no turns")
             else:
-                print(f"[CTX] No history found for thread_id={thread_id!r} (thread may not exist or has no turns)")
+                logger.info("[CTX] No history found for thread_id={thread_id!r} (thread may not exist or has no turns)")
         except Exception as e:
-            print(f"⚠️  In-memory thread storage error: {e}, falling back to DB")
+            logger.error("⚠️  In-memory thread storage error: {e}, falling back to DB")
             import traceback
             print(traceback.format_exc())
         
@@ -429,7 +432,7 @@ class ContextBuilder:
                 ]
                 
                 if history:
-                    print(f"✅ Loaded {len(history)} messages from database (attempt {attempt + 1})")
+                    logger.info("✅ Loaded {len(history)} messages from database (attempt {attempt + 1})")
                     # Also populate in-memory store for next time (only if empty)
                     try:
                         from app.services.threads_store import get_thread, add_turn, Turn
@@ -439,22 +442,22 @@ class ContextBuilder:
                             for msg in history:
                                 add_turn(thread_id, Turn(role=msg.get("role", "user"), content=msg.get("content", "")))
                     except Exception as e:
-                        print(f"⚠️  Failed to populate in-memory store: {e}")
+                        logger.warning("⚠️  Failed to populate in-memory store: {e}")
                     return history
                 else:
-                    print(f"⚠️  No messages found in DB for thread {thread_id}")
+                    logger.warning("⚠️  No messages found in DB for thread {thread_id}")
                     break  # No point retrying if DB returns empty
                     
             except Exception as e:
                 if attempt < max_retries - 1:
                     delay = retry_delay * (2 ** attempt)  # Exponential backoff
-                    print(f"⚠️  DB query failed (attempt {attempt + 1}/{max_retries}): {e}, retrying in {delay}s...")
+                    logger.warning("⚠️  DB query failed (attempt {attempt + 1}/{max_retries}): {e}, retrying in {delay}s...")
                     await asyncio.sleep(delay)
                 else:
-                    print(f"❌ DB query failed after {max_retries} attempts: {e}")
+                    logger.error("❌ DB query failed after {max_retries} attempts: {e}")
         
         # STRATEGY 3: Graceful degradation - return empty list
-        print(f"⚠️  No conversation history available for thread {thread_id}, starting fresh")
+        logger.warning("⚠️  No conversation history available for thread {thread_id}, starting fresh")
         return []
     
     async def _retrieve_memory_context(
@@ -483,10 +486,10 @@ class ContextBuilder:
                 timeout=2.0
             )
         except asyncio.TimeoutError:
-            print("⚠️  Memory retrieval timeout, continuing without memory")
+            logger.warning("⚠️  Memory retrieval timeout, continuing without memory")
             return None
         except Exception as e:
-            print(f"⚠️  Memory retrieval error: {e}")
+            logger.error("⚠️  Memory retrieval error: {e}")
             return None
     
     def _format_memory_snippet(self, memory_context: MemoryContext, max_chars: int = 2000) -> str:

@@ -379,13 +379,21 @@ async def _test_openai(api_key: str) -> tuple[bool, str, Optional[Dict[str, Any]
                     error_detail = response.json()
                     error_msg = error_detail.get("error", {}).get("message", "Invalid API key")
                     return False, f"Invalid API key: {error_msg}", {"status_code": 401, "detail": error_detail}
-                except:
+                except ValueError as json_error:
+                    logger.warning(f"Failed to parse 401 error response as JSON: {json_error}")
+                    return False, "Invalid API key (401 Unauthorized)", {"status_code": 401}
+                except Exception as e:
+                    logger.exception(f"Unexpected error parsing 401 response: {e}")
                     return False, "Invalid API key (401 Unauthorized)", {"status_code": 401}
             else:
                 try:
                     error_data = response.json()
                     return False, f"Error {response.status_code}: {error_data}", {"status_code": response.status_code, "response": error_data}
-                except:
+                except ValueError as json_error:
+                    logger.warning(f"Failed to parse error response as JSON: {json_error}")
+                    return False, f"Unexpected response: {response.status_code}", {"status_code": response.status_code}
+                except Exception as e:
+                    logger.exception(f"Unexpected error parsing response: {e}")
                     return False, f"Unexpected response: {response.status_code}", {"status_code": response.status_code}
 
         except httpx.TimeoutException:
@@ -466,13 +474,21 @@ async def _test_kimi(api_key: str) -> tuple[bool, str, Optional[Dict[str, Any]]]
                     error_detail = response.json()
                     error_msg = error_detail.get("error", {}).get("message", "Invalid API key")
                     return False, f"Invalid API key: {error_msg}", {"status_code": 401, "detail": error_detail}
-                except:
+                except ValueError as json_error:
+                    logger.warning(f"Failed to parse 401 error response as JSON: {json_error}")
+                    return False, "Invalid API key (401 Unauthorized)", {"status_code": 401}
+                except Exception as e:
+                    logger.exception(f"Unexpected error parsing 401 response: {e}")
                     return False, "Invalid API key (401 Unauthorized)", {"status_code": 401}
             else:
                 try:
                     error_data = response.json()
                     return False, f"Error {response.status_code}: {error_data}", {"status_code": response.status_code, "response": error_data}
-                except:
+                except ValueError as json_error:
+                    logger.warning(f"Failed to parse error response as JSON: {json_error}")
+                    return False, f"Unexpected response: {response.status_code}", {"status_code": response.status_code}
+                except Exception as e:
+                    logger.exception(f"Unexpected error parsing response: {e}")
                     return False, f"Unexpected response: {response.status_code}", {"status_code": response.status_code}
 
         except httpx.TimeoutException:

@@ -147,7 +147,11 @@ async def test_provider_single_request(
             try:
                 error_json = message_response.json()
                 error_msg = error_json.get("detail", error_data)
-            except:
+            except ValueError as json_error:
+                # JSON parsing failed, use raw text
+                error_msg = error_data
+            except Exception as e:
+                # Unexpected error, still use raw text
                 error_msg = error_data
 
             result.add_failure(message_response.status_code, str(error_msg))

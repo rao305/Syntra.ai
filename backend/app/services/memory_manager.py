@@ -73,19 +73,19 @@ def get_thread(thread_id: str) -> Thread:
     # CRITICAL: Normalize thread_id to string to ensure consistent key matching
     thread_id = str(thread_id)
     
-    print(f"[THREAD_STORE] get_thread called: thread_id={thread_id!r}, type={type(thread_id).__name__}")
-    print(f"[THREAD_STORE] store_keys_at_get={list(_thread_store.keys())}")
-    print(f"[THREAD_STORE] store_size={len(_thread_store)}")
+    logger.info("[THREAD_STORE] get_thread called: thread_id={thread_id!r}, type={type(thread_id).__name__}")
+    logger.info("[THREAD_STORE] store_keys_at_get={list(_thread_store.keys())}")
+    logger.info("[THREAD_STORE] store_size={len(_thread_store)}")
     
     if thread_id not in _thread_store:
         _thread_store[thread_id] = Thread(id=thread_id)
-        print(f"[THREAD_STORE] Created new thread for thread_id={thread_id!r}")
+        logger.info("[THREAD_STORE] Created new thread for thread_id={thread_id!r}")
     else:
         thread = _thread_store[thread_id]
-        print(f"[THREAD_STORE] Found existing thread: thread_id={thread_id!r}, turns_count={len(thread.turns)}")
+        logger.info("[THREAD_STORE] Found existing thread: thread_id={thread_id!r}, turns_count={len(thread.turns)}")
     
     thread = _thread_store[thread_id]
-    print(f"[THREAD_STORE] Returning thread with {len(thread.turns)} turns")
+    logger.info("[THREAD_STORE] Returning thread with {len(thread.turns)} turns")
     return thread
 
 
@@ -138,17 +138,17 @@ def add_turn(thread_id: str, turn: Turn, model_context_limit: Optional[int] = No
     # CRITICAL: Normalize thread_id to string to ensure consistent key matching
     thread_id = str(thread_id)
     
-    print(f"[THREAD_STORE] add_turn called: thread_id={thread_id!r}, type={type(thread_id).__name__}")
-    print(f"[THREAD_STORE] turn.role={turn.role}, turn.content_preview={turn.content[:50] if len(turn.content) > 50 else turn.content}...")
-    print(f"[THREAD_STORE] store_keys_before_save={list(_thread_store.keys())}")
-    print(f"[THREAD_STORE] store_size_before_save={len(_thread_store)}")
+    logger.info("[THREAD_STORE] add_turn called: thread_id={thread_id!r}, type={type(thread_id).__name__}")
+    logger.info("[THREAD_STORE] turn.role={turn.role}, turn.content_preview={turn.content[:50] if len(turn.content) > 50 else turn.content}...")
+    logger.info("[THREAD_STORE] store_keys_before_save={list(_thread_store.keys())}")
+    logger.info("[THREAD_STORE] store_size_before_save={len(_thread_store)}")
     
     thread = get_thread(thread_id)
     thread.turns.append(turn)
     
-    print(f"[THREAD_STORE] thread_len_after_save={len(thread.turns)}")
-    print(f"[THREAD_STORE] store_keys_after_save={list(_thread_store.keys())}")
-    print(f"[THREAD_STORE] store_size_after_save={len(_thread_store)}")
+    logger.info("[THREAD_STORE] thread_len_after_save={len(thread.turns)}")
+    logger.info("[THREAD_STORE] store_keys_after_save={list(_thread_store.keys())}")
+    logger.info("[THREAD_STORE] store_size_after_save={len(_thread_store)}")
     
     # Extract profile facts from user messages
     if turn.role == "user":
@@ -294,4 +294,7 @@ def update_last_intent(thread_id: str, intent: str) -> None:
 
 # Import re at module level
 import re
+
+import logging
+logger = logging.getLogger(__name__)
 

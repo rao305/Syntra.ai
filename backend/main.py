@@ -1,11 +1,37 @@
 """FastAPI application entry point."""
+
+# Initialize logging FIRST, before any other imports
+import os
+from app.core.logging_config import setup_logging
+
+setup_logging(
+    level=os.getenv("LOG_LEVEL", "INFO"),
+    json_logs=os.getenv("ENVIRONMENT", "development") == "production",
+    log_file=os.getenv("LOG_FILE")
+)
+
+import logging
+logger = logging.getLogger(__name__)
+
+logger.info("Starting Syntra API...")
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from config import get_settings
 from app.database import init_db, close_db
-from app.api import threads, router, providers, billing, audit, metrics, query_rewriter, entities, auth, collaboration, dynamic_collaborate, council, eval, quality_analytics
+from app.api import router, providers, billing, audit, metrics, query_rewriter, entities, auth, collaboration, dynamic_collaborate, council, eval, quality_analytics
+from app.api import threads as threads_module
+from app.core.security_middleware import configure_security
+
+# Import intelligent router endpoints (Phase 1)
+try:
+    from api.router_endpoints import router as intelligent_router
+    INTELLIGENT_ROUTER_AVAILABLE = True
+except ImportError:
+    intelligent_router = None
+    INTELLIGENT_ROUTER_AVAILABLE = False
 from app.middleware import ObservabilityMiddleware
 from app.adapters._client import get_client
 
@@ -62,22 +88,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-        settings.frontend_url
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Security middleware (CORS, headers, etc.)
+configure_security(app)
 
 # Observability middleware (Phase 1.5)
 app.add_middleware(ObservabilityMiddleware)
@@ -87,8 +99,12 @@ if OTEL_ENABLED:
     app = instrument_fastapi_app(app)
 
 # Include routers
-app.include_router(threads.router, prefix="/api/threads", tags=["threads"])
+app.include_router(threads_module.router, prefix="/api/threads", tags=["threads"])
 app.include_router(router.router, prefix="/api/router", tags=["router"])
+
+# Include intelligent router endpoints (Phase 1)
+if INTELLIGENT_ROUTER_AVAILABLE:
+    app.include_router(intelligent_router, prefix="/api/router", tags=["intelligent-router"])
 app.include_router(providers.router, prefix="/api/orgs", tags=["providers"])
 app.include_router(billing.router, prefix="/api/billing", tags=["billing"])
 app.include_router(audit.router, prefix="/api/audit", tags=["audit"])

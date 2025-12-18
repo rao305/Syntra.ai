@@ -1,15 +1,42 @@
-"""Router API endpoints."""
-from fastapi import APIRouter, Depends
+"""Router API endpoints.
+
+This module provides both the legacy rule-based routing and the new Phase 1
+Intelligent Router system. The intelligent router uses fine-tuned GPT-4o-mini
+for optimal model selection based on cost, latency, and task suitability.
+"""
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 import re
+import asyncio
 
 from app.database import get_db
 from app.api.deps import require_org_id
 from app.models.provider_key import ProviderType
 from app.services.model_registry import validate_and_get_model, get_default_model
 from app.services.memory_manager import smooth_intent, update_last_intent
+
+# Try to import UserPriority first - it may be needed regardless
+from enum import Enum
+
+class UserPriority(str, Enum):
+    """User routing priority."""
+    BALANCED = "balanced"
+    SPEED = "speed"
+    COST = "cost"
+    QUALITY = "quality"
+
+# Import the new intelligent router system
+try:
+    from router import intelligent_router, router_metrics
+    from router.config import UserPriority as RouterUserPriority
+    UserPriority = RouterUserPriority  # Use the real one if available
+    INTELLIGENT_ROUTER_AVAILABLE = True
+except ImportError:
+    INTELLIGENT_ROUTER_AVAILABLE = False
+    intelligent_router = None
+    router_metrics = None
 
 router = APIRouter()
 
@@ -20,6 +47,7 @@ class ChooseProviderRequest(BaseModel):
     context_size: Optional[int] = None  # Number of messages in thread
     thread_id: Optional[str] = None
     has_images: bool = False  # Whether the request contains images
+    use_intelligent_router: bool = False  # Use Phase 1 intelligent router
 
 
 class ChooseProviderResponse(BaseModel):
@@ -27,6 +55,36 @@ class ChooseProviderResponse(BaseModel):
     provider: str
     model: str
     reason: str
+
+
+# =============================================================================
+# INTELLIGENT ROUTER MODELS (PHASE 1)
+# =============================================================================
+
+class IntelligentRouteRequest(BaseModel):
+    """Request for intelligent routing (Phase 1)."""
+    query: str = Field(..., min_length=1, description="User query to route")
+    context: Optional[str] = Field(None, description="Previous conversation context")
+    user_priority: UserPriority = Field(UserPriority.BALANCED, description="User's routing priority")
+    force_model: Optional[str] = Field(None, description="Force specific model (bypasses routing)")
+    use_intelligent_router: bool = Field(True, description="Use Phase 1 intelligent router")
+
+
+class IntelligentRouteResponse(BaseModel):
+    """Response from intelligent routing."""
+    provider: str
+    model: str
+    task_type: str
+    complexity: int
+    confidence: float
+    reasoning: str
+    needs_web: bool
+    estimated_tokens: int
+    routing_time_ms: float
+    method: str
+    model_info: Optional[dict] = None
+    alternatives: Optional[List[dict]] = None
+    router_version: str = "phase1_intelligent"
 
 
 def analyze_content(message: str, context_size: int = 0, has_images: bool = False) -> tuple[str, str, str]:
@@ -230,13 +288,31 @@ async def choose_provider(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Choose best provider for a request using rule-based routing.
+    Choose best provider for a request.
 
-    This implements Phase 1 routing logic based on content analysis.
-    Phase 2 will add cost optimization, latency tracking, and fallback logic.
+    This endpoint supports both legacy rule-based routing and the new Phase 1
+    intelligent router. Use the 'use_intelligent_router' parameter to choose.
     """
+    # Check if intelligent routing is requested
+    use_intelligent = getattr(request, 'use_intelligent_router', False)
+
+    if use_intelligent and INTELLIGENT_ROUTER_AVAILABLE:
+        # Use Phase 1 intelligent router
+        return await choose_provider_intelligent(
+            IntelligentRouteRequest(
+                query=request.message,
+                context=None,  # Legacy API doesn't provide context
+                user_priority=UserPriority.BALANCED,
+                force_model=None,
+                use_intelligent_router=True
+            ),
+            org_id,
+            db
+        )
+
+    # Legacy rule-based routing
     provider_str, model, reason = analyze_content(request.message, request.context_size or 0, request.has_images)
-    
+
     # Extract intent from reason for smoothing
     current_intent = "ambiguous_or_other"  # Default
     intent_keywords = {
@@ -250,7 +326,7 @@ async def choose_provider(
         if any(kw in reason.lower() for kw in keywords):
             current_intent = intent
             break
-    
+
     # Apply intent smoothing if thread_id is provided
     if request.thread_id:
         smoothed_intent = smooth_intent(current_intent, request.thread_id, request.message)
@@ -259,7 +335,7 @@ async def choose_provider(
 
         # Update last intent for next turn
         update_last_intent(request.thread_id, smoothed_intent)
-    
+
     # Ensure we're using a valid ProviderType enum
     try:
         provider = ProviderType(provider_str)
@@ -268,12 +344,109 @@ async def choose_provider(
         provider = ProviderType.OPENROUTER
         model = validate_and_get_model(provider)
         reason = f"Invalid provider '{provider_str}', using fallback"
-    
+
     # Double-check model is valid for the provider (safety net)
     validated_model = validate_and_get_model(provider, model)
-    
+
     return ChooseProviderResponse(
         provider=provider.value,
         model=validated_model,
         reason=reason
     )
+
+
+@router.post("/choose/intelligent", response_model=IntelligentRouteResponse)
+async def choose_provider_intelligent(
+    request: IntelligentRouteRequest,
+    org_id: str = Depends(require_org_id),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Choose best provider using Phase 1 Intelligent Router.
+
+    This uses fine-tuned GPT-4o-mini for optimal model selection based on:
+    - Query content analysis
+    - Cost optimization
+    - Latency requirements
+    - User preferences
+    """
+    if not INTELLIGENT_ROUTER_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Intelligent router not available. Use legacy /choose endpoint."
+        )
+
+    try:
+        # Make routing decision
+        decision = await intelligent_router.route(
+            query=request.query,
+            context=request.context,
+            user_priority=request.user_priority,
+            force_model=request.force_model
+        )
+
+        # Record metrics
+        if router_metrics:
+            router_metrics.record_request(
+                routing_time_ms=decision.routing_time_ms,
+                model=decision.model,
+                task_type=decision.task_type,
+                user_priority=request.user_priority.value,
+                confidence=decision.confidence
+            )
+
+        # Convert model to provider for legacy compatibility
+        # This mapping might need to be updated based on your model registry
+        model_to_provider = {
+            "gpt-4o-mini": "openai",
+            "gpt-4o": "openai",
+            "gemini-2.5-flash": "google",
+            "perplexity-sonar-pro": "perplexity",
+            "kimi-k2": "moonshot"
+        }
+
+        provider = model_to_provider.get(decision.model, "openai")
+
+        return IntelligentRouteResponse(
+            provider=provider,
+            model=decision.model,
+            task_type=decision.task_type,
+            complexity=decision.complexity,
+            confidence=decision.confidence,
+            reasoning=decision.reasoning,
+            needs_web=decision.needs_web,
+            estimated_tokens=decision.estimated_tokens,
+            routing_time_ms=decision.routing_time_ms,
+            method=decision.method,
+            model_info=decision.model_info,
+            alternatives=decision.alternatives
+        )
+
+    except Exception as e:
+        # Record error
+        if router_metrics:
+            router_metrics.record_error(
+                error_type="intelligent_routing_error",
+                error_message=str(e),
+                query=request.query[:100]
+            )
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Intelligent routing failed: {str(e)}"
+        )
+
+
+@router.get("/status")
+async def router_status():
+    """Get router system status."""
+    status = {
+        "legacy_router": "available",
+        "intelligent_router": "available" if INTELLIGENT_ROUTER_AVAILABLE else "unavailable",
+        "version": "phase1_intelligent" if INTELLIGENT_ROUTER_AVAILABLE else "legacy"
+    }
+
+    if INTELLIGENT_ROUTER_AVAILABLE and router_metrics:
+        status["metrics"] = router_metrics.get_summary()
+
+    return status

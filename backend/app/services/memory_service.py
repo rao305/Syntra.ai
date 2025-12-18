@@ -28,6 +28,9 @@ from app.models.provider_key import ProviderType
 from app.models.access_graph import AgentResourcePermission
 from config import get_settings
 
+import logging
+logger = logging.getLogger(__name__)
+
 settings = get_settings()
 
 
@@ -99,7 +102,7 @@ class MemoryService:
                     )
                 )
         except Exception as e:
-            print(f"Error ensuring collection: {e}")
+            logger.error("Error ensuring collection: {e}")
             # Continue without memory if Qdrant is unavailable
 
     async def retrieve_memory_context(
@@ -159,11 +162,11 @@ class MemoryService:
 
             # Log any errors
             if isinstance(results[0], Exception):
-                print(f"[Memory] SuperMemory error: {results[0]}")
+                logger.error("[Memory] SuperMemory error: {results[0]}")
             if isinstance(results[1], Exception):
-                print(f"[Memory] Qdrant private tier error: {results[1]}")
+                logger.error("[Memory] Qdrant private tier error: {results[1]}")
             if isinstance(results[2], Exception):
-                print(f"[Memory] Qdrant shared tier error: {results[2]}")
+                logger.error("[Memory] Qdrant shared tier error: {results[2]}")
 
             retrieval_time_ms = (time.perf_counter() - start_time) * 1000
 
@@ -177,7 +180,7 @@ class MemoryService:
             )
 
         except Exception as e:
-            print(f"Error retrieving memory context: {e}")
+            logger.error("Error retrieving memory context: {e}")
             # Return empty context on error
             return MemoryContext(
                 episodic_fragments=[],
@@ -267,7 +270,7 @@ class MemoryService:
             return fragments
 
         except Exception as e:
-            print(f"Error retrieving from tier {tier}: {e}")
+            logger.error("Error retrieving from tier {tier}: {e}")
             return []
     
     async def _check_fragment_access(
@@ -314,7 +317,7 @@ class MemoryService:
             return permission.can_access
 
         except Exception as e:
-            print(f"Error checking fragment access: {e}")
+            logger.error("Error checking fragment access: {e}")
             # Default to allow on error (fail open for availability)
             return True
 
@@ -343,7 +346,7 @@ class MemoryService:
 
             # Check if SuperMemory is configured
             if not settings.supermemory_api_key:
-                print("[Memory] SuperMemory not configured, skipping episodic memory retrieval")
+                logger.info("[Memory] SuperMemory not configured, skipping episodic memory retrieval")
                 return []
 
             # Query SuperMemory
@@ -366,11 +369,11 @@ class MemoryService:
                 for m in memories
             ]
 
-            print(f"[Memory] Retrieved {len(formatted)} episodic memories from SuperMemory")
+            logger.info("[Memory] Retrieved {len(formatted)} episodic memories from SuperMemory")
             return formatted
 
         except Exception as e:
-            print(f"[Memory] SuperMemory query error: {e}")
+            logger.error("[Memory] SuperMemory query error: {e}")
             return []
 
     def classify_memory_tier(
@@ -513,7 +516,7 @@ class MemoryService:
             return saved_count
 
         except Exception as e:
-            print(f"Error saving memory from turn: {e}")
+            logger.error("Error saving memory from turn: {e}")
             return 0
 
     async def _extract_insights(
@@ -666,7 +669,7 @@ class MemoryService:
             return fragment.id
 
         except Exception as e:
-            print(f"Error saving fragment: {e}")
+            logger.error("Error saving fragment: {e}")
             await db.rollback()
             return None
 
@@ -714,7 +717,7 @@ class MemoryService:
                     return [0.0] * 1536
 
         except Exception as e:
-            print(f"Error getting embedding: {e}")
+            logger.error("Error getting embedding: {e}")
             # Return zero vector as fallback
             return [0.0] * 1536
 
@@ -800,7 +803,7 @@ class MemoryService:
                             points_selector=[fragment.vector_id]
                         )
                 except Exception as e:
-                    print(f"Error deleting fragment {fragment.id} from Qdrant: {e}")
+                    logger.error("Error deleting fragment {fragment.id} from Qdrant: {e}")
                 
                 # Delete from database
                 await db.delete(fragment)
@@ -810,7 +813,7 @@ class MemoryService:
             return expired_count
             
         except Exception as e:
-            print(f"Error expiring old fragments: {e}")
+            logger.error("Error expiring old fragments: {e}")
             await db.rollback()
             return 0
 

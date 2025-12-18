@@ -486,8 +486,8 @@ async def websocket_council_updates(
                 "type": "error",
                 "error": str(e)
             })
-        except:
-            pass
+        except Exception as websocket_error:
+            logger.warning(f"Failed to send error message to websocket: {websocket_error}")
     finally:
         # Unregister connection
         try:
@@ -495,13 +495,13 @@ async def websocket_council_updates(
                 session_websockets[session_id].remove(websocket)
                 if not session_websockets[session_id]:
                     del session_websockets[session_id]
-        except:
-            pass
+        except Exception as cleanup_error:
+            logger.warning(f"Error during websocket cleanup: {cleanup_error}")
 
         try:
             await websocket.close()
-        except:
-            pass
+        except Exception as close_error:
+            logger.warning(f"Error closing websocket: {close_error}")
 
 
 # ============================================================================

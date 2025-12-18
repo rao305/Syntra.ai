@@ -22,6 +22,9 @@ from app.services.model_capabilities import (
 from app.adapters.openai_adapter import call_openai
 from app.adapters.gemini import call_gemini
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class CollabRole(str, Enum):
     ANALYST = "analyst"
@@ -388,8 +391,8 @@ class DynamicOrchestrator:
             
             plan_data = json.loads(plan_json)
         except json.JSONDecodeError as e:
-            print(f"Failed to parse orchestrator response: {e}")
-            print(f"Raw response: {plan_json}")
+            logger.info("Failed to parse orchestrator response: {e}")
+            logger.info("Raw response: {plan_json}")
             return self._create_fallback_plan(available_models, user_message)
         
         # Convert to CollaborationPlan
@@ -543,7 +546,7 @@ Provide a comprehensive, well-structured response.""",
                 ))
                 
                 # Continue with remaining steps but log the error
-                print(f"Step {step.step_index} ({step.role}) failed: {e}")
+                logger.info("Step {step.step_index} ({step.role}) failed: {e}")
         
         total_time = (time.perf_counter() - start_time) * 1000
         
@@ -649,9 +652,9 @@ Provide a comprehensive, well-structured response.""",
             max_steps=max_steps
         )
         
-        print(f"🎯 Collaboration Plan: {plan.pipeline_summary}")
+        logger.info("🎯 Collaboration Plan: {plan.pipeline_summary}")
         for step in plan.steps:
-            print(f"  Step {step.step_index}: {step.role.value} -> {step.model_id}")
+            logger.info("  Step {step.step_index}: {step.role.value} -> {step.model_id}")
         
         # Execute the plan
         result = await self.execute_plan(

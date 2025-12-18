@@ -7,6 +7,9 @@ from typing import Callable, Awaitable
 from app.services.provider_dispatch import call_provider_adapter_streaming
 from app.models.provider_key import ProviderType
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 async def normalize_to_dac_voice(
     raw_text: str,
@@ -36,7 +39,7 @@ async def normalize_to_dac_voice(
         return normalized.strip()
     except Exception as e:
         # If normalization fails, return original
-        print(f"Style normalization failed: {e}")
+        logger.info("Style normalization failed: {e}")
         return raw_text
 
 

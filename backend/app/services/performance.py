@@ -8,6 +8,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 import asyncio
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class PerformanceMetrics:
@@ -142,10 +145,10 @@ class PerformanceMonitor:
             
             # Log warning if targets not met
             if not metrics.meets_ttft_target and metrics.ttft is not None:
-                print(f"⚠️  TTFT target missed: {metrics.ttft_seconds:.2f}s (target: ≤1.5s)")
+                logger.warning("⚠️  TTFT target missed: {metrics.ttft_seconds:.2f}s (target: ≤1.5s)")
             
             if not metrics.meets_latency_target_p95 and metrics.latency_ms is not None:
-                print(f"⚠️  Latency P95 target missed: {metrics.latency_seconds:.2f}s (target: ≤6s)")
+                logger.warning("⚠️  Latency P95 target missed: {metrics.latency_seconds:.2f}s (target: ≤6s)")
     
     async def get_stats(self, last_n: Optional[int] = 100) -> Dict[str, Any]:
         """Get performance statistics."""

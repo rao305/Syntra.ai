@@ -20,6 +20,9 @@ import httpx
 
 from config import get_settings
 
+import logging
+logger = logging.getLogger(__name__)
+
 settings = get_settings()
 
 
@@ -69,7 +72,7 @@ class SuperMemoryClient:
             cache_key = self._make_cache_key("search", user_id, query)
             cached = self._get_cached(cache_key)
             if cached is not None:
-                print(f"[SuperMemory] Cache hit for search: {user_id}")
+                logger.info("[SuperMemory] Cache hit for search: {user_id}")
                 return cached
 
             # Make API call
@@ -103,17 +106,17 @@ class SuperMemoryClient:
                     # Cache result
                     self._set_cache(cache_key, formatted, ttl_seconds=cache_ttl)
 
-                    print(f"[SuperMemory] Found {len(formatted)} memories for {user_id}")
+                    logger.info("[SuperMemory] Found {len(formatted)} memories for {user_id}")
                     return formatted
                 else:
-                    print(f"[SuperMemory] Search error {response.status_code}: {response.text}")
+                    logger.error("[SuperMemory] Search error {response.status_code}: {response.text}")
                     return []
 
         except asyncio.TimeoutError:
-            print(f"[SuperMemory] Search timeout for {user_id}")
+            logger.info("[SuperMemory] Search timeout for {user_id}")
             return []
         except Exception as e:
-            print(f"[SuperMemory] Search error: {e}")
+            logger.error("[SuperMemory] Search error: {e}")
             return []
 
     async def add_memory(
@@ -155,17 +158,17 @@ class SuperMemoryClient:
                 if response.status_code in (200, 201):
                     # Invalidate search cache for this user since we added new memory
                     self._invalidate_cache_prefix(f"search:{user_id}")
-                    print(f"[SuperMemory] Added memory for {user_id}")
+                    logger.info("[SuperMemory] Added memory for {user_id}")
                     return True
                 else:
-                    print(f"[SuperMemory] Add memory error {response.status_code}: {response.text}")
+                    logger.error("[SuperMemory] Add memory error {response.status_code}: {response.text}")
                     return False
 
         except asyncio.TimeoutError:
-            print(f"[SuperMemory] Add memory timeout for {user_id}")
+            logger.info("[SuperMemory] Add memory timeout for {user_id}")
             return False
         except Exception as e:
-            print(f"[SuperMemory] Add memory error: {e}")
+            logger.error("[SuperMemory] Add memory error: {e}")
             return False
 
     async def get_user_preferences(
@@ -188,7 +191,7 @@ class SuperMemoryClient:
             cache_key = self._make_cache_key("prefs", user_id)
             cached = self._get_cached(cache_key)
             if cached is not None:
-                print(f"[SuperMemory] Cache hit for preferences: {user_id}")
+                logger.info("[SuperMemory] Cache hit for preferences: {user_id}")
                 return cached
 
             # Make API call
@@ -201,17 +204,17 @@ class SuperMemoryClient:
                 if response.status_code == 200:
                     prefs = response.json().get("preferences", {})
                     self._set_cache(cache_key, prefs, ttl_seconds=cache_ttl)
-                    print(f"[SuperMemory] Retrieved preferences for {user_id}")
+                    logger.info("[SuperMemory] Retrieved preferences for {user_id}")
                     return prefs
                 else:
-                    print(f"[SuperMemory] Preferences error {response.status_code}")
+                    logger.error("[SuperMemory] Preferences error {response.status_code}")
                     return {}
 
         except asyncio.TimeoutError:
-            print(f"[SuperMemory] Preferences timeout for {user_id}")
+            logger.info("[SuperMemory] Preferences timeout for {user_id}")
             return {}
         except Exception as e:
-            print(f"[SuperMemory] Preferences error: {e}")
+            logger.error("[SuperMemory] Preferences error: {e}")
             return {}
 
     def _get_headers(self) -> Dict[str, str]:

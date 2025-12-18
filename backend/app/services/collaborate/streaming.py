@@ -10,6 +10,9 @@ from datetime import datetime
 from app.services.collaborate.models import ModelInfo
 from app.services.collaborate.pipeline import run_collaborate, run_inner_stage, run_council, run_director, compress_internal_report, load_system_prompt, run_inner_team_pipeline
 
+import logging
+logger = logging.getLogger(__name__)
+
 # Map internal roles to user-facing abstract phases
 ROLE_TO_PHASE = {
     "analyst": "understand",
@@ -284,7 +287,7 @@ async def run_collaborate_streaming(
                     run_id,
                 )
             except Exception as e:
-                print(f"Council review failed for {source}: {e}")
+                logger.info("Council review failed for {source}: {e}")
                 continue
 
         # Emit council done (detailed stage event)
@@ -427,7 +430,7 @@ async def run_collaborate_streaming(
                             run_id,
                         )
                     except Exception as e:
-                        print(f"Visualization rendering failed: {e}")
+                        logger.info("Visualization rendering failed: {e}")
 
                 # Generate images
                 if state.images:
@@ -449,7 +452,7 @@ async def run_collaborate_streaming(
                                 run_id,
                             )
                     except Exception as e:
-                        print(f"Image generation failed: {e}")
+                        logger.info("Image generation failed: {e}")
 
                 if charts or images:
                     visuals_obj = Visuals(
@@ -459,7 +462,7 @@ async def run_collaborate_streaming(
                     )
 
             except Exception as e:
-                print(f"Visualization generation failed: {e}")
+                logger.info("Visualization generation failed: {e}")
 
             # Emit phase_end for visualization
             yield sse_event(

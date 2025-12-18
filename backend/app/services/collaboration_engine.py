@@ -20,6 +20,9 @@ from app.adapters.perplexity import call_perplexity
 from app.adapters.gemini import call_gemini
 from app.adapters.kimi import call_kimi
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class AgentRole(Enum):
     ANALYST = "agent_analyst"
@@ -308,7 +311,7 @@ Previous AI responses to build upon:
                 )
                 agent_outputs.append(fallback_output)
                 
-                print(f"⚠️ Collaboration step {step_num} failed: {error_message}")
+                logger.error("⚠️ Collaboration step {step_num} failed: {error_message}")
                 
                 # If this is the final step and we have no successful outputs, provide a basic response
                 if step_num == 5 and len([o for o in agent_outputs if not o.content.startswith("[Error")]) == 0:

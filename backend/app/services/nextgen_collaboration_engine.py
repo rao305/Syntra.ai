@@ -23,6 +23,9 @@ from app.services.truth_arbitrator import TruthArbitrator
 from app.services.task_orchestrator import task_orchestrator, WorkflowDAG
 from app.models.provider_key import ProviderType
 
+import logging
+logger = logging.getLogger(__name__)
+
 class CollaborationMode(Enum):
     """Next-gen collaboration modes"""
     INTELLIGENT_SWARM = "intelligent_swarm"    # Full AI orchestration (default)
@@ -97,18 +100,18 @@ class NextGenCollaborationEngine:
         
         try:
             # Phase 1: Intent Classification & Analysis
-            print(f"🧠 Phase 1: Analyzing intent for query: {user_query[:100]}...")
+            logger.info("🧠 Phase 1: Analyzing intent for query: {user_query[:100]}...")
             intent_vector = await intent_classifier.classify_intent(user_query, context)
             
-            print(f"📊 Intent analysis complete. Detected needs: {dict(intent_vector.needs)}")
-            print(f"🎯 Complexity: {intent_vector.complexity:.2f}, Urgency: {intent_vector.urgency:.2f}")
+            logger.info("📊 Intent analysis complete. Detected needs: {dict(intent_vector.needs)}")
+            logger.info("🎯 Complexity: {intent_vector.complexity:.2f}, Urgency: {intent_vector.urgency:.2f}")
             
             # Phase 2: Choose execution strategy
             execution_mode = self._choose_execution_strategy(
                 collaboration_mode, intent_vector, len(api_keys)
             )
             
-            print(f"⚡ Selected execution mode: {execution_mode.value}")
+            logger.info("⚡ Selected execution mode: {execution_mode.value}")
             
             # Phase 3: Execute based on chosen strategy
             if execution_mode == CollaborationMode.INTELLIGENT_SWARM:
@@ -138,13 +141,13 @@ class NextGenCollaborationEngine:
             # Update performance tracking
             self._update_performance_metrics(result)
             
-            print(f"✅ Collaboration complete in {total_time:.0f}ms")
-            print(f"🎯 Convergence: {result.convergence_score:.2%}, Insights: {result.insights_generated}")
+            logger.info("✅ Collaboration complete in {total_time:.0f}ms")
+            logger.info("🎯 Convergence: {result.convergence_score:.2%}, Insights: {result.insights_generated}")
             
             return result
             
         except Exception as e:
-            print(f"❌ Collaboration failed: {str(e)}")
+            logger.error("❌ Collaboration failed: {str(e)}")
             # Graceful degradation
             return await self._fallback_collaboration(user_query, turn_id, api_keys, str(e))
     
@@ -193,7 +196,7 @@ class NextGenCollaborationEngine:
     ) -> NextGenCollaborationResult:
         """Execute full intelligent swarm with all advanced features"""
         
-        print("🚀 Executing Intelligent Swarm mode...")
+        logger.info("🚀 Executing Intelligent Swarm mode...")
         
         # Execute adaptive model swarm
         swarm_result = await self.model_swarm.execute_swarm(
@@ -261,7 +264,7 @@ class NextGenCollaborationEngine:
     ) -> NextGenCollaborationResult:
         """Execute DAG-based task workflow orchestration"""
         
-        print("📋 Executing Task Workflow mode...")
+        logger.info("📋 Executing Task Workflow mode...")
         
         # Build workflow DAG
         available_models = list(api_keys.keys())
@@ -269,7 +272,7 @@ class NextGenCollaborationEngine:
             user_query, intent_vector, available_models
         )
         
-        print(f"📊 Built workflow with {len(workflow.nodes)} tasks, {workflow.parallelization_opportunities} parallel opportunities")
+        logger.info("📊 Built workflow with {len(workflow.nodes)} tasks, {workflow.parallelization_opportunities} parallel opportunities")
         
         # Execute workflow
         workflow_result = await task_orchestrator.execute_workflow(
@@ -320,7 +323,7 @@ class NextGenCollaborationEngine:
     ) -> NextGenCollaborationResult:
         """Execute simple parallel model execution without full orchestration"""
         
-        print("⚡ Executing Parallel Models mode...")
+        logger.info("⚡ Executing Parallel Models mode...")
 
         # Route to best models for this intent
         available_models = list(api_keys.keys())
@@ -330,7 +333,7 @@ class NextGenCollaborationEngine:
 
         # Fallback: if no models assigned, use all 4 available models
         if not model_assignments:
-            print("⚠️  No models assigned by intent classifier, using all 4 available models as fallback")
+            logger.warning("⚠️  No models assigned by intent classifier, using all 4 available models as fallback")
             # Map provider names to model names (all 4 providers: OpenAI, Gemini, Kimi, Perplexity)
             provider_to_model = {
                 "openai": "gpt-4o-mini",
@@ -343,7 +346,7 @@ class NextGenCollaborationEngine:
                 for provider in available_models
                 if provider in provider_to_model
             ]  # Use all 4 models
-            print(f"📌 Using all 4 fallback models: {[m[0] for m in model_assignments]}")
+            logger.info("📌 Using all 4 fallback models: {[m[0] for m in model_assignments]}")
 
         # Execute models in parallel
         tasks = []
@@ -420,7 +423,7 @@ class NextGenCollaborationEngine:
     ) -> NextGenCollaborationResult:
         """Fallback to original sequential collaboration for compatibility"""
         
-        print("🔄 Executing Legacy Sequential mode...")
+        logger.info("🔄 Executing Legacy Sequential mode...")
         
         # Import and use original collaboration engine
         from app.services.collaboration_engine import CollaborationEngine
@@ -599,7 +602,8 @@ class NextGenCollaborationEngine:
                     convergence_score=1.0,  # Single model = perfect convergence
                     insights_generated=1
                 )
-            except:
+            except Exception as fallback_error:
+                logger.warning(f"Failed to create fallback result: {fallback_error}")
                 pass
         
         # Ultimate fallback

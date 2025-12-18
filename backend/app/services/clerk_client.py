@@ -8,6 +8,9 @@ from jose import jwt
 
 from config import get_settings
 
+import logging
+logger = logging.getLogger(__name__)
+
 settings = get_settings()
 
 # Simple in-memory cache for verified tokens: {token: (decoded_payload, expiry_time)}
@@ -54,7 +57,7 @@ async def verify_clerk_token(token: str) -> Optional[dict]:
         if not user_id:
             raise ValueError("Token missing user ID (sub claim)")
 
-        print(f"[CLERK] Verifying user_id: {user_id}")
+        logger.info("[CLERK] Verifying user_id: {user_id}")
 
         # Verify the token is valid by calling Clerk's API
         # Get user info to verify the token is valid
@@ -68,16 +71,20 @@ async def verify_clerk_token(token: str) -> Optional[dict]:
                     timeout=5.0,
                 )
             except httpx.TimeoutException as e:
-                print(f"[CLERK] Timeout connecting to Clerk API: {e}")
+                logger.info("[CLERK] Timeout connecting to Clerk API: {e}")
                 raise ValueError(f"Timeout verifying with Clerk: {e}")
 
-        print(f"[CLERK] Clerk API response: {response.status_code}")
+        logger.info("[CLERK] Clerk API response: {response.status_code}")
         if response.status_code != 200:
             try:
                 error_body = response.json()
-                print(f"[CLERK] Error body: {error_body}")
-            except:
-                print(f"[CLERK] Response text: {response.text}")
+                logger.error("[CLERK] Error body: {error_body}")
+            except ValueError as json_error:
+                logger.warning(f"[CLERK] Failed to parse error response as JSON: {json_error}")
+                logger.info("[CLERK] Response text: {response.text}")
+            except Exception as e:
+                logger.exception(f"[CLERK] Unexpected error parsing response: {e}")
+                logger.info("[CLERK] Response text: {response.text}")
             raise ValueError(f"Invalid token: Clerk API returned {response.status_code}")
 
         user_data = response.json()

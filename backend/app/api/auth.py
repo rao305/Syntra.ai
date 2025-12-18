@@ -14,6 +14,9 @@ from app.models.user import User, UserRole
 from app.services.token_service import create_access_token
 from config import get_settings
 
+import logging
+logger = logging.getLogger(__name__)
+
 settings = get_settings()
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -161,7 +164,7 @@ async def exchange_clerk_token(
     except Exception as e:
         import traceback
         traceback.print_exc()
-        print(f"Error exchanging Clerk token: {e}")
+        logger.error("Error exchanging Clerk token: {e}")
         # Return more detailed error for debugging
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

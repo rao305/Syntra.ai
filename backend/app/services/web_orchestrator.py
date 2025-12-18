@@ -13,6 +13,9 @@ import asyncio
 from app.adapters.perplexity import call_perplexity
 from app.models.provider_key import ProviderType
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 def build_queries(user_text: str) -> List[str]:
     """
@@ -159,7 +162,7 @@ async def gather_search(
         return dedupe_keep_recent(results)
     
     except Exception as e:
-        print(f"Search gathering failed: {e}")
+        logger.info("Search gathering failed: {e}")
         return []
 
 
@@ -205,7 +208,7 @@ async def synthesize(
         text = await llm_call(prompt, temperature, max_tokens)
         return text.strip()
     except Exception as e:
-        print(f"Synthesis failed: {e}")
+        logger.info("Synthesis failed: {e}")
         return "I found some sources but couldn't synthesize them. Want me to try again?"
 
 

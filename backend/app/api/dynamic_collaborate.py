@@ -33,6 +33,9 @@ from app.services.model_capabilities import (
     MODEL_CAPABILITIES
 )
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 router = APIRouter()
 
@@ -116,7 +119,7 @@ async def get_org_api_keys(db: AsyncSession, org_id: str) -> Dict[str, str]:
             if key:
                 api_keys[provider.value] = key
         except Exception as e:
-            print(f"Could not get API key for {provider.value}: {e}")
+            logger.info("Could not get API key for {provider.value}: {e}")
             continue
     
     return api_keys

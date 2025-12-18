@@ -6,6 +6,9 @@ from fastapi import Depends, Header, HTTPException, status
 
 from app.services.token_service import TokenVerificationError, verify_access_token
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class CurrentUser:
@@ -38,7 +41,7 @@ async def get_current_user_optional(
     except TokenVerificationError as exc:
         # Invalid/expired token - return None instead of raising
         # This allows requests with x-org-id header to proceed
-        print(f"⚠️  Token verification failed (treating as unauthenticated): {exc}")
+        logger.warning("⚠️  Token verification failed (treating as unauthenticated): {exc}")
         return None
 
 
