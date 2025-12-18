@@ -64,3 +64,52 @@ async def require_org_id(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Missing x-org-id header",
     )
+
+
+def validate_user_access(
+    current_user: Optional[CurrentUser],
+    requested_user_id: Optional[str] = None
+) -> None:
+    """
+    SECURITY: Validate that user can only access/modify their own data.
+
+    Prevents user impersonation by ensuring:
+    1. User is authenticated
+    2. User can only modify their own user_id
+    3. User cannot spoof other users in the organization
+
+    Args:
+        current_user: Authenticated user from token
+        requested_user_id: User ID being operated on (from request)
+
+    Raises:
+        HTTPException: 403 Forbidden if user lacks permission
+    """
+    # If no user_id is being requested, no validation needed
+    if not requested_user_id:
+        return
+
+    # User must be authenticated to perform operations
+    if not current_user:
+        logger.warning(
+            f"Unauthenticated request attempted to access user data: {requested_user_id}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required for user operations"
+        )
+
+    # User can only modify their own data
+    if current_user.id != requested_user_id:
+        logger.warning(
+            f"User {current_user.id} attempted to access data for user {requested_user_id}",
+            extra={
+                "authenticated_user": current_user.id,
+                "requested_user": requested_user_id,
+                "org_id": current_user.org_id,
+            }
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden: Cannot access other users' data"
+        )

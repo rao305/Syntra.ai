@@ -138,4 +138,22 @@ async def health():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+    # SECURITY: Never enable reload in production
+    # Code reloading exposes source code and enables remote code execution
+    enable_reload = os.getenv("ENABLE_RELOAD", "false").lower() == "true"
+    environment = os.getenv("ENVIRONMENT", "development")
+
+    if environment == "production" and enable_reload:
+        logger.critical("⚠️ SECURITY: Code reload disabled in production mode")
+        enable_reload = False
+
+    logger.info(f"Starting Syntra API server (reload={enable_reload}, env={environment})")
+
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 8000)),
+        reload=enable_reload,
+        log_level=os.getenv("LOG_LEVEL", "info").lower()
+    )

@@ -133,15 +133,21 @@ def format_error_response(error: APIError) -> Dict[str, Any]:
 
 
 def log_error(request: Request, error: Exception, status_code: int) -> None:
-    """Log error with context."""
+    """Log error with context (never expose traceback in response)."""
+    # Only include traceback in logs for 5xx errors (server errors)
+    extra = {
+        "path": request.url.path,
+        "method": request.method,
+        "error": str(error),
+    }
+
+    # SECURITY: Only log traceback for 5xx errors, never for client errors
+    if status_code >= 500:
+        extra["traceback"] = traceback.format_exc()
+
     logger.error(
         f"API Error: {status_code}",
-        extra={
-            "path": request.url.path,
-            "method": request.method,
-            "error": str(error),
-            "traceback": traceback.format_exc()
-        }
+        extra=extra
     )
 
 
@@ -192,9 +198,18 @@ async def database_error_handler(request: Request, exc: SQLAlchemyError) -> JSON
 
 
 async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Handle all other exceptions."""
-    logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
+    """Handle all other exceptions (never expose details to client)."""
+    # Log full exception details server-side
+    logger.error(
+        f"Unhandled exception: {type(exc).__name__}: {str(exc)}",
+        exc_info=True,
+        extra={
+            "path": request.url.path,
+            "method": request.method,
+        }
+    )
 
+    # Return generic error to client (never expose exception details)
     error = InternalServerError("An unexpected error occurred")
     return JSONResponse(
         status_code=error.status_code,
