@@ -57,7 +57,12 @@ class QueryClassifier:
     FACTUAL_KEYWORDS = [
         "what is", "who is", "when did", "where is", "latest", "current",
         "news", "recent", "update", "happening", "search", "find",
-        "what happened", "define", "explain", "tell me about"
+        "what happened", "define", "explain", "tell me about",
+        # Additional factual keywords
+        "how to", "why does", "how does", "what are", "what does",
+        "which", "where", "when", "who", "how much", "how many",
+        "facts", "information", "details", "summary", "overview",
+        "statistics", "data", "research", "study", "analysis"
     ]
 
     REASONING_KEYWORDS = [
@@ -134,34 +139,64 @@ class QueryClassifier:
         )
 
     def _is_multilingual(self, query: str) -> bool:
-        """Check if query contains non-English characters."""
-        return bool(
+        """Check if query contains non-English characters or is a translation request."""
+        query_lower = query.lower()
+
+        # Check for non-English characters
+        has_non_english = bool(
             self.CHINESE_PATTERN.search(query) or
             self.JAPANESE_PATTERN.search(query) or
             self.KOREAN_PATTERN.search(query) or
             self.ARABIC_PATTERN.search(query)
         )
 
+        # Check for translation/multilingual keywords
+        multilingual_keywords = [
+            "translate", "translation", "translate to", "translate from",
+            "bilingual", "multilingual", "chinese", "japanese", "korean", "arabic",
+            "中文", "日本語", "한국어", "العربية",
+            "language", "languages", "localize", "localization",
+            "cjk", "character", "characters"
+        ]
+        has_multilingual_keyword = any(kw in query_lower for kw in multilingual_keywords)
+
+        return has_non_english or has_multilingual_keyword
+
     def _classify_multilingual(self, query: str) -> QueryClassification:
         """Handle multilingual queries."""
-        # Kimi is excellent for Chinese
+        query_lower = query.lower()
+
+        # Kimi is excellent for Chinese - highest priority
         if self.CHINESE_PATTERN.search(query):
             return QueryClassification(
                 query_type=QueryType.MULTILINGUAL,
                 complexity=ComplexityLevel.MEDIUM,
                 recommended_provider=ProviderType.KIMI,
                 recommended_model="moonshot-v1-32k",
-                reason="Chinese language detected, Kimi specializes in Chinese",
+                reason="Chinese language detected - Kimi specializes in Chinese with 128k context",
                 confidence=0.95
             )
 
-        # Gemini is strong for multilingual
+        # Kimi also handles translation requests and other CJK languages well
+        translation_keywords = ["translate", "translation", "translate to", "translate from"]
+        cjk_keywords = ["japanese", "korean", "cjk", "bilingual", "multilingual"]
+        if any(kw in query_lower for kw in translation_keywords + cjk_keywords):
+            return QueryClassification(
+                query_type=QueryType.MULTILINGUAL,
+                complexity=ComplexityLevel.MEDIUM,
+                recommended_provider=ProviderType.KIMI,
+                recommended_model="moonshot-v1-32k",
+                reason="Translation/multilingual request - Kimi excels at CJK languages and long context",
+                confidence=0.90
+            )
+
+        # Gemini is strong for other multilingual (Arabic, European languages, etc.)
         return QueryClassification(
             query_type=QueryType.MULTILINGUAL,
             complexity=ComplexityLevel.MEDIUM,
             recommended_provider=ProviderType.GEMINI,
             recommended_model="gemini-2.5-pro",
-            reason="Multilingual query detected, Gemini has strong multilingual support",
+            reason="Multilingual query detected - Gemini has strong support for world languages",
             confidence=0.85
         )
 
@@ -179,14 +214,34 @@ class QueryClassifier:
         max_score = max(scores.values())
 
         if max_score == 0:
-            # No keywords matched, assume simple conversation
-            return QueryType.SIMPLE
+            # No keywords matched - analyze query structure for better classification
+            return self._classify_by_structure(query_lower)
 
         # Return type with highest score
         for query_type, score in scores.items():
             if score == max_score:
                 return query_type
 
+        return QueryType.SIMPLE
+
+    def _classify_by_structure(self, query_lower: str) -> QueryType:
+        """Classify queries based on sentence structure when no keywords match."""
+        # Check for question patterns (often factual)
+        question_words = ['what', 'who', 'where', 'when', 'why', 'how', 'which']
+        if any(query_lower.startswith(word) for word in question_words):
+            return QueryType.FACTUAL
+
+        # Check for explanatory requests
+        explanatory_phrases = ['explain', 'describe', 'tell me', 'can you']
+        if any(phrase in query_lower for phrase in explanatory_phrases):
+            return QueryType.FACTUAL
+
+        # Check for comparative language
+        comparative_words = ['versus', 'vs', 'compared to', 'better than', 'worse than']
+        if any(word in query_lower for word in comparative_words):
+            return QueryType.ANALYSIS
+
+        # Default to simple for casual conversation
         return QueryType.SIMPLE
 
     def _count_keywords(self, query_lower: str, keywords: List[str]) -> int:
@@ -314,13 +369,23 @@ class QueryClassifier:
                 "Analysis task - OpenAI's structured reasoning and depth"
             )
 
-        # SIMPLE queries: Gemini is GOOD ENOUGH and fast
+        # SIMPLE queries: Balance between OpenAI and Gemini, favor OpenAI for quality
         if query_type == QueryType.SIMPLE or query_type == QueryType.CONVERSATION:
-            return (
-                ProviderType.GEMINI,
-                "gemini-2.5-flash",
-                "Simple conversation - Gemini Flash for quick responses"
-            )
+            # Alternate between OpenAI and Gemini for simple queries
+            # OpenAI gives better quality, Gemini gives better speed/cost
+            import random
+            if random.random() < 0.6:  # 60% OpenAI, 40% Gemini for better quality
+                return (
+                    ProviderType.OPENAI,
+                    "gpt-4o-mini",
+                    "Simple query - OpenAI for reliable responses"
+                )
+            else:
+                return (
+                    ProviderType.GEMINI,
+                    "gemini-2.5-flash",
+                    "Simple query - Gemini Flash for quick responses"
+                )
 
         # Default fallback: OpenAI for general capability
         return (

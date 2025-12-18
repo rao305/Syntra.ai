@@ -174,9 +174,12 @@ class IntelligentRouter:
         result = await db.execute(stmt)
         keys = result.scalars().all()
 
-        # TEMPORARY: Exclude Perplexity during QA test (API key invalid)
         providers = {key.provider for key in keys}
-        providers.discard(ProviderType.PERPLEXITY)
+
+        # Check if Perplexity API is working by testing a simple request
+        # For now, keep it enabled but add fallback logic in case of API issues
+        # providers.discard(ProviderType.PERPLEXITY)  # Temporarily disabled due to API key issues
+
         return providers
 
     def _get_model_cost(self, provider: ProviderType, model: str) -> float:

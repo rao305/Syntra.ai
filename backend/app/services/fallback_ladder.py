@@ -24,39 +24,40 @@ class IntentType(str, Enum):
 
 
 # Fallback ladder configuration
-# NOTE: Ordered by speed + quality for fast fallback switching
-# If primary is slow, system automatically tries next provider within 6 seconds
+# NOTE: Ordered by CAPABILITY FIRST, then speed for resilience
+# Priority: Quality/specialization > Speed > Cost
+# If primary is slow/unavailable, system automatically tries next provider within 6 seconds
 FALLBACK_LADDERS: Dict[IntentType, List[Tuple[ProviderType, str, str]]] = {
     IntentType.CODING_HELP: [
-        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Fast code generation (Fastest)"),
-        (ProviderType.OPENAI, "gpt-4o-mini", "Fallback: Reliable reasoning (Fast)"),
+        (ProviderType.OPENAI, "gpt-4o-mini", "Primary: Superior code generation (best quality)"),
+        (ProviderType.GEMINI, "gemini-2.5-flash", "Fallback: Fast code generation (if OpenAI slow)"),
         (ProviderType.KIMI, "moonshot-v1-32k", "Backup: Cost-effective alternative"),
         (ProviderType.PERPLEXITY, "sonar", "Final: General fallback"),
     ],
     IntentType.QA_RETRIEVAL: [
-        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Fast reasoning (fastest, if Perplexity slow)"),
-        (ProviderType.PERPLEXITY, "sonar", "Fallback: Search-augmented"),
-        (ProviderType.OPENAI, "gpt-4o-mini", "Final: General fallback"),
+        (ProviderType.PERPLEXITY, "sonar", "Primary: Real-time web search with citations"),
+        (ProviderType.OPENAI, "gpt-4o-mini", "Fallback: High-quality answers without web"),
+        (ProviderType.GEMINI, "gemini-2.5-flash", "Backup: Fast alternative (if Perplexity slow)"),
     ],
     IntentType.REASONING_MATH: [
-        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Fast (switch from slow OpenAI)"),
-        (ProviderType.OPENAI, "gpt-4o-mini", "Fallback: Superior reasoning (but slower)"),
+        (ProviderType.OPENAI, "gpt-4o-mini", "Primary: Superior logical reasoning (best quality)"),
+        (ProviderType.GEMINI, "gemini-2.5-flash", "Fallback: Fast reasoning (if OpenAI slow)"),
         (ProviderType.PERPLEXITY, "sonar", "Final: General fallback"),
     ],
     IntentType.SOCIAL_CHAT: [
-        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Fast chat (Fastest)"),
-        (ProviderType.OPENAI, "gpt-4o-mini", "Fallback: Conversational chat (slower)"),
+        (ProviderType.OPENAI, "gpt-4o-mini", "Primary: Natural conversation quality"),
+        (ProviderType.GEMINI, "gemini-2.5-flash", "Fallback: Fast casual chat (if OpenAI slow)"),
         (ProviderType.PERPLEXITY, "sonar", "Final: General fallback"),
     ],
     IntentType.EDITING_WRITING: [
-        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Fast editing (switch from slow Perplexity)"),
-        (ProviderType.PERPLEXITY, "sonar", "Fallback: Web-grounded editing"),
-        (ProviderType.OPENAI, "gpt-4o-mini", "Final: General fallback"),
+        (ProviderType.OPENAI, "gpt-4o-mini", "Primary: Superior creative writing (best quality)"),
+        (ProviderType.PERPLEXITY, "sonar", "Fallback: Web-grounded editing with sources"),
+        (ProviderType.GEMINI, "gemini-2.5-flash", "Backup: Fast alternative (if primary slow)"),
     ],
     IntentType.AMBIGUOUS: [
-        (ProviderType.GEMINI, "gemini-2.5-flash", "Primary: Fast (handles vague requests, Fastest)"),
-        (ProviderType.OPENAI, "gpt-4o-mini", "Fallback: Good reasoning"),
-        (ProviderType.PERPLEXITY, "sonar", "Final: Web-grounded"),
+        (ProviderType.OPENAI, "gpt-4o-mini", "Primary: Best at handling vague/ambiguous requests"),
+        (ProviderType.GEMINI, "gemini-2.5-flash", "Fallback: Fast alternative (if OpenAI slow)"),
+        (ProviderType.PERPLEXITY, "sonar", "Final: Web-grounded fallback"),
     ],
 }
 

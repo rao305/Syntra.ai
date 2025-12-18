@@ -2222,8 +2222,12 @@ async def add_message_streaming(
         try:
             async for chunk in stream_with_background_validation():
                 chunk_type = chunk.get("type", "delta")
-                
-                if chunk_type == "meta":
+
+                if chunk_type == "model_info":
+                    # Send model information to frontend immediately
+                    yield f"event: model_info\n"
+                    yield f"data: {json.dumps(chunk)}\n\n"
+                elif chunk_type == "meta":
                     if "ttft_ms" in chunk and not ttft_emitted:
                         ttft_emitted = True
                     yield f"event: meta\n"

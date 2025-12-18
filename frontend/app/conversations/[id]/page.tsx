@@ -648,23 +648,14 @@ export default function ConversationPage() {
                       actualProvider = data.provider
                       actualModel = data.model
 
-                      // Add message if not already added
-                      if (!messageAdded) {
-                        const initialMessage: Message = {
-                          id: assistantId,
-                          role: 'assistant',
-                          content: '',
-                          timestamp: new Date().toLocaleTimeString('en-US', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          }),
-                          modelId: actualModel,
-                          modelName: actualModel,
-                        }
-                        setMessages((prev) => [...prev, initialMessage])
-                        messageAdded = true
-                      } else {
-                        // Update model info if message already exists
+                      console.log('📊 Received model_info:', { actualModel, actualProvider, messageAdded })
+
+                      // Don't add message yet - wait for first delta to arrive
+                      // This prevents showing empty messages with just the model info
+                      // Model info will be included when the first content chunk arrives
+                      if (messageAdded) {
+                        // Update model info if message already exists (delta already arrived)
+                        console.log('✏️ Updating existing message with model info')
                         setMessages((prev) =>
                           prev.map((m) =>
                             m.id === assistantId
@@ -677,12 +668,17 @@ export default function ConversationPage() {
                               : m
                           )
                         )
+                      } else {
+                        console.log('⏳ Skipping message creation - model_info received, waiting for delta...')
                       }
                     } else if (data.type === 'delta' && data.delta) {
                       assistantContent += data.delta
 
+                      console.log('📝 Received delta, content length:', assistantContent.length, 'messageAdded:', messageAdded)
+
                       // Add message on first delta if not already added
                       if (!messageAdded) {
+                        console.log('➕ Adding message on first delta with model:', actualModel)
                         // Ensure we have a modelName - use actualModel, then selectedModel (if not 'auto'), then 'Processing'
                         const messageModelName = actualModel || (selectedModel !== 'auto' ? selectedModel : 'Processing')
                         const initialMessage: Message = {

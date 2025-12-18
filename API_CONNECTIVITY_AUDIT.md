@@ -334,3 +334,4 @@ const wsUrl = `${wsProtocol}//${apiHost}/api/council/ws/${sessionId}`
    - All WebSocket endpoints support both `ws://` and `wss://`
    - Automatic protocol detection based on API URL
 
+

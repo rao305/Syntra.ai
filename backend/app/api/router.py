@@ -123,10 +123,10 @@ def analyze_content(message: str, context_size: int = 0, has_images: bool = Fals
         "build a", "make a", "debug", "refactor", "optimize code"
     ]
     if any(keyword in message_lower for keyword in structured_keywords):
-        # Code generation: Try Gemini first (fast), fallback to Perplexity
-        provider = ProviderType.GEMINI
-        model = validate_and_get_model(provider, "gemini-2.5-flash")  # Production model, 60 RPM
-        return provider.value, model, "Code generation (Gemini 1.5 Flash - 60 RPM, fast)"
+        # Code generation: Try OpenAI first (best quality), fallback to Gemini
+        provider = ProviderType.OPENAI
+        model = validate_and_get_model(provider, "gpt-4o-mini")  # Best at code generation
+        return provider.value, model, "Code generation (GPT-4o-mini - superior programming)"
 
     # ═══════════════════════════════════════════════════════════════════
     # DOMAIN 2: COMPLEX REASONING (OpenAI Agent)
@@ -254,12 +254,9 @@ async def choose_provider(
     # Apply intent smoothing if thread_id is provided
     if request.thread_id:
         smoothed_intent = smooth_intent(current_intent, request.thread_id, request.message)
-        if smoothed_intent != current_intent and smoothed_intent == "qa_retrieval":
-            # Re-route to a model good for explanations
-            provider_str = ProviderType.GEMINI.value
-            model = validate_and_get_model(ProviderType.GEMINI, "gemini-2.5-flash")
-            reason = f"Explanation follow-up (Gemini 1.5 Flash - fast, context-aware)"
-        
+        # Note: Don't override routing based on intent smoothing - let primary router decide
+        # qa_retrieval queries should route through Perplexity (web search) not forced to Gemini
+
         # Update last intent for next turn
         update_last_intent(request.thread_id, smoothed_intent)
     
