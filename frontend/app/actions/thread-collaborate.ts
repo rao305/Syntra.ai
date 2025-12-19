@@ -35,7 +35,7 @@ export async function threadCollaborate(
       mode
     })
 
-    const response = await fetch(`${API_BASE_URL}/api/collaboration/${threadId}/collaborate`, {
+    const response = await fetch(`${API_BASE_URL}/api/threads/${threadId}/collaborate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

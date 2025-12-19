@@ -84,8 +84,8 @@ export function useCollaborationStream({
     onAddMessage(initialMessage)
 
     // Start SSE connection
-    // API_BASE_URL already includes /api, so we use /collaboration instead of /api/collaboration
-    const sseUrl = `${API_BASE_URL}/collaboration/${actualThreadId}/collaborate/stream`
+    // Backend endpoint is at /threads/{thread_id}/collaborate-stream
+    const sseUrl = `${API_BASE_URL}/threads/${actualThreadId}/collaborate-stream`
 
     console.log('🔗 Starting collaboration stream:', {
       url: sseUrl,
