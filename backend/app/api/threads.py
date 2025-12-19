@@ -1227,7 +1227,7 @@ async def add_message(
         # DEBUG: log finish_reason and token usage for normal mode
         finish_reason = getattr(provider_response, "finish_reason", None)
         try:
-            print(
+            logger.debug(
                 f"[NORMAL MODE] provider={request.provider.value} "
                 f"model={current_attempt_model} "
                 f"finish_reason={finish_reason} "
@@ -1904,6 +1904,9 @@ async def add_message_streaming(
             await db.commit()  # Commit immediately so it's available for queries
             user_message_saved = True
             logger.info(f"💾✅ Saved user message to database BEFORE streaming (sequence: {user_sequence}, user_id: {message_user_id}, thread_id: {thread_id})")
+            # Re-set RLS context after commit since SET LOCAL is transaction-scoped
+            user_id = current_user.id if current_user else None
+            await set_rls_context(db, org_id, user_id)
             # Verify it was saved
             verify_stmt = select(Message).where(Message.thread_id == thread_id, Message.sequence == user_sequence)
             verify_result = await db.execute(verify_stmt)
@@ -1991,7 +1994,7 @@ async def add_message_streaming(
                             budget = _completion_budget(provider_enum)
                         except Exception:
                             budget = "unknown"
-                        print(
+                        logger.warning(
                             f"⚠️  Provider {provider_enum.value} terminated due to length "
                             f"(response truncated at {len(response_content)} chars, "
                             f"budget={budget})"
@@ -2101,6 +2104,9 @@ async def add_message_streaming(
                     # Commit both messages to database
                     await db.commit()
                     logger.info(f"✅ Messages persisted to database for thread {thread_id}")
+                    # Re-set RLS context after commit since SET LOCAL is transaction-scoped
+                    user_id = current_user.id if current_user else None
+                    await set_rls_context(db, org_id, user_id)
 
                 except Exception as save_error:
                     logger.warning(f"⚠️  Failed to save messages to database: {save_error}")
@@ -2116,6 +2122,9 @@ async def add_message_streaming(
                 if should_auto_title(thread.title, count):
                     thread.title = generate_thread_title(user_content)
                     await db.commit()
+                    # Re-set RLS context after commit since SET LOCAL is transaction-scoped
+                    user_id = current_user.id if current_user else None
+                    await set_rls_context(db, org_id, user_id)
 
                 # Load messages for next time (sync DB to in-memory if needed)
                 prior_messages = await _get_recent_messages(db, thread_id)
