@@ -38,6 +38,7 @@ export function FinalAnswerCard({ finalAnswer, meta }: FinalAnswerCardProps) {
           <EnhancedMessageContent
             content={finalAnswer.content}
             role="assistant"
+            disableTruncation={true}
           />
         </div>
       </div>

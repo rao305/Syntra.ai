@@ -28,6 +28,7 @@ interface EnhancedMessageContentProps {
   role: 'user' | 'assistant'
   images?: ImageFile[]
   onCodePanelOpen?: (code: string, language: string) => void
+  disableTruncation?: boolean // Disable content truncation (for collaboration results, etc.)
 }
 
 // Threshold for determining when to show code in parallel panel (characters)
@@ -492,7 +493,8 @@ export const EnhancedMessageContent: React.FC<EnhancedMessageContentProps> = ({
   content,
   role,
   images,
-  onCodePanelOpen
+  onCodePanelOpen,
+  disableTruncation
 }) => {
   // Set global handler for code expansion
   React.useEffect(() => {
@@ -518,7 +520,98 @@ export const EnhancedMessageContent: React.FC<EnhancedMessageContentProps> = ({
       )}
 
       {/* Text Content */}
-      {content && (
+      {content && disableTruncation ? (
+        // Full content for collaboration results
+        <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              code({ node, inline, className, children, ...props }) {
+                // Check inline flag first - this is the definitive indicator for single backticks
+                if (inline) {
+                  return <InlineCode>{children}</InlineCode>
+                }
+
+                // For block code, extract language from className (format: language-xxx)
+                const match = /language-(\w+)/.exec(className || '')
+                const language = match ? match[1] : null
+
+                // If no language detected, render as inline code instead of a block with "TEXT" header
+                if (!language && !className) {
+                  return <InlineCode>{children}</InlineCode>
+                }
+
+                // Create a stable key from code content to prevent remounting
+                const codeContent = String(children).replace(/\n$/, '')
+                const codeKey = hashCode(codeContent)
+
+                return (
+                  <CodeBlock
+                    key={`codeblock-${codeKey}`}
+                    className={`language-${language || 'text'}`}
+                  >
+                    {children}
+                  </CodeBlock>
+                )
+              },
+              p: Paragraph,
+              // Style other markdown elements
+              h1: ({ children }) => <h1 className="text-2xl font-bold mb-4 mt-6 text-zinc-100 first:mt-0">{children}</h1>,
+              h2: ({ children }) => <h2 className="text-xl font-semibold mb-3 mt-5 text-zinc-200 first:mt-0">{children}</h2>,
+              h3: ({ children }) => <h3 className="text-lg font-medium mb-2 mt-4 text-zinc-200 first:mt-0">{children}</h3>,
+              h4: ({ children }) => <h4 className="text-base font-medium mb-2 mt-3 text-zinc-200 first:mt-0">{children}</h4>,
+              ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-2 text-zinc-200">{children}</ul>,
+              ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-2 text-zinc-200">{children}</ol>,
+              li: ({ children }) => <li className="text-zinc-200 leading-relaxed">{children}</li>,
+              strong: ({ children }) => <strong className="font-semibold text-zinc-100">{children}</strong>,
+              em: ({ children }) => <em className="italic text-zinc-200">{children}</em>,
+              blockquote: ({ children }) => (
+                <blockquote className="border-l-4 border-zinc-600 pl-4 italic text-zinc-300 my-4">
+                  {children}
+                </blockquote>
+              ),
+              a: ({ href, children }) => (
+                <a href={href} className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">
+                  {children}
+                </a>
+              ),
+              table: ({ children }) => (
+                <div className="overflow-x-auto my-4">
+                  <table className="w-full border-collapse border border-zinc-700 rounded-lg bg-zinc-900/50">
+                    {children}
+                  </table>
+                </div>
+              ),
+              thead: ({ children }) => (
+                <thead className="bg-zinc-800/80">
+                  {children}
+                </thead>
+              ),
+              tbody: ({ children }) => (
+                <tbody>
+                  {children}
+                </tbody>
+              ),
+              tr: ({ children }) => (
+                <tr className="border-b border-zinc-700 hover:bg-zinc-800/30 transition-colors">
+                  {children}
+                </tr>
+              ),
+              th: ({ children }) => (
+                <th className="border border-zinc-700 px-4 py-3 bg-zinc-800 text-zinc-200 font-semibold text-left">
+                  {children}
+                </th>
+              ),
+              td: ({ children }) => (
+                <td className="border border-zinc-700 px-4 py-2 text-zinc-300">
+                  {children}
+                </td>
+              )
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+      ) : content ? (
+        // Truncated content for regular messages
         <ExpandableContainer maxHeight={600}>
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -609,7 +702,7 @@ export const EnhancedMessageContent: React.FC<EnhancedMessageContentProps> = ({
             {content}
           </ReactMarkdown>
         </ExpandableContainer>
-      )}
+      ) : null}
     </div>
   )
 }
