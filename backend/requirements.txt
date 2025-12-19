@@ -16,6 +16,9 @@ qdrant-client==1.16.1
 # Redis
 upstash-redis==1.5.0
 
+# Storage (Supabase)
+supabase==2.0.0
+
 # Auth & Security
 python-jose[cryptography]==3.5.0
 passlib[bcrypt]==1.7.4

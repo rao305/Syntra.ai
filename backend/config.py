@@ -81,6 +81,13 @@ class Settings(BaseSettings):
     clerk_secret_key: Optional[str] = None
     clerk_publishable_key: Optional[str] = None
 
+    # Supabase (NEW)
+    supabase_db_url: Optional[str] = None  # Direct connection for migrations
+    supabase_pooler_url: Optional[str] = None  # Transaction pooler for FastAPI
+    supabase_url: Optional[str] = None  # API URL
+    supabase_anon_key: Optional[str] = None  # Public key
+    supabase_service_key: Optional[str] = None  # Admin key
+
     @property
     def is_production(self) -> bool:
         """Check if running in production."""

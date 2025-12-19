@@ -36,3 +36,4 @@ def downgrade() -> None:
 
     # Drop table
     op.drop_table("threads")
+

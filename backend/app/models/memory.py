@@ -2,10 +2,39 @@
 from sqlalchemy import Column, String, DateTime, ForeignKey, Text, Enum as SQLEnum, JSON, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from sqlalchemy.types import UserDefinedType
 import uuid
 import enum
 
 from app.database import Base
+
+
+class Vector(UserDefinedType):
+    """Custom SQLAlchemy type for pgvector."""
+    cache_ok = True
+
+    def get_col_spec(self, **kw):
+        return "vector"
+
+    def bind_processor(self, dialect):
+        def process(value):
+            if value is None:
+                return None
+            # Convert list to pgvector format
+            if isinstance(value, (list, tuple)):
+                return value
+            return value
+        return process
+
+    def result_processor(self, dialect, coltype):
+        def process(value):
+            if value is None:
+                return None
+            # PostgreSQL returns vectors as strings like "[1,2,3]"
+            if isinstance(value, str):
+                return value
+            return value
+        return process
 
 
 class MemoryTier(str, enum.Enum):
@@ -40,8 +69,11 @@ class MemoryFragment(Base):
         index=True
     )
 
-    # Vector embedding (store vector ID from Qdrant)
+    # Vector embedding (store vector ID from Qdrant - DEPRECATED)
     vector_id = Column(String, nullable=True, index=True)
+
+    # Vector embedding (store in pgvector - NEW)
+    embedding = Column(Vector(), nullable=True)
 
     # Provenance (immutable audit trail)
     provenance = Column(JSON, nullable=False)

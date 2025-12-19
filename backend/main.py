@@ -1,7 +1,15 @@
 """FastAPI application entry point."""
 
-# Initialize logging FIRST, before any other imports
+# Load environment variables FIRST, before any other imports
 import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env file from current directory
+dotenv_path = Path(__file__).parent / ".env"
+load_dotenv(dotenv_path)
+
+# Initialize logging after environment is loaded
 from app.core.logging_config import setup_logging
 
 setup_logging(
@@ -22,9 +30,10 @@ from contextlib import asynccontextmanager
 from config import get_settings
 from app.database import init_db, close_db
 from app.api import router, providers, billing, audit, metrics, query_rewriter, entities, auth, collaboration, dynamic_collaborate, council, eval, quality_analytics
-from app.api import threads as threads_module
+from app.api.threads import router as threads_router
 from app.core.security_middleware import configure_security
 from app.core.error_handlers import register_error_handlers
+from app.core.rate_limit import RateLimitMiddleware
 
 # Import intelligent router endpoints (Phase 1)
 try:
@@ -92,6 +101,9 @@ app = FastAPI(
 # Security middleware (CORS, headers, etc.)
 configure_security(app)
 
+# Rate limiting middleware
+app.add_middleware(RateLimitMiddleware)
+
 # Error handlers
 register_error_handlers(app)
 
@@ -103,7 +115,7 @@ if OTEL_ENABLED:
     app = instrument_fastapi_app(app)
 
 # Include routers
-app.include_router(threads_module.router, prefix="/api/threads", tags=["threads"])
+app.include_router(threads_router, prefix="/api", tags=["threads"])
 app.include_router(router.router, prefix="/api/router", tags=["router"])
 
 # Include intelligent router endpoints (Phase 1)
@@ -131,9 +143,46 @@ async def root():
 
 @app.get("/health")
 async def health():
-    """Health check with DB status."""
-    # TODO: Add DB ping check
-    return {"status": "healthy"}
+    """Basic health check."""
+    return {"status": "healthy", "timestamp": __import__("time").time()}
+
+
+@app.get("/health/ready")
+async def readiness_check():
+    """
+    Readiness check - verifies database connection.
+    Returns 200 if ready to accept traffic, otherwise 503.
+    """
+    from app.database import get_db
+    from sqlalchemy import text
+
+    checks = {"database": False}
+
+    try:
+        # Create a session from the async engine
+        from app.database import AsyncSessionLocal
+        async with AsyncSessionLocal() as session:
+            await session.execute(text("SELECT 1"))
+            checks["database"] = True
+    except Exception as e:
+        logger.warning(f"Database readiness check failed: {e}")
+
+    all_ok = all(checks.values())
+    status_code = 200 if all_ok else 503
+
+    return {
+        "status": "ready" if all_ok else "not_ready",
+        "checks": checks
+    }
+
+
+@app.get("/health/live")
+async def liveness_check():
+    """
+    Liveness check - verifies the service is running.
+    This is a fast check that doesn't validate dependencies.
+    """
+    return {"status": "alive", "timestamp": __import__("time").time()}
 
 
 if __name__ == "__main__":

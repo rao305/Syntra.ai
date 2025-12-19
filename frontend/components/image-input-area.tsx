@@ -443,7 +443,7 @@ export function ImageInputArea({
                 onClick={() => setIsModelOpen(!isModelOpen)}
                 className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-zinc-300 hover:text-zinc-100 transition-all backdrop-blur-sm relative"
               >
-                <span className="font-medium">{selectedModel === 'auto' && autoRoutedModel ? `Auto - ${autoRoutedModel}` : selectedModelData.name}</span>
+                <span className="font-medium">{selectedModel === 'auto' && autoRoutedModel ? autoRoutedModel : selectedModelData.name}</span>
                 <ChevronDown className="w-3 h-3" />
               </button>
             </div>

@@ -79,3 +79,4 @@ def configure_security(app: FastAPI) -> None:
     """Configure all security middleware."""
     configure_cors(app)
     app.add_middleware(SecurityHeadersMiddleware)
+

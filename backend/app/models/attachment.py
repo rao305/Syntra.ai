@@ -23,9 +23,10 @@ class Attachment(Base):
     mime_type = Column(String, nullable=True)  # e.g., image/png, application/pdf
     file_size = Column(Integer, nullable=False)  # Size in bytes
 
-    # Storage
-    file_data = Column(LargeBinary, nullable=False)  # Binary file content
-    storage_path = Column(String, nullable=True)  # For future external storage (S3, GCS, etc.)
+    # Storage (dual-mode during migration)
+    file_data = Column(LargeBinary, nullable=True)  # Legacy BLOB (being phased out)
+    storage_path = Column(String, nullable=True)  # Supabase Storage path (NEW)
+    storage_bucket = Column(String, default="attachments", nullable=True)  # Bucket name
 
     # Attachment type
     attachment_type = Column(String, nullable=False, default="file")  # "image", "file", etc.
@@ -37,6 +38,11 @@ class Attachment(Base):
     # Relationships
     thread = relationship("Thread", back_populates="attachments")
     message = relationship("Message", back_populates="attachments")
+
+    @property
+    def is_in_storage(self) -> bool:
+        """Check if file is in Supabase Storage (vs legacy BLOB)."""
+        return self.storage_path is not None
 
     def __repr__(self):
         return f"<Attachment {self.id} ({self.filename})>"

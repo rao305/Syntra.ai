@@ -374,3 +374,4 @@ class CostAwareRouter:
 # =============================================================================
 
 cost_optimizer = CostOptimizer()
+

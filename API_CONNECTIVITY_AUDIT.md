@@ -335,3 +335,4 @@ const wsUrl = `${wsProtocol}//${apiHost}/api/council/ws/${sessionId}`
    - Automatic protocol detection based on API URL
 
 
+

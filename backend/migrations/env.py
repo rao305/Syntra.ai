@@ -31,7 +31,15 @@ if config.config_file_name is not None:
 settings = get_settings()
 
 # Override sqlalchemy.url from settings
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Use SUPABASE_DB_URL if available (handles % characters in passwords)
+db_url = os.environ.get("SUPABASE_DB_URL") or settings.database_url
+
+# For Supabase URLs with % characters, we need to use raw string or bypass configparser
+try:
+    config.set_main_option("sqlalchemy.url", db_url)
+except ValueError:
+    # If configparser fails (due to % in password), we'll use it directly in run_async_migrations
+    pass
 
 # add your model's MetaData object here for 'autogenerate' support
 target_metadata = Base.metadata
@@ -62,7 +70,8 @@ def do_run_migrations(connection):
 async def run_async_migrations():
     """Run migrations in async mode."""
     configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = settings.database_url
+    # Use db_url which handles Supabase URLs with % characters
+    configuration["sqlalchemy.url"] = db_url
 
     connectable = async_engine_from_config(
         configuration,

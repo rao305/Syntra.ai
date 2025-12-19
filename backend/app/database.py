@@ -6,12 +6,21 @@ from config import get_settings
 settings = get_settings()
 
 # Create async engine
+# CRITICAL: Use Supabase transaction pooler (port 6543) for RLS context (SET LOCAL)
+# Session pooler (port 5432) won't work - context gets lost between requests
+db_url = settings.supabase_pooler_url or settings.database_url
+
 engine = create_async_engine(
-    settings.database_url,
+    db_url,
     echo=False,  # Disabled for performance - use SQLAlchemy logging if needed
     pool_pre_ping=True,
-    pool_size=20,
-    max_overflow=0
+    pool_size=50,  # Increased for Supabase pooler
+    max_overflow=20,  # Added overflow for traffic spikes
+    pool_recycle=1800,  # Recycle connections every 30 minutes
+    connect_args={
+        "ssl": True,  # Enable SSL for Supabase
+        "server_settings": {"application_name": "syntra_backend"}
+    }
 )
 
 # Create session factory

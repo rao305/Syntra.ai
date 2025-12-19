@@ -48,19 +48,19 @@ class RowLevelSecurity:
             org_id: Organization ID (must be valid UUID)
             user_id: Optional user ID (must be valid UUID)
         """
-        # Validate org_id format (UUID)
-        try:
-            uuid.UUID(org_id)
-        except ValueError:
-            raise ValidationAPIError(
-                "Invalid organization ID",
-                details={"field": "org_id", "message": f"org_id must be a valid UUID, got: {org_id}"}
-            )
+        # Validate org_id format (UUID) - allow demo org
+        if org_id != "org_demo":  # Special case for demo/development
+            try:
+                uuid.UUID(org_id)
+            except ValueError:
+                raise ValidationAPIError(
+                    "Invalid organization ID",
+                    details={"field": "org_id", "message": f"org_id must be a valid UUID, got: {org_id}"}
+                )
 
-        # SAFE: Using parameterized query
+        # SAFE: PostgreSQL SET doesn't support parameterized queries, but we've validated the UUID
         await db.execute(
-            text("SET LOCAL app.current_org_id = :org_id"),
-            {"org_id": org_id}
+            text(f"SET LOCAL app.current_org_id = '{org_id}'")
         )
 
         if user_id:
@@ -73,8 +73,7 @@ class RowLevelSecurity:
                 )
 
             await db.execute(
-                text("SET LOCAL app.current_user_id = :user_id"),
-                {"user_id": user_id}
+                text(f"SET LOCAL app.current_user_id = '{user_id}'")
             )
 
         logger.debug(f"RLS context set for org: {org_id[:8]}...")
@@ -105,7 +104,9 @@ class RowLevelSecurity:
         except ValueError:
             return False
 
-        query = f"SELECT 1 FROM {safe_table} WHERE id = :record_id AND org_id = :org_id LIMIT 1"
+        # Build query safely - table name is validated against allowlist
+        base_query = "SELECT 1 FROM {} WHERE id = :record_id AND org_id = :org_id LIMIT 1"
+        query = base_query.format(safe_table)
         result = await db.execute(
             text(query),
             {"record_id": record_id, "org_id": org_id}

@@ -208,3 +208,4 @@ def validate_email(email: Optional[str]) -> Optional[str]:
         )
 
     return email
+

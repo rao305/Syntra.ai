@@ -203,46 +203,62 @@ class MemoryService:
         query: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
-        Retrieve fragments from a specific Qdrant tier with access graph permission checks.
+        Retrieve fragments from a specific pgvector tier with access graph permission checks.
 
-        Now includes fine-grained access control via AgentResourcePermission.
+        Uses PostgreSQL pgvector for similarity search with HNSW indexing.
         """
         try:
+            from sqlalchemy import and_, text as sql_text
+            import json
+
             # Get embedding if not provided
             if query_vector is None and query:
                 query_vector = await self._get_embedding(query)
             elif query_vector is None:
                 return []
 
-            client = await self._get_client()
+            # Convert query vector to pgvector format
+            query_vector_str = json.dumps(query_vector)
 
-            # Build filter
-            must_conditions = [
-                {"key": "org_id", "match": {"value": org_id}},
-                {"key": "tier", "match": {"value": tier.value}}
-            ]
+            # Build SQL query with pgvector cosine distance
+            # Using raw SQL because SQLAlchemy may not have native pgvector support
+            sql = f"""
+                SELECT id, org_id, user_id, text, tier, embedding, provenance, created_at,
+                       (embedding <-> '{query_vector_str}'::vector) AS distance
+                FROM memory_fragments
+                WHERE org_id = :org_id
+                  AND tier = :tier
+                  AND embedding IS NOT NULL
+            """
 
-            # For private tier, filter by user
+            # Add user filter for private tier
             if tier == MemoryTier.PRIVATE and user_id:
-                must_conditions.append(
-                    {"key": "user_id", "match": {"value": user_id}}
-                )
+                sql += " AND user_id = :user_id"
 
-            # Search in Qdrant (get more results to filter by permissions)
-            search_result = await client.search(
-                collection_name=self.COLLECTION_NAME,
-                query_vector=query_vector,
-                query_filter={
-                    "must": must_conditions
-                },
-                limit=top_k * 2,  # Get more to filter by permissions
-                score_threshold=0.7  # Only return relevant matches
-            )
+            # Order by distance and limit
+            sql += f"""
+                ORDER BY distance ASC
+                LIMIT {top_k * 2}
+            """
+
+            # Build parameters
+            params = {
+                "org_id": org_id,
+                "tier": tier.value,
+            }
+            if tier == MemoryTier.PRIVATE and user_id:
+                params["user_id"] = user_id
+
+            # Execute raw SQL query
+            result = await db.execute(sql_text(sql), params)
+            rows = result.all()
 
             # Convert to dict format and apply access graph permissions
             fragments = []
-            for hit in search_result:
-                fragment_id = hit.id
+            for row in rows:
+                row_dict = row._mapping
+                fragment_id = row_dict["id"]
+                distance = row_dict["distance"]
 
                 # Check access graph permissions if provider is specified
                 if current_provider:
@@ -252,16 +268,20 @@ class MemoryService:
                     if not has_access:
                         continue  # Skip fragments this agent cannot access
 
-                fragment = {
+                # Convert distance to similarity score (1 - distance)
+                # Cosine distance ranges from 0 to 2, where 0 = identical, 2 = opposite
+                similarity_score = max(0, 1 - distance)
+
+                fragment_dict = {
                     "id": fragment_id,
-                    "text": hit.payload.get("text", ""),
-                    "tier": hit.payload.get("tier", ""),
-                    "score": hit.score,
-                    "provenance": hit.payload.get("provenance", {}),
-                    "created_at": hit.payload.get("created_at", ""),
-                    "source": "qdrant"
+                    "text": row_dict["text"],
+                    "tier": row_dict["tier"],
+                    "score": float(similarity_score),
+                    "provenance": row_dict["provenance"],
+                    "created_at": row_dict["created_at"].isoformat() if row_dict["created_at"] else "",
+                    "source": "pgvector"
                 }
-                fragments.append(fragment)
+                fragments.append(fragment_dict)
 
                 # Stop when we have enough fragments
                 if len(fragments) >= top_k:
@@ -270,7 +290,9 @@ class MemoryService:
             return fragments
 
         except Exception as e:
-            logger.error("Error retrieving from tier {tier}: {e}")
+            logger.error(f"Error retrieving from tier {tier}: {e}")
+            import traceback
+            traceback.print_exc()
             return []
     
     async def _check_fragment_access(
@@ -601,7 +623,7 @@ class MemoryService:
         model: str,
         thread_id: str
     ) -> Optional[str]:
-        """Save a single memory fragment to both DB and Qdrant."""
+        """Save a single memory fragment to PostgreSQL with pgvector embedding."""
         try:
             # Generate content hash for deduplication
             content_hash = self._hash_content(text)
@@ -628,48 +650,26 @@ class MemoryService:
             # Get embedding
             embedding = await self._get_embedding(text)
 
-            # Generate vector ID
-            vector_id = f"mem_{content_hash}"
-
-            # Save to database
+            # Save directly to PostgreSQL with pgvector embedding
             fragment = MemoryFragment(
                 org_id=org_id,
                 user_id=user_id,
                 text=text,
                 tier=tier,
-                vector_id=vector_id,
+                embedding=embedding,  # Store embedding directly in pgvector column
+                vector_id=None,  # No longer using Qdrant
                 provenance=provenance,
                 content_hash=content_hash
             )
             db.add(fragment)
-            await db.flush()
-
-            # Save to Qdrant
-            client = await self._get_client()
-            await client.upsert(
-                collection_name=self.COLLECTION_NAME,
-                points=[
-                    PointStruct(
-                        id=vector_id,
-                        vector=embedding,
-                        payload={
-                            "text": text,
-                            "tier": tier.value,
-                            "org_id": org_id,
-                            "user_id": user_id or "",
-                            "provenance": provenance,
-                            "created_at": provenance["timestamp"]
-                        }
-                    )
-                ]
-            )
-
             await db.commit()
+            await db.refresh(fragment)
 
+            logger.info(f"Saved memory fragment to pgvector: {fragment.id}")
             return fragment.id
 
         except Exception as e:
-            logger.error("Error saving fragment: {e}")
+            logger.error(f"Error saving fragment: {e}")
             await db.rollback()
             return None
 

@@ -65,3 +65,4 @@ class SafeQueryBuilder:
 
         logger.debug(f"Executing safe query: {query[:100]}...")
         return await db.execute(text(query), params)
+

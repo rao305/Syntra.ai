@@ -526,3 +526,4 @@ def remove_model(model_id: str) -> bool:
         del MODEL_REGISTRY[model_id]
         return True
     return False
+
