@@ -28,7 +28,7 @@ Base = declarative_base()
 async def init_db():
     """Initialize database connection."""
     # Import all models here to ensure they're registered
-    from app.models import org, user, thread, message, memory, audit, provider_key, access_graph  # noqa
+    from app.models import org, user, thread, message, memory, audit, provider_key, access_graph, attachment  # noqa
 
     # In production, use Alembic migrations instead
     if not settings.is_production:

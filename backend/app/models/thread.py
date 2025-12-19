@@ -41,6 +41,7 @@ class Thread(Base):
     creator = relationship("User", back_populates="threads", foreign_keys=[creator_id])
     messages = relationship("Message", back_populates="thread", cascade="all, delete-orphan", order_by="Message.created_at")
     audit_logs = relationship("AuditLog", back_populates="thread", cascade="all, delete-orphan")
+    attachments = relationship("Attachment", back_populates="thread", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Thread {self.id} ({self.title or 'Untitled'})>"
