@@ -53,7 +53,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      secretKey={process.env.CLERK_SECRET_KEY}
+    >
       <html lang="en" className="dark" suppressHydrationWarning>
         <head>
           <link rel="icon" href="/syntra.png" type="image/png" />
