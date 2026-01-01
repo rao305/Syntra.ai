@@ -9,6 +9,8 @@ from app.models.provider_key import ProviderKey
 from app.models.access_graph import UserAgentPermission, AgentResourcePermission
 from app.models.router_run import RouterRun
 from app.models.collaborate import CollaborateRun, CollaborateStage, CollaborateReview
+from app.models.attachment import Attachment
+from app.models.user_api_key import UserAPIKey, APIKeyAuditLog
 
 __all__ = [
     "Org",
@@ -24,4 +26,7 @@ __all__ = [
     "CollaborateRun",
     "CollaborateStage",
     "CollaborateReview",
+    "Attachment",
+    "UserAPIKey",
+    "APIKeyAuditLog",
 ]

@@ -174,3 +174,9 @@ echo "  psql -d syntra -c \"SELECT meta->'collaborate' FROM messages WHERE threa
 echo ""
 
 
+
+
+
+
+
+

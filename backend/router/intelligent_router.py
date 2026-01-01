@@ -684,6 +684,165 @@ class IntelligentRouter:
 
 
 # =============================================================================
+# USER KEY ROUTER
+# =============================================================================
+
+class UserKeyRouter:
+    """
+    Router that uses user-provided API keys for making API calls.
+    """
+
+    def __init__(self, db_session, user_id: str, config: RouterConfig):
+        self.db = db_session
+        self.user_id = user_id
+        self.config = config
+        self.api_key_service = None
+
+        # Import here to avoid circular imports
+        from app.services.api_key_service import APIKeyService
+        self.api_key_service = APIKeyService(self.db, self.user_id)
+
+    async def route_and_call(
+        self,
+        query: str,
+        context: Optional[str] = None,
+        user_priority: UserPriority = UserPriority.BALANCED,
+        conversation_history: Optional[List[Dict[str, str]]] = None,
+        force_model: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Route query to best available model based on user's API keys and make the API call.
+        """
+        # Get user's active API keys
+        user_keys = await self.api_key_service.get_api_keys(active_only=True)
+
+        if not user_keys:
+            raise ValueError(
+                "No API keys configured. "
+                "Please add at least one API key in Settings → API Keys."
+            )
+
+        # Get available providers
+        available_providers = {key.provider for key in user_keys}
+
+        # Route based on available providers and query
+        routing_decision = await self._decide_best_provider(
+            query,
+            available_providers,
+            user_priority
+        )
+
+        # Get the API key for selected provider
+        selected_key = await self.api_key_service.get_active_key_for_provider(
+            routing_decision['provider']
+        )
+
+        if not selected_key:
+            # Fallback to any available provider
+            selected_key = user_keys[0]
+
+        # Decrypt the API key
+        decrypted_key = await self.api_key_service.get_decrypted_key(
+            selected_key.id
+        )
+
+        # Track usage (tokens will be updated after the call)
+        await self.api_key_service.track_usage(
+            selected_key.id,
+            0,  # tokens used - will be updated after call
+            "routing"
+        )
+
+        return {
+            'provider': selected_key.provider,
+            'model': routing_decision['model'],
+            'api_key': decrypted_key,
+            'user_api_key_id': selected_key.id,
+            'reasoning': routing_decision['reasoning']
+        }
+
+    async def _decide_best_provider(
+        self,
+        query: str,
+        available_providers: set,
+        user_priority: UserPriority
+    ) -> Dict[str, Any]:
+        """Decide which provider to use based on query and availability."""
+        # Simple routing logic - can be enhanced with ML later
+        provider_priority = {
+            UserPriority.SPEED: ['openai', 'gemini', 'anthropic', 'perplexity', 'kimi'],
+            UserPriority.COST: ['openai', 'gemini', 'anthropic', 'kimi', 'perplexity'],
+            UserPriority.QUALITY: ['anthropic', 'openai', 'gemini', 'perplexity', 'kimi'],
+            UserPriority.BALANCED: ['openai', 'anthropic', 'gemini', 'perplexity', 'kimi']
+        }
+
+        for provider in provider_priority[user_priority.value]:
+            if provider in available_providers:
+                model = self._get_best_model_for_provider(provider, user_priority)
+                return {
+                    'provider': provider,
+                    'model': model,
+                    'reasoning': f"Selected {provider} based on {user_priority.value} priority and availability"
+                }
+
+        # Fallback to first available
+        provider = list(available_providers)[0]
+        model = self._get_best_model_for_provider(provider, user_priority)
+        return {
+            'provider': provider,
+            'model': model,
+            'reasoning': f"Fallback to {provider} - only available provider"
+        }
+
+    def _get_best_model_for_provider(self, provider: str, priority: UserPriority) -> str:
+        """Get the best model for a provider based on priority."""
+        provider_models = {
+            'openai': {
+                UserPriority.SPEED: 'gpt-4o-mini',
+                UserPriority.COST: 'gpt-4o-mini',
+                UserPriority.QUALITY: 'gpt-4o',
+                UserPriority.BALANCED: 'gpt-4o-mini'
+            },
+            'anthropic': {
+                UserPriority.SPEED: 'claude-3-haiku-20240307',
+                UserPriority.COST: 'claude-3-haiku-20240307',
+                UserPriority.QUALITY: 'claude-3-opus-20240229',
+                UserPriority.BALANCED: 'claude-3-sonnet-20240229'
+            },
+            'gemini': {
+                UserPriority.SPEED: 'gemini-pro',
+                UserPriority.COST: 'gemini-pro',
+                UserPriority.QUALITY: 'gemini-pro',
+                UserPriority.BALANCED: 'gemini-pro'
+            },
+            'perplexity': {
+                UserPriority.SPEED: 'sonar-small-online',
+                UserPriority.COST: 'sonar-small-online',
+                UserPriority.QUALITY: 'sonar-large-online',
+                UserPriority.BALANCED: 'sonar-medium-online'
+            },
+            'kimi': {
+                UserPriority.SPEED: 'moonshot-v1-8k',
+                UserPriority.COST: 'moonshot-v1-8k',
+                UserPriority.QUALITY: 'moonshot-v1-32k',
+                UserPriority.BALANCED: 'moonshot-v1-8k'
+            }
+        }
+
+        return provider_models.get(provider, {}).get(priority, 'default-model')
+
+
+# Add method to base router
+def with_user_keys(self, db_session, user_id: str):
+    """
+    Create a router instance that uses user-provided API keys.
+    """
+    return UserKeyRouter(db_session, user_id, self.config)
+
+IntelligentRouter.with_user_keys = with_user_keys
+
+
+# =============================================================================
 # GLOBAL INSTANCE
 # =============================================================================
 

@@ -553,13 +553,15 @@ class CouncilOrchestrator:
                 # Increased to 7 minutes to account for large input and potential retries
                 JUDGE_TIMEOUT = 420  # 7 minutes
                 try:
-                    final_output, judge_provider = await asyncio.wait_for(
+                    raw_output, judge_provider = await asyncio.wait_for(
                         run_agent(
                             "judge", judge_enhanced_prompt, judge_input, config.api_keys,
                             providers.get("judge")
                         ),
                         timeout=JUDGE_TIMEOUT
                     )
+                    # Clean the output to remove hard rules and internal structure for non-code tasks
+                    final_output = _clean_user_facing_output(raw_output.strip(), config.query)
                 except asyncio.TimeoutError:
                     error_msg = f"Judge Agent timed out after {JUDGE_TIMEOUT} seconds"
                     logger.error(error_msg)
@@ -665,8 +667,16 @@ class CouncilOrchestrator:
 
                     # If quality gate still failed, log warning
                     if not quality_scores.quality_gate_passed:
+                        # Safely convert gaps to strings, handling any non-string types
+                        gaps_str = []
+                        for gap in validation_result.gaps_identified:
+                            if hasattr(gap, 'value'):
+                                gaps_str.append(str(gap.value))
+                            else:
+                                gaps_str.append(str(gap))
+                        
                         logger.warning(
-                            f"Quality gate not passed. Gaps: {', '.join(validation_result.gaps_identified)}"
+                            f"Quality gate not passed. Gaps: {', '.join(gaps_str)}"
                         )
 
                     if progress_callback:
@@ -811,6 +821,77 @@ def _contains_forbidden_tokens(text: str, forbidden: List[str]) -> List[str]:
         if token.lower() in lower:
             hits.append(token)
     return hits
+
+
+def _clean_user_facing_output(output: str, query: str) -> str:
+    """
+    Clean the output to remove hard rules, internal structure, and markdown file references
+    for non-code tasks. Only keep these for explicit code generation requests.
+    """
+    if not output:
+        return output
+    
+    query_lower = query.lower()
+    is_code_request = any(keyword in query_lower for keyword in [
+        'code', 'file', 'script', 'program', 'function', 'class', 'import',
+        'create a', 'write a', 'generate code', 'build a', 'implement',
+        '.py', '.js', '.ts', '.java', '.cpp', '.go', '.rs'
+    ])
+    
+    # For non-code requests, remove hard rules and internal structure
+    if not is_code_request:
+        lines = output.split('\n')
+        cleaned_lines = []
+        skip_section = False
+        skip_hard_rules = False
+        
+        for i, line in enumerate(lines):
+            line_lower = line.lower().strip()
+            
+            # Skip hard rules section
+            if 'hard rules' in line_lower or 'hard rule' in line_lower:
+                skip_hard_rules = True
+                continue
+            
+            if skip_hard_rules:
+                # Stop skipping when we hit a new major section (## or #)
+                if line.strip().startswith('##') or line.strip().startswith('#'):
+                    skip_hard_rules = False
+                else:
+                    continue
+            
+            # Skip "Final Deliverable" section header for non-code
+            if line_lower.startswith('## final deliverable') and not is_code_request:
+                # Skip the section but keep content if it's actual content
+                continue
+            
+            # Skip provenance/ownership tables for non-code
+            if 'ownership & provenance' in line_lower or 'provenance' in line_lower:
+                # Skip until next major section
+                skip_section = True
+                continue
+            
+            if skip_section:
+                if line.strip().startswith('##') or line.strip().startswith('#'):
+                    skip_section = False
+                else:
+                    continue
+            
+            # Remove markdown file references like "Research_Report.md" in headers
+            if line.strip().startswith('###') and '.md' in line:
+                # Replace with just the title without .md
+                line = re.sub(r'`?([^`]+\.md)`?', r'\1'.replace('.md', ''), line)
+            
+            cleaned_lines.append(line)
+        
+        output = '\n'.join(cleaned_lines)
+        
+        # Remove any remaining hard rules patterns
+        output = re.sub(r'\*\*HARD RULES.*?\*\*.*?(?=\n\n|\n#|$)', '', output, flags=re.DOTALL | re.IGNORECASE)
+        output = re.sub(r'❌ CANNOT.*?\n', '', output, flags=re.IGNORECASE)
+        output = re.sub(r'✅ CAN.*?\n', '', output, flags=re.IGNORECASE)
+    
+    return output.strip()
 
 
 def _detect_incident_domain(text: str) -> bool:

@@ -56,8 +56,12 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
         apiFetch<Thread[]>("/threads/?limit=50&archived=true", orgId)
       ]);
 
+      // Ensure data is arrays before spreading
+      const activeThreads = Array.isArray(activeData) ? activeData : [];
+      const archivedThreads = Array.isArray(archivedData) ? archivedData : [];
+
       // Combine both sets
-      setThreads([...activeData, ...archivedData]);
+      setThreads([...activeThreads, ...archivedThreads]);
 
       // Removed bulk Firestore sync - it was causing slow page loads
       // Individual threads will sync on-demand when needed
@@ -91,15 +95,15 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
       description?: string;
       user_id?: string;
     }) => {
-      const data = await apiFetch<{ thread_id: string; created_at: string }>("/threads/", orgId, {
+      const data = await apiFetch<{ thread_id: string; created_at: string }>("/threads", orgId, {
         method: "POST",
         body: JSON.stringify(params || {}),
       });
 
       // Try to sync to Firestore asynchronously without blocking
-      if (user?.uid && data?.thread_id) {
+      if (user?.id && data?.thread_id) {
         // Fire and forget - don't wait for Firestore sync
-        ensureConversationMetadata(user.uid, data.thread_id, {
+        ensureConversationMetadata(user.id, data.thread_id, {
           title: params?.title || "New conversation",
           lastMessagePreview: "",
         }).catch((firestoreError) => {
@@ -112,7 +116,7 @@ export function useThreads(explicitOrgId?: string): UseThreadsReturn {
 
       return data;
     },
-    [orgId, user?.uid]
+    [orgId, user?.id]
   );
 
   const searchThreads = useCallback(

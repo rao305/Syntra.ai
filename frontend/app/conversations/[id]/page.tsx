@@ -59,7 +59,7 @@ export default function ConversationPage() {
   const threadId = params.id as string
   const { orgId: authOrgId, accessToken, user } = useAuth()
   const orgId = authOrgId || 'org_demo'
-  const { conversations: userConversations, loading: userConversationsLoading } = useUserConversations(user?.uid || undefined)
+  const { conversations: userConversations, loading: userConversationsLoading } = useUserConversations(user?.id || undefined)
   const { isCollaborateMode } = useWorkflowStore()
 
   const [messages, setMessages] = React.useState<Message[]>([])
@@ -210,16 +210,16 @@ export default function ConversationPage() {
 
   // Ensure conversation metadata exists
   React.useEffect(() => {
-    if (!user?.uid || !threadId || threadId === 'new' || userConversationsLoading) return
+    if (!user?.id || !threadId || threadId === 'new' || userConversationsLoading) return
 
     const hasConversation = userConversations.some((conv) => conv.id === threadId)
     if (!hasConversation) {
-      ensureConversationMetadata(user.uid, threadId, {
+      ensureConversationMetadata(user.id, threadId, {
         title: messages[0]?.content.substring(0, 50) || 'New conversation',
         lastMessagePreview: messages[messages.length - 1]?.content.substring(0, 100) || '',
       })
     }
-  }, [user?.uid, threadId, userConversations, userConversationsLoading, messages])
+  }, [user?.id, threadId, userConversations, userConversationsLoading, messages])
 
   // Build chat history
   React.useEffect(() => {
@@ -337,7 +337,7 @@ export default function ConversationPage() {
             ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
           },
           body: JSON.stringify({
-            user_id: user?.uid || null,
+            user_id: user?.id || null,
             title: query.substring(0, 50),
             description: '',
           }),
@@ -480,7 +480,7 @@ export default function ConversationPage() {
             ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
           },
           body: JSON.stringify({
-            user_id: user?.uid || null,
+            user_id: user?.id || null,
             title: content.trim().substring(0, 50),
             description: '',
           }),
@@ -503,8 +503,8 @@ export default function ConversationPage() {
           await startCollaboration(content.trim(), "auto", actualThreadId)
 
           // Update conversation metadata for collaboration
-          if (user?.uid) {
-            await updateConversationMetadata(user.uid, actualThreadId, {
+          if (user?.id) {
+            await updateConversationMetadata(user.id, actualThreadId, {
               title: messages.length === 0 ? content.substring(0, 50) : undefined,
               lastMessagePreview: `Collaboration: ${content.substring(0, 80)}...`,
             })
@@ -817,8 +817,8 @@ export default function ConversationPage() {
         )
 
         // Update conversation metadata
-        if (user?.uid && actualThreadId !== 'new') {
-          await updateConversationMetadata(user.uid, actualThreadId, {
+        if (user?.id && actualThreadId !== 'new') {
+          await updateConversationMetadata(user.id, actualThreadId, {
             title:
               messages.length === 1 // Only the user message at this point
                 ? content.substring(0, 50)

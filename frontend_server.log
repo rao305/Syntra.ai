@@ -4,43 +4,28 @@
 
    ▲ Next.js 16.0.0 (Turbopack)
    - Local:        http://localhost:3000
-   - Network:      http://100.70.52.119:3000
-   - Environments: .env.local
+   - Network:      http://192.168.1.148:3000
+   - Environments: .env.local, .env
 
  ✓ Starting...
 [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
- ✓ Ready in 2.5s
- ○ Compiling /conversations ...
- GET /conversations?utm_source=homepage-hero 200 in 7.5s (compile: 6.6s, render: 868ms)
- ✓ Compiled in 1528ms
- ✓ Compiled in 701ms
- ✓ Compiled in 1528ms
- ✓ Compiled in 361ms
- ○ Compiling /api/chat ...
-[API /chat] Streaming failed: 500 Internal Server Error
- POST /api/chat 500 in 11.8s (compile: 8.0s, render: 3.8s)
-[API /chat] Calling backend streaming endpoint: {
-  url: 'http://localhost:8000/api/threads/f22c71e5-b61f-41a2-a673-22b9be57e6ac/messages/stream',
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json', 'x-org-id': 'org_demo' },
-  body: '{"content":"desrcibe to me what is gdpr","role":"user","scope":"private","use_memory":true}'
-}
-[API /chat] Backend streaming failed: {
-  status: 500,
-  statusText: 'Internal Server Error',
-  errorText: 'Internal Server Error',
-  url: 'http://localhost:8000/api/threads/f22c71e5-b61f-41a2-a673-22b9be57e6ac/messages/stream'
-}
- POST /api/chat 500 in 4.2s (compile: 1114ms, render: 3.1s)
- ○ Compiling /conversations/[id] ...
- GET /conversations/229d353c-64d4-4f0e-bdbd-56d44878d0fb 200 in 6.3s (compile: 6.1s, render: 128ms)
- GET /conversations/e5300a55-f1b0-4c42-b758-0e5e042ac61a 200 in 4.2s (compile: 4.0s, render: 131ms)
- GET /conversations/dbe1c509-537e-483a-8242-9703d3359e9a 200 in 5.7s (compile: 5.6s, render: 130ms)
- GET /conversations/229d353c-64d4-4f0e-bdbd-56d44878d0fb 200 in 60ms (compile: 6ms, render: 54ms)
- GET /conversations/229d353c-64d4-4f0e-bdbd-56d44878d0fb 200 in 228ms (compile: 157ms, render: 71ms)
- GET /conversations/new 200 in 66ms (compile: 39ms, render: 27ms)
- GET /conversations/c47d490a-a4de-4dc0-9d06-5f8a0f4d650b 200 in 533ms (compile: 336ms, render: 197ms)
- GET /conversations/c47d490a-a4de-4dc0-9d06-5f8a0f4d650b 200 in 408ms (compile: 188ms, render: 220ms)
- GET /conversations/c47d490a-a4de-4dc0-9d06-5f8a0f4d650b 200 in 28ms (compile: 8ms, render: 20ms)
- GET /conversations/229d353c-64d4-4f0e-bdbd-56d44878d0fb 200 in 69ms (compile: 39ms, render: 30ms)
- GET /conversations/c47d490a-a4de-4dc0-9d06-5f8a0f4d650b 200 in 337ms (compile: 292ms, render: 46ms)
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+ ✓ Ready in 860ms
+ ○ Compiling / ...
+ GET / 200 in 4.2s (compile: 3.9s, proxy.ts: 73ms, render: 215ms)
+ GET / 200 in 138ms (compile: 42ms, proxy.ts: 34ms, render: 62ms)
+ GET / 200 in 137ms (compile: 26ms, proxy.ts: 53ms, render: 58ms)
+ POST / 200 in 139ms (compile: 16ms, proxy.ts: 26ms, render: 98ms)
+ ✓ Compiled in 204ms
+ ✓ Compiled in 376ms
+ ✓ Compiled in 173ms
+ ✓ Compiled in 100ms
+ ✓ Compiled in 128ms
+ ✓ Compiled in 220ms
+ ✓ Compiled in 71ms
+ GET /auth/sign-in 200 in 1378ms (compile: 1328ms, proxy.ts: 26ms, render: 24ms)
+ GET /auth/sign-in/SignIn_clerk_catchall_check_1767283981902 200 in 91ms (compile: 13ms, proxy.ts: 11ms, render: 67ms)
+ GET /auth/callback 200 in 480ms (compile: 408ms, proxy.ts: 10ms, render: 62ms)
+ POST /auth/callback 200 in 20ms (compile: 3ms, proxy.ts: 9ms, render: 8ms)
+ GET /conversations 200 in 2.4s (compile: 2.3s, proxy.ts: 8ms, render: 49ms)
+ GET /conversations/4904de83-07bc-4b33-af32-bfe3492d0199 200 in 1439ms (compile: 1404ms, proxy.ts: 18ms, render: 17ms)

@@ -378,6 +378,9 @@ async def list_threads(
     # Set RLS context
     user_id = current_user.id if current_user else None
     await set_rls_context(db, org_id, user_id)
+    
+    # CRITICAL DEBUG: Log authentication status
+    logger.info(f"🔍 list_threads called - org_id: {org_id}, user_id: {user_id}, current_user: {current_user}")
 
     # Build query - filter by org_id and creator_id if user is authenticated
     query = select(Thread).where(Thread.org_id == org_id)
@@ -421,6 +424,31 @@ async def list_threads(
         query.order_by(Thread.updated_at.desc().nulls_last(), Thread.created_at.desc())
         .limit(limit)
     )
+    
+    threads = result.scalars().all()
+    
+    # CRITICAL FIX: For threads with null creator_id, check if user has messages and update creator_id
+    # This fixes threads that were created before the fix
+    updated_threads = False
+    if user_id:
+        for thread in threads:
+            if thread.creator_id is None:
+                # Check if user has messages in this thread
+                msg_check = await db.execute(
+                    select(Message).where(
+                        Message.thread_id == thread.id,
+                        Message.user_id == user_id
+                    ).limit(1)
+                )
+                if msg_check.scalar_one_or_none():
+                    # Update creator_id to fix the association
+                    thread.creator_id = user_id
+                    updated_threads = True
+                    logger.info(f"✅ Fixed thread {thread.id} creator_id to {user_id}")
+        # Commit any updates
+        if updated_threads:
+            await db.commit()
+            await set_rls_context(db, org_id, user_id)
     threads = result.scalars().all()
 
     return [
@@ -730,6 +758,7 @@ async def create_thread(
     if current_user:
         # Use the authenticated user's ID from the JWT token
         creator_id = current_user.id
+        logger.info(f"✅ Creating thread with authenticated user: {creator_id}")
     elif request.user_id:
         # Fallback: if no authenticated user but user_id provided, try to find user
         result = await db.execute(
@@ -738,8 +767,9 @@ async def create_thread(
         user = result.scalar_one_or_none()
         if user:
             creator_id = user.id
+            logger.info(f"✅ Creating thread with user from request: {creator_id}")
         else:
-            logger.warning(f"⚠️ User '{request.user_id}' not found in users table - thread will have no creator")
+            logger.warning(f"⚠️ User '{request.user_id}' not found in users table - thread will have no creator (will be set when first message is saved)")
 
     # Create thread
     new_thread = Thread(
@@ -1409,9 +1439,14 @@ async def save_raw_message(
         # Determine message role
         role = MessageRole.USER if request.role.lower() == "user" else MessageRole.ASSISTANT
 
+        # CRITICAL FIX: Set user_id for both USER and ASSISTANT messages
+        # This ensures all messages are associated with the correct user
+        message_user_id = user_id  # Use authenticated user from JWT token
+        
         # Create message with meta if provided
         message = Message(
             thread_id=thread_id,
+            user_id=message_user_id,  # CRITICAL: Associate message with user
             role=role,
             content=request.content,
             sequence=next_sequence,
@@ -1901,6 +1936,13 @@ async def add_message_streaming(
                 sequence=user_sequence,
             )
             db.add(user_msg)
+            
+            # CRITICAL FIX: Update thread creator_id if it's null and we have a user_id
+            # This ensures threads are properly associated with users even if created without auth
+            if message_user_id and thread.creator_id is None:
+                thread.creator_id = message_user_id
+                logger.info(f"✅ Updated thread {thread_id} creator_id to {message_user_id} (before streaming)")
+            
             await db.commit()  # Commit immediately so it's available for queries
             user_message_saved = True
             logger.info(f"💾✅ Saved user message to database BEFORE streaming (sequence: {user_sequence}, user_id: {message_user_id}, thread_id: {thread_id})")
@@ -2073,6 +2115,13 @@ async def add_message_streaming(
                             sequence=user_sequence,
                         )
                         db.add(user_msg)
+                        
+                        # CRITICAL FIX: Update thread creator_id if it's null and we have a user_id
+                        # This ensures threads are properly associated with users even if created without auth
+                        if message_user_id and thread.creator_id is None:
+                            thread.creator_id = message_user_id
+                            logger.info(f"✅ Updated thread {thread_id} creator_id to {message_user_id}")
+                        
                         logger.info(f"💾 Saved user message to database in background_cleanup (fallback, sequence: {user_sequence}, user_id: {message_user_id})")
                     else:
                         logger.info(f"ℹ️  User message already exists in database (saved before streaming)")
@@ -2101,6 +2150,12 @@ async def add_message_streaming(
                         db.add(assistant_msg)
                         logger.info(f"💾 Saved assistant message to database (sequence: {assistant_sequence}, user_id: {message_user_id})")
 
+                    # CRITICAL FIX: Update thread creator_id if it's still null and we have a user_id
+                    # This ensures threads are properly associated with users even if created without auth
+                    if message_user_id and thread.creator_id is None:
+                        thread.creator_id = message_user_id
+                        logger.info(f"✅ Updated thread {thread_id} creator_id to {message_user_id} (in background cleanup)")
+                    
                     # Commit both messages to database
                     await db.commit()
                     logger.info(f"✅ Messages persisted to database for thread {thread_id}")

@@ -4,13 +4,96 @@
 
    ▲ Next.js 16.0.0 (Turbopack)
    - Local:        http://localhost:3000
-   - Network:      http://100.70.52.119:3000
-   - Environments: .env.local
+   - Network:      http://192.168.1.148:3000
+   - Environments: .env.local, .env
 
  ✓ Starting...
 [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
- ✓ Ready in 784ms
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+ ✓ Ready in 1117ms
+ GET / 200 in 3.2s (compile: 2.9s, proxy.ts: 74ms, render: 245ms)
+ GET / 200 in 37ms (compile: 5ms, proxy.ts: 7ms, render: 24ms)
+ GET / 200 in 56ms (compile: 11ms, proxy.ts: 7ms, render: 38ms)
+ POST / 200 in 46ms (compile: 10ms, proxy.ts: 14ms, render: 21ms)
+ GET /conversations 200 in 2.5s (compile: 2.1s, proxy.ts: 10ms, render: 413ms)
+[workflow] Current working directory: /Users/rrao/Desktop/Syntra-main/frontend
+[workflow] Trying paths: [
+  '/Users/rrao/Desktop/Syntra-main/backend/.env',
+  '/Users/rrao/Desktop/Syntra-main/frontend/backend/.env',
+  '/Users/rrao/Desktop/Syntra-main/backend/.env',
+  '/Users/rrao/Desktop/Syntra-main/backend/.env',
+  '/ROOT/backend/.env',
+  '/backend/.env'
+]
+[workflow] Checking: /Users/rrao/Desktop/Syntra-main/backend/.env, exists: true
+[dotenv@17.2.3] injecting env (49) from ../backend/.env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+[workflow] ✅ Loaded backend environment variables from /Users/rrao/Desktop/Syntra-main/backend/.env
+[workflow] KIMI_API_KEY present: true
+[workflow] OPENAI_API_KEY present: true
+[workflow] GEMINI_API_KEY present: true
+[workflow] PERPLEXITY_API_KEY present: true
+ POST /conversations 200 in 80ms (compile: 13ms, proxy.ts: 20ms, render: 47ms)
+[API /chat] Calling backend streaming endpoint: {
+  url: 'http://127.0.0.1:8000/api/threads/4904de83-07bc-4b33-af32-bfe3492d0199/messages/stream',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-org-id': 'org_demo',
+    Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNWZiZWE2MS1kYTc1LTRlNzUtYjM1MS1hMWYxN2Y0MzdlODQiLCJvcmdfaWQiOiJvcmdfZGVtbyIsImVtYWlsIjoicm9oaXRyYW8xMjA1QGdtYWlsLmNvbSIsImV4cCI6MTc2NzI4MzIwNn0.Y0CEWOD_ykUnHfpUCtxLcpcx9QhXRGmiRo6bIQdvpRw'
+  },
+  body: '{"content":"Hi there","role":"user","scope":"private","use_memory":true,"user_id":"user_36SM6Ee1NCgt4PqFQ2FAQMQbEdz"}'
+}
+ POST /api/chat 200 in 2.2s (compile: 196ms, proxy.ts: 292ms, render: 1675ms)
+[API /chat] Calling backend streaming endpoint: {
+  url: 'http://127.0.0.1:8000/api/threads/4904de83-07bc-4b33-af32-bfe3492d0199/messages/stream',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-org-id': 'org_demo',
+    Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNWZiZWE2MS1kYTc1LTRlNzUtYjM1MS1hMWYxN2Y0MzdlODQiLCJvcmdfaWQiOiJvcmdfZGVtbyIsImVtYWlsIjoicm9oaXRyYW8xMjA1QGdtYWlsLmNvbSIsImV4cCI6MTc2NzI4MzIwNn0.Y0CEWOD_ykUnHfpUCtxLcpcx9QhXRGmiRo6bIQdvpRw'
+  },
+  body: '{"content":"so what can you do","role":"user","scope":"private","use_memory":true,"user_id":"user_36SM6Ee1NCgt4PqFQ2FAQMQbEdz"}'
+}
+ POST /api/chat 200 in 4.7s (compile: 9ms, proxy.ts: 89ms, render: 4.6s)
+[API /chat] Calling backend streaming endpoint: {
+  url: 'http://127.0.0.1:8000/api/threads/4904de83-07bc-4b33-af32-bfe3492d0199/messages/stream',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-org-id': 'org_demo',
+    Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNWZiZWE2MS1kYTc1LTRlNzUtYjM1MS1hMWYxN2Y0MzdlODQiLCJvcmdfaWQiOiJvcmdfZGVtbyIsImVtYWlsIjoicm9oaXRyYW8xMjA1QGdtYWlsLmNvbSIsImV4cCI6MTc2NzI4MzIwNn0.Y0CEWOD_ykUnHfpUCtxLcpcx9QhXRGmiRo6bIQdvpRw'
+  },
+  body: '{"content":"interesting","role":"user","scope":"private","use_memory":true,"user_id":"user_36SM6Ee1NCgt4PqFQ2FAQMQbEdz"}'
+}
+ POST /api/chat 200 in 2.3s (compile: 33ms, proxy.ts: 167ms, render: 2.1s)
+ ✓ Compiled in 273ms
+ ✓ Compiled in 124ms
+ ✓ Compiled in 127ms
+ ✓ Compiled in 89ms
+ ✓ Compiled in 56ms
+ ✓ Compiled in 47ms
+ ✓ Compiled in 59ms
+ ✓ Compiled in 76ms
+ ✓ Compiled in 96ms
+ ✓ Compiled in 83ms
+ ✓ Compiled in 101ms
+ ✓ Compiled in 196ms
+ ✓ Compiled in 249ms
+ ✓ Compiled in 84ms
+ ✓ Compiled in 345ms
  ○ Compiling /conversations/[id] ...
- GET / 200 in 2.7s (compile: 1941ms, render: 743ms)
- GET /conversations/794d0cfe-9fdb-46bc-b057-97b9c0b0634c 200 in 4.6s (compile: 4.2s, render: 466ms)
- GET / 200 in 1098ms (compile: 255ms, render: 843ms)
+ GET /conversations/4904de83-07bc-4b33-af32-bfe3492d0199 200 in 6.3s (compile: 5.8s, proxy.ts: 399ms, render: 137ms)
+ POST /conversations/4904de83-07bc-4b33-af32-bfe3492d0199 200 in 361ms (compile: 94ms, proxy.ts: 243ms, render: 25ms)
+ GET /conversations/4904de83-07bc-4b33-af32-bfe3492d0199 200 in 426ms (compile: 11ms, proxy.ts: 20ms, render: 396ms)
+ POST /conversations/4904de83-07bc-4b33-af32-bfe3492d0199 200 in 253ms (compile: 35ms, proxy.ts: 112ms, render: 107ms)
+ GET /conversations/new 200 in 111ms (compile: 20ms, proxy.ts: 32ms, render: 60ms)
+ GET /conversations/new 200 in 239ms (compile: 48ms, proxy.ts: 61ms, render: 130ms)
+ POST /conversations/new 200 in 264ms (compile: 36ms, proxy.ts: 108ms, render: 119ms)
+ GET /conversations/new 200 in 823ms (compile: 49ms, proxy.ts: 702ms, render: 72ms)
+ POST /conversations/new 200 in 101ms (compile: 44ms, proxy.ts: 21ms, render: 36ms)
+ GET /conversations/4904de83-07bc-4b33-af32-bfe3492d0199 200 in 62ms (compile: 21ms, proxy.ts: 19ms, render: 22ms)
+ GET /conversations/4904de83-07bc-4b33-af32-bfe3492d0199 200 in 43ms (compile: 11ms, proxy.ts: 18ms, render: 14ms)
+ GET /conversations/6876425e-e129-4fea-bce2-222cfe24652c 200 in 33ms (compile: 10ms, proxy.ts: 9ms, render: 15ms)
+ GET /conversations/4904de83-07bc-4b33-af32-bfe3492d0199 200 in 38ms (compile: 10ms, proxy.ts: 14ms, render: 14ms)
+ GET /conversations/6876425e-e129-4fea-bce2-222cfe24652c 200 in 49ms (compile: 9ms, proxy.ts: 28ms, render: 12ms)
+ GET /conversations/4904de83-07bc-4b33-af32-bfe3492d0199 200 in 62ms (compile: 16ms, proxy.ts: 31ms, render: 16ms)

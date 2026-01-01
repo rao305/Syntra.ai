@@ -263,7 +263,7 @@ function ModelCard({
 
   // Determine card styling based on active state and model type
   // Only show special colors when actively routing
-  let cardClasses = "border-border bg-card/50 transition-all duration-500"
+  let cardClasses = "border-zinc-700/50 bg-zinc-800/80 transition-all duration-500"
 
   if (active) {
     if (isGemini) {

@@ -7,18 +7,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  User, 
-  Building2, 
-  Key, 
-  Route, 
-  CreditCard, 
-  Shield, 
+import {
+  User,
+  Building2,
+  Key,
+  Route,
+  CreditCard,
+  Shield,
   BarChart3,
-  ArrowRight 
+  ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
-import { ProvidersPage } from './providers-content'
+import dynamic from 'next/dynamic'
+
+// Dynamically import the API Keys page
+const APIKeysPage = dynamic(() => import('./api-keys/page'), {
+  loading: () => <div className="flex items-center justify-center py-8">Loading API Keys...</div>
+})
 
 function TabSync({ onTabChange }: { onTabChange: (tab: string) => void }) {
   const searchParams = useSearchParams()
@@ -50,7 +55,7 @@ export default function SettingsPageClient() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 mb-8 bg-zinc-900/40">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-8 bg-zinc-900/40">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Profile</span>
@@ -59,9 +64,9 @@ export default function SettingsPageClient() {
               <Building2 className="w-4 h-4" />
               <span className="hidden sm:inline">Organization</span>
             </TabsTrigger>
-            <TabsTrigger value="providers" className="flex items-center gap-2">
+            <TabsTrigger value="api-keys" className="flex items-center gap-2">
               <Key className="w-4 h-4" />
-              <span className="hidden sm:inline">Providers</span>
+              <span className="hidden sm:inline">API Keys</span>
             </TabsTrigger>
             <TabsTrigger value="routing" className="flex items-center gap-2">
               <Route className="w-4 h-4" />
@@ -70,6 +75,10 @@ export default function SettingsPageClient() {
             <TabsTrigger value="billing" className="flex items-center gap-2">
               <CreditCard className="w-4 h-4" />
               <span className="hidden sm:inline">Billing</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
             <TabsTrigger value="security" className="flex items-center gap-2">
               <Shield className="w-4 h-4" />
@@ -152,9 +161,9 @@ export default function SettingsPageClient() {
             </Card>
           </TabsContent>
 
-          {/* Providers Tab */}
-          <TabsContent value="providers">
-            <ProvidersPage />
+          {/* API Keys Tab */}
+          <TabsContent value="api-keys">
+            <APIKeysPage />
           </TabsContent>
 
           {/* Routing Tab */}
@@ -222,6 +231,44 @@ export default function SettingsPageClient() {
                     No payment method on file
                   </div>
                   <Button variant="outline">Add Payment Method</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <Card className="border-border bg-zinc-900/40 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle>Usage Analytics</CardTitle>
+                <CardDescription>Track your API usage and performance metrics</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-lg bg-muted/50">
+                    <div className="text-sm text-muted-foreground mb-1">Total Requests</div>
+                    <div className="text-2xl font-bold">0</div>
+                  </div>
+                  <div className="p-4 rounded-lg bg-muted/50">
+                    <div className="text-sm text-muted-foreground mb-1">Total Tokens</div>
+                    <div className="text-2xl font-bold">0</div>
+                  </div>
+                  <div className="p-4 rounded-lg bg-muted/50">
+                    <div className="text-sm text-muted-foreground mb-1">Avg Response Time</div>
+                    <div className="text-2xl font-bold">0ms</div>
+                  </div>
+                  <div className="p-4 rounded-lg bg-muted/50">
+                    <div className="text-sm text-muted-foreground mb-1">Active Keys</div>
+                    <div className="text-2xl font-bold">0</div>
+                  </div>
+                </div>
+
+                <div className="text-center py-8 text-muted-foreground">
+                  <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Usage analytics coming soon</p>
+                  <p className="text-sm mt-2">
+                    Detailed insights into your API usage patterns and costs
+                  </p>
                 </div>
               </CardContent>
             </Card>

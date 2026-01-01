@@ -265,7 +265,7 @@ export function ComparisonSection() {
                 variants={itemVariants}
                 className={`group relative p-6 rounded-xl border-2 cursor-pointer overflow-hidden ${isActive
                   ? `${colors.card} shadow-2xl`
-                  : "bg-background/50 border-border hover:border-primary/30 hover:bg-background/80"
+                  : "bg-zinc-800/80 border-zinc-700/50 hover:border-primary/30 hover:bg-zinc-800/90"
                   }`}
                 onMouseEnter={() => setActiveIndex(index)}
                 whileHover={{ scale: 1.02, y: -5 }}

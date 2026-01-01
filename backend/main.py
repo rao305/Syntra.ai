@@ -30,6 +30,7 @@ from contextlib import asynccontextmanager
 from config import get_settings
 from app.database import init_db, close_db
 from app.api import router, providers, billing, audit, metrics, query_rewriter, entities, auth, collaboration, dynamic_collaborate, council, eval, quality_analytics
+from app.api.api_keys import router as api_keys_router
 from app.api.threads import router as threads_router
 from app.core.security_middleware import configure_security
 from app.core.error_handlers import register_error_handlers
@@ -128,6 +129,7 @@ app.include_router(metrics.router, prefix="/api", tags=["metrics"])
 app.include_router(query_rewriter.router, tags=["query-rewriter"])
 app.include_router(entities.router, prefix="/api", tags=["entities"])
 app.include_router(auth.router, prefix="/api", tags=["auth"])
+app.include_router(api_keys_router, prefix="/api", tags=["api-keys"])
 app.include_router(collaboration.router, prefix="/api/collaboration", tags=["collaboration"])
 app.include_router(dynamic_collaborate.router, prefix="/api/dynamic-collaborate", tags=["dynamic-collaboration"])
 app.include_router(council.router, tags=["council"])

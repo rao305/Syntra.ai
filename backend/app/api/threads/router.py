@@ -36,10 +36,99 @@ async def list_threads(
     db: AsyncSession = Depends(get_db)
 ):
     """List all threads for the organization."""
-    logger.info(f"Listing threads for org {org_id[:8]}")
-    # TODO: Implement thread listing logic
-    # This should be migrated from the original threads.py
-    return []
+    from app.models.thread import Thread
+    from app.models.message import Message
+    from sqlalchemy import select, or_, exists, and_
+    
+    # Set RLS context
+    user_id = current_user.id if current_user else None
+    await set_rls_context(db, org_id, user_id)
+    
+    logger.info(f"🔍 list_threads called - org_id: {org_id}, user_id: {user_id}, current_user: {current_user}")
+    
+    # Build query - filter by org_id and creator_id if user is authenticated
+    query = select(Thread).where(Thread.org_id == org_id)
+    
+    # CRITICAL FIX: Filter threads by creator_id to prevent cross-user data leaks
+    # Also handle legacy threads with creator_id: null - show them only if user has messages in that thread
+    if user_id:
+        # Show threads where:
+        # 1. creator_id matches the user (new threads), OR
+        # 2. creator_id is null AND user has messages in that thread (legacy threads)
+        subquery = exists().where(
+            and_(
+                Message.thread_id == Thread.id,
+                Message.user_id == user_id
+            )
+        )
+        query = query.where(
+            or_(
+                Thread.creator_id == user_id,
+                and_(
+                    Thread.creator_id.is_(None),
+                    subquery
+                )
+            )
+        )
+    
+    # Filter archived threads (default: exclude archived)
+    if archived is None:
+        # Exclude archived threads by default
+        query = query.where(Thread.archived == False)
+    elif archived is True:
+        # Only archived threads
+        query = query.where(Thread.archived == True)
+    else:
+        # Only non-archived threads (explicit)
+        query = query.where(Thread.archived == False)
+    
+    # Query threads ordered by updated_at (most recent first), then created_at
+    result = await db.execute(
+        query.order_by(Thread.updated_at.desc().nulls_last(), Thread.created_at.desc())
+        .limit(limit)
+    )
+    
+    threads = result.scalars().all()
+    
+    # CRITICAL FIX: For threads with null creator_id, check if user has messages and update creator_id
+    # This fixes threads that were created before the fix
+    updated_threads = False
+    if user_id:
+        for thread in threads:
+            if thread.creator_id is None:
+                # Check if user has messages in this thread
+                msg_check = await db.execute(
+                    select(Message).where(
+                        Message.thread_id == thread.id,
+                        Message.user_id == user_id
+                    ).limit(1)
+                )
+                if msg_check.scalar_one_or_none():
+                    # Update creator_id to fix the association
+                    thread.creator_id = user_id
+                    updated_threads = True
+                    logger.info(f"✅ Fixed thread {thread.id} creator_id to {user_id}")
+        # Commit any updates
+        if updated_threads:
+            await db.commit()
+            await set_rls_context(db, org_id, user_id)
+    
+    logger.info(f"✅ Returning {len(threads)} threads for user {user_id}")
+    
+    return [
+        ThreadListItem(
+            id=thread.id,
+            title=thread.title,
+            last_message_preview=thread.last_message_preview,
+            last_provider=thread.last_provider,
+            last_model=thread.last_model,
+            created_at=thread.created_at,
+            updated_at=thread.updated_at,
+            pinned=thread.pinned or False,
+            archived=thread.archived or False
+        )
+        for thread in threads
+    ]
 
 
 @router.get("/search", response_model=List[ThreadListItem])

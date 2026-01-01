@@ -53,6 +53,8 @@ class Coalescer:
             if ent.error:
                 raise ent.error
             return ent.result
+
+    
         
         try:
             # Track leader event

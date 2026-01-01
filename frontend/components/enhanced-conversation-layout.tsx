@@ -44,6 +44,7 @@ interface EnhancedConversationLayoutProps {
   orgId?: string
   onCollaborate?: (query: string, orgId: string) => Promise<void>
   onCollaborationComplete?: (output: string) => void
+  streamingStarted?: boolean
 }
 
 export function EnhancedConversationLayout({
@@ -66,6 +67,7 @@ export function EnhancedConversationLayout({
   orgId,
   onCollaborate,
   onCollaborationComplete,
+  streamingStarted = false,
 }: EnhancedConversationLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const user = null
@@ -100,6 +102,7 @@ export function EnhancedConversationLayout({
             collabPanel={collabPanel}
             orgId={orgId}
             currentThreadId={currentThreadId}
+            streamingStarted={streamingStarted}
           />
         </div>
       </main>

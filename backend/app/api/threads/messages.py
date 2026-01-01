@@ -169,10 +169,12 @@ async def save_raw_message(
             detail=f"Invalid role: {request.role}"
         )
 
+    # CRITICAL FIX: Set user_id for both USER and ASSISTANT messages
+    # This ensures all messages are associated with the correct user
     # Create message
     message = Message(
         thread_id=thread_id,
-        user_id=user_id if role == MessageRole.USER else None,
+        user_id=user_id,  # CRITICAL: Associate ALL messages with user (not just USER role)
         role=role,
         content=request.content,
         provider=request.provider,

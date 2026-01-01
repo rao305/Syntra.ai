@@ -45,9 +45,9 @@ export default function Home() {
 
   // Show homepage for unauthenticated users
   return (
-    <main className="min-h-screen bg-background relative overflow-x-hidden">
+    <main className="min-h-screen bg-zinc-900 relative overflow-x-hidden">
       {/* Floating particles background */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-zinc-900">
         {[...Array(20)].map((_, i) => (
           <div
             key={i}

@@ -8,7 +8,7 @@ settings = get_settings()
 # Create async engine
 # CRITICAL: Use Supabase transaction pooler (port 6543) for RLS context (SET LOCAL)
 # Session pooler (port 5432) won't work - context gets lost between requests
-db_url = settings.supabase_pooler_url or settings.database_url
+db_url = settings.database_url  # Use local database for development
 
 engine = create_async_engine(
     db_url,
@@ -18,7 +18,6 @@ engine = create_async_engine(
     max_overflow=20,  # Added overflow for traffic spikes
     pool_recycle=1800,  # Recycle connections every 30 minutes
     connect_args={
-        "ssl": True,  # Enable SSL for Supabase
         "server_settings": {"application_name": "syntra_backend"}
     }
 )
@@ -37,7 +36,7 @@ Base = declarative_base()
 async def init_db():
     """Initialize database connection."""
     # Import all models here to ensure they're registered
-    from app.models import org, user, thread, message, memory, audit, provider_key, access_graph, attachment  # noqa
+    from app.models import org, user, thread, message, memory, audit, provider_key, access_graph, attachment, user_api_key  # noqa
 
     # In production, use Alembic migrations instead
     if not settings.is_production:

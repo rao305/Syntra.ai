@@ -69,7 +69,7 @@ export function FeatureCard({
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.5, delay, ease: 'easeOut' }}
     >
-      <Card className="border-white/5 bg-zinc-900/40 backdrop-blur-sm hover:bg-zinc-900/60 transition-all hover:-translate-y-1 h-full">
+      <Card className="border-zinc-700/50 bg-zinc-800/80 backdrop-blur-sm hover:bg-zinc-800/90 transition-all hover:-translate-y-1 h-full">
         <CardContent className="p-6">
           <div
             className={`w-12 h-12 rounded-lg ${colors.iconBg} ${colors.iconBorder} border-2 flex items-center justify-center mb-4`}

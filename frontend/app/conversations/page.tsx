@@ -65,6 +65,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
   const [selectedModel, setSelectedModel] = React.useState('auto')
   const [autoRoutedModel, setAutoRoutedModel] = React.useState<string | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)
+  const [streamingStarted, setStreamingStarted] = React.useState(false) // Track when actual streaming starts
   const [currentThreadId, setCurrentThreadId] = React.useState<string | null>(null)
 
   // Keep ref in sync with state
@@ -747,6 +748,79 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
 
       setMessages((prev) => [...prev, finalMessage])
 
+      // CRITICAL FIX: Save collaboration messages to thread
+      // This ensures collaboration is part of the normal chat history
+      const actualThreadId = currentThreadId
+      if (actualThreadId && user?.id) {
+        try {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api'
+          
+          // Find the original user query that started this collaboration
+          const userQuery = userContent || 
+            (localSteps.length > 0 && localSteps[0].inputContext 
+              ? localSteps[0].inputContext 
+              : '')
+          
+          // Save user message first
+          await fetch(`${apiUrl}/threads/${actualThreadId}/messages/raw`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-org-id': orgId,
+              ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+            },
+            body: JSON.stringify({
+              role: 'user',
+              content: userQuery,
+              provider: null,
+              model: null,
+              meta: {
+                is_collaboration_query: true,
+              }
+            }),
+          })
+          
+          // Save collaboration response
+          await fetch(`${apiUrl}/threads/${actualThreadId}/messages/raw`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-org-id': orgId,
+              ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+            },
+            body: JSON.stringify({
+              role: 'assistant',
+              content: finalContent,
+              provider: 'collaboration',
+              model: 'multi-agent',
+              meta: {
+                engine: 'collaboration',
+                collaboration: {
+                  mode: 'complete',
+                  stages: localSteps.map(s => ({
+                    role: s.role,
+                    status: s.status,
+                    model: s.model
+                  })),
+                },
+                is_collaboration_response: true,
+              }
+            }),
+          })
+          
+          console.log('✅ Saved collaboration messages to thread:', actualThreadId)
+          
+          // Update conversation metadata
+          if (user?.id) {
+            await updateConversationMetadata(user.id, actualThreadId, {
+              lastMessagePreview: finalContent.substring(0, 100),
+            })
+          }
+        } catch (error) {
+          console.error('Failed to save collaboration messages:', error)
+        }
+      }
+
       // Deactivate collab panel
       setCollabPanel(prev => ({
         ...prev,
@@ -1059,6 +1133,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       return newMessages
     })
     setIsLoading(true)
+    setStreamingStarted(false) // Reset streaming state for new message
     console.log('⏳ Set loading to true')
 
     try {
@@ -1079,7 +1154,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         const threadResponse = await apiFetch<{
           thread_id: string
           created_at: string
-        }>(`/threads/`, {
+        }>(`/threads`, {
           method: 'POST',
           body: JSON.stringify({
             user_id: user?.id || null,
@@ -1095,8 +1170,8 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         console.log('📌 Thread ID stored (not setting state yet):', threadId)
 
         // Ensure conversation metadata exists for the sidebar
-        if (user?.uid) {
-          await ensureConversationMetadata(user.uid, threadId, {
+        if (user?.id) {
+          await ensureConversationMetadata(user.id, threadId, {
             title: content.trim().substring(0, 50),
             lastMessagePreview: content.trim().substring(0, 100),
           })
@@ -1280,6 +1355,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
                 // Text content
                 if (!sawFirstDelta) {
                   sawFirstDelta = true
+                  setStreamingStarted(true) // Mark that streaming has actually started
                   console.log('🚀 First chunk received')
                 }
                 const delta = eventData.delta || dataLine
@@ -1375,8 +1451,8 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
         console.log(`📋 Current messages in state: ${messagesRef.current.length}`)
 
         // Update conversation metadata with the AI response for the sidebar
-        if (user?.uid && assistantMessage.content) {
-          await updateConversationMetadata(user.uid, threadId, {
+        if (user?.id && assistantMessage.content) {
+          await updateConversationMetadata(user.id, threadId, {
             lastMessagePreview: assistantMessage.content.substring(0, 100),
             lastProvider: assistantMessage.modelId,
             lastModel: assistantMessage.modelName,
@@ -1421,6 +1497,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
     } finally {
       console.log('🏁 Finally block - setting loading to false')
       setIsLoading(false)
+      setStreamingStarted(false) // Reset streaming state
     }
   }, [user, orgId, accessToken, selectedModel, messages, currentThreadId, updateMessage, setMessages, setCurrentThreadId, setAutoRoutedModel, ensureConversationMetadata, updateConversationMetadata])
 
@@ -1461,6 +1538,7 @@ export default function ConversationsLanding({ searchParams }: ConversationsLand
       orgId={orgId}
       onCollaborate={handleCollaborate}
       onCollaborationComplete={handleCollaborationComplete}
+      streamingStarted={streamingStarted}
     />
   )
 }

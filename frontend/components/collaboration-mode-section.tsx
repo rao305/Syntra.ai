@@ -79,8 +79,8 @@ function ModelCard({
   const cardClasses = isGemini
     ? "border-blue-500/60 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 hover:border-blue-400/80 hover:from-blue-500/15 hover:to-cyan-500/15 transition-all"
     : selected
-      ? "border-primary bg-card"
-      : "border-border bg-card/50"
+      ? "border-primary bg-zinc-800/80"
+      : "border-zinc-700/50 bg-zinc-800/80"
 
   return (
     <div className={`p-4 rounded-xl border ${cardClasses} min-w-[280px]`}>

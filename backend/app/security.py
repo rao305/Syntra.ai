@@ -1,6 +1,10 @@
 """Security utilities for RLS and encryption."""
 from typing import Optional
 from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import base64
+import os
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 import uuid
@@ -27,6 +31,101 @@ class EncryptionService:
     def decrypt(self, ciphertext: bytes) -> str:
         """Decrypt bytes to string."""
         return self.cipher.decrypt(ciphertext).decode()
+
+
+class UserAPIKeyEncryptionService:
+    """
+    Secure encryption/decryption for user-provided API keys.
+    Uses Fernet (symmetric encryption) with user-specific salts.
+    """
+
+    def __init__(self):
+        # Master encryption key from environment
+        # MUST be set in production and kept secret
+        self.master_key = settings.encryption_key
+
+        if not self.master_key:
+            raise ValueError(
+                "ENCRYPTION_KEY must be set in environment.  "
+                "Generate with: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
+            )
+
+        if len(self.master_key) < 32:
+            raise ValueError("ENCRYPTION_KEY must be at least 32 characters")
+
+    def _derive_key(self, salt: bytes) -> bytes:
+        """Derive encryption key from master key and salt."""
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100000,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(self.master_key.encode()))
+        return key
+
+    def generate_salt(self) -> str:
+        """Generate a random salt for a user."""
+        return base64.urlsafe_b64encode(os.urandom(16)).decode()
+
+    def encrypt(self, plaintext: str, salt: str) -> str:
+        """
+        Encrypt plaintext using master key and user salt.
+
+        Args:
+            plaintext: The data to encrypt (e.g., API key)
+            salt: User-specific salt
+
+        Returns:
+            Base64-encoded encrypted data
+        """
+        try:
+            salt_bytes = base64.urlsafe_b64decode(salt.encode())
+            key = self._derive_key(salt_bytes)
+            f = Fernet(key)
+
+            encrypted = f.encrypt(plaintext.encode())
+            return base64.urlsafe_b64encode(encrypted).decode()
+
+        except Exception as e:
+            logger.error(f"Encryption failed: {e}")
+            raise ValueError("Failed to encrypt data")
+
+    def decrypt(self, encrypted_data: str, salt: str) -> str:
+        """
+        Decrypt data using master key and user salt.
+
+        Args:
+            encrypted_data: Base64-encoded encrypted data
+            salt: User-specific salt
+
+        Returns:
+            Decrypted plaintext
+        """
+        try:
+            salt_bytes = base64.urlsafe_b64decode(salt.encode())
+            key = self._derive_key(salt_bytes)
+            f = Fernet(key)
+
+            encrypted_bytes = base64.urlsafe_b64decode(encrypted_data.encode())
+            decrypted = f.decrypt(encrypted_bytes)
+            return decrypted.decode()
+
+        except Exception as e:
+            logger.error(f"Decryption failed: {e}")
+            raise ValueError("Failed to decrypt data")
+
+    def rotate_encryption(
+        self,
+        encrypted_data: str,
+        old_salt: str,
+        new_salt: str
+    ) -> str:
+        """
+        Re-encrypt data with a new salt (for key rotation).
+        """
+        plaintext = self.decrypt(encrypted_data, old_salt)
+        return self.encrypt(plaintext, new_salt)
 
 
 class RowLevelSecurity:
@@ -120,5 +219,6 @@ async def set_rls_context(session: AsyncSession, org_id: str, user_id: Optional[
     return await RowLevelSecurity.set_context(session, org_id, user_id)
 
 
-# Singleton instance
+# Singleton instances
 encryption_service = EncryptionService()
+user_api_key_encryption_service = UserAPIKeyEncryptionService()

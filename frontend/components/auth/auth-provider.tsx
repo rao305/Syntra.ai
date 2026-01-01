@@ -123,7 +123,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setAccessToken(undefined);
       setOrgId(DEFAULT_ORG_ID);
-      await clerkSignOut({ redirectUrl: "/auth/sign-in" });
+      // Redirect to homepage (landing page) after sign out
+      await clerkSignOut({ redirectUrl: "/" });
     } catch (error) {
       console.error("Sign out failed:", error);
       throw error;

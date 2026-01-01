@@ -22,7 +22,7 @@ export function PricingSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {/* Pro Plan */}
-          <div className="bg-card rounded-2xl border border-border p-8">
+          <div className="bg-zinc-800/80 rounded-2xl border border-zinc-700/50 p-8">
             <h3 className="text-xl font-semibold text-foreground mb-4">Pro</h3>
             <div className="flex items-baseline gap-1 mb-2">
               <span className="text-4xl font-bold text-foreground">$15</span>
@@ -77,7 +77,7 @@ export function PricingSection() {
           </div>
 
           {/* Enterprise Plan */}
-          <div className="bg-card rounded-2xl border border-border p-8">
+          <div className="bg-zinc-800/80 rounded-2xl border border-zinc-700/50 p-8">
             <h3 className="text-xl font-semibold text-foreground mb-4">Enterprise</h3>
             <div className="mb-2">
               <span className="text-3xl font-bold text-foreground">Custom Pricing</span>

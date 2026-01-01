@@ -167,6 +167,7 @@ interface ChatInterfaceProps {
   collabPanel?: CollabPanelState
   orgId?: string
   currentThreadId?: string | null
+  streamingStarted?: boolean
 }
 
 export function EnhancedChatInterface({
@@ -182,7 +183,8 @@ export function EnhancedChatInterface({
   autoRoutedModel,
   collabPanel,
   orgId,
-  currentThreadId
+  currentThreadId,
+  streamingStarted = false
 }: ChatInterfaceProps) {
   const [expandedThoughts, setExpandedThoughts] = useState<Set<string>>(new Set())
   const [codePanelOpen, setCodePanelOpen] = useState(false)
@@ -562,7 +564,7 @@ export function EnhancedChatInterface({
             return (
               <div key={messageId} className={cn(
                 "space-y-3 transition-all duration-200",
-                index > 0 && "pt-6 border-t border-zinc-800/50"
+                index > 0 && "pt-6"
               )}>
                 {message.role === 'user' ? (
                   <div className="flex justify-end">
@@ -712,7 +714,13 @@ export function EnhancedChatInterface({
                           : undefined
                     }
                     elapsedMs={elapsedMs}
-                    status={autoRoutedModel || selectedModel !== 'auto' ? 'generating' : 'selecting'}
+                    status={
+                      streamingStarted
+                        ? 'generating'
+                        : autoRoutedModel || selectedModel !== 'auto'
+                          ? 'processing'
+                          : 'selecting'
+                    }
                   />
                 )}
               </div>
